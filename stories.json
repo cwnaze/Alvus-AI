@@ -449,7 +449,10 @@
       "acceptanceCriteria": [
         "User can start a Stripe Checkout session to upgrade to Plus or Pro and, on success, their tier updates to match",
         "User can open the Stripe Billing Portal to manage/cancel their subscription",
-        "Stripe webhook events (subscription created/updated/canceled) update subscriptions correctly and are idempotent under redelivery",
+        "Webhook endpoint is registered for exactly these events: checkout.session.completed, customer.subscription.created, customer.subscription.updated, customer.subscription.deleted, invoice.payment_failed",
+        "checkout.session.completed links the session's subscription/customer IDs to the initiating user via client_reference_id or metadata set at session creation",
+        "customer.subscription.created/updated/deleted keep subscriptions.status, current_period_start/end, and cancel_at_period_end in sync with Stripe, idempotent under redelivery",
+        "invoice.payment_failed does not immediately downgrade the user; past_due/failed-payment users keep their active tier through a grace period, downgrading only once Stripe reports the subscription canceled/unpaid",
         "An invalid webhook signature is rejected and never triggers a tier change",
         "A user already on a tier cannot start a duplicate checkout for the same tier (clear error)"
       ],
