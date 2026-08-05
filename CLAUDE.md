@@ -35,7 +35,7 @@ drafts are treated as sensitive/private data.
 | Auth | Supabase Auth, email/password, admin-approved waitlist | Matches intake constraint. |
 | File storage | Supabase Storage | Uploaded PDF/TXT sources; RLS enforces the "sensitive/private by default" constraint. |
 | Payments | Stripe (Checkout + Billing + webhooks) | Decided in intake; stable API surface, low version risk. |
-| AI | Anthropic API (Claude) | Source summarization, strengths/weaknesses, usefulness scoring, quote extraction, writing feedback. |
+| AI | LiteLLM proxy (OpenAI-compatible), model `gemma-4-31b-it` | Source summarization, strengths/weaknesses, usefulness scoring, quote extraction, writing feedback. Accessed via the `openai` SDK pointed at `LITELLM_BASE_URL`. |
 | Academic sources | Semantic Scholar API + CrossRef API + Unpaywall | Matches intake; Unpaywall resolves open-access full text per the "fetch full text where legally available" decision. |
 | Styling | Tailwind CSS v4 | Config-in-CSS (`@theme`) model works cleanly with Vite. |
 | Test runner | Vitest + `@cloudflare/vitest-pool-workers` | Native Vite integration; Workers pool runs API tests against the real Workers runtime. |
@@ -52,6 +52,11 @@ drafts are treated as sensitive/private data.
   static assets + Hono API routes via `wrangler.jsonc`'s static-assets binding. Do NOT
   use the older Pages `_routes.json` / Pages Functions model — that is a different,
   legacy deploy target.
+- AI provider: this project does NOT call the Anthropic API directly. All AI calls go
+  through a LiteLLM proxy via the `openai` SDK configured with `baseURL:
+  process.env.LITELLM_BASE_URL` and `apiKey: process.env.LITELLM_API_KEY`, requesting
+  model `process.env.LITELLM_MODEL`. Do not add an `ANTHROPIC_API_KEY` or an Anthropic
+  SDK dependency.
 
 ## Definition of done
 Applies to every story. Do not restate these in individual acceptance criteria.

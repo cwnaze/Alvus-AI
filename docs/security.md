@@ -53,7 +53,7 @@ matching manual check is a bug.
 | `SUPABASE_URL`, `SUPABASE_ANON_KEY` | App runtime (public by design) | Yes | No (env-sourced) |
 | `SUPABASE_SERVICE_ROLE_KEY` | App runtime (sensitive) | **Never** | No |
 | `DATABASE_URL` | App runtime (sensitive) | Never | No |
-| `ANTHROPIC_API_KEY` | App runtime (sensitive) | Never | No |
+| `LITELLM_API_KEY` | App runtime (sensitive) | Never | No |
 | `STRIPE_SECRET_KEY` | App runtime (sensitive) | Never | No |
 | `STRIPE_WEBHOOK_SECRET` | App runtime (sensitive) | Never | No |
 | `SEMANTIC_SCHOLAR_API_KEY` (optional) | App runtime (sensitive) | Never | No |
@@ -66,7 +66,7 @@ bypass = treat as a full data breach.
 
 - **Uploads:** PDF/TXT only, check MIME **and** extension, reject others (400). Size
   cap ~20MB/file (tune later, not specified in intake). Malformed/corrupted PDF → fail
-  parse gracefully, clear user-facing error, never pass garbage bytes to Anthropic.
+  parse gracefully, clear user-facing error, never pass garbage bytes to the LiteLLM proxy.
   Scanned-image-only PDF (no text layer) → detect near-empty extraction, surface "no
   extractable text — OCR not supported at v1" instead of an empty-content AI call.
 - **Citation format:** enum `mla | apa | chicago` only, validated at API boundary
@@ -82,7 +82,7 @@ bypass = treat as a full data breach.
 ## Threat notes
 
 - **AI-cost abuse:** metered endpoints (source analysis, feedback passes) — enforce
-  quota check server-side before calling Anthropic, hard per-account ceiling, edge
+  quota check server-side before calling the LiteLLM proxy, hard per-account ceiling, edge
   rate limiting as a first layer.
 - **Share-link brute force/leak:** high-entropy token (128-bit class), optional
   expiry + owner revocation, rate-limit lookups; blast radius scoped to one
@@ -94,6 +94,6 @@ bypass = treat as a full data breach.
   RLS-enabled with an explicit policy from day one; missing RLS = full data leak, not
   degraded UX.
 - **Prompt injection from source/upload content:** external/uploaded text is
-  untrusted data, not instructions, once in Anthropic API context — structurally
+  untrusted data, not instructions, once in the LLM's context — structurally
   separate system instructions from quoted source text; instruction-like text inside
   a source is just text to summarize, never something the app acts on.

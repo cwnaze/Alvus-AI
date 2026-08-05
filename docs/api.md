@@ -21,7 +21,7 @@ through to static-asset serving. All routes below are relative to `/api`.
 **Status codes**: 400 validation, 401 auth, 402 usage/tier limit, 403 forbidden,
 404 not found / unknown share token, 409 conflict, 410 share link revoked,
 422 semantically invalid, 429 rate-limited, 502 upstream provider failure
-(Semantic Scholar / CrossRef / Unpaywall / Anthropic / Stripe).
+(Semantic Scholar / CrossRef / Unpaywall / LiteLLM proxy / Stripe).
 
 **Metered actions**: only *source analysis* and *feedback pass* count against tier
 limits. Both check `usage_events` summed for the billing period against `tier_limits`

@@ -104,7 +104,7 @@ over a billing period at read time, not a mutable counter.
 | `project_id` | uuid, nullable, FK → `projects.id` ON DELETE SET NULL | |
 | `action_type` | text | enum: `source_analysis`\|`feedback_pass` |
 | `quantity` | integer, default `1` | |
-| `token_cost_input` / `token_cost_output` | integer, nullable | Anthropic tokens |
+| `token_cost_input` / `token_cost_output` | integer, nullable | LiteLLM-reported tokens |
 | `billing_period` | date, not null | first-of-month UTC, calendar-month for all tiers |
 | `metadata` | jsonb, nullable | model/latency, non-limit-relevant |
 | `created_at` | timestamptz | |

@@ -10,7 +10,7 @@
   real Hono API against the shared non-production "dev" Supabase project (no per-PR
   database branching — revisit only if concurrent PRs start colliding on shared data).
 - **Production**: `wrangler deploy` against the production Supabase project, live
-  Stripe keys, production Anthropic/academic-API credentials.
+  Stripe keys, production LiteLLM/academic-API credentials.
 - No separate staging environment — per-PR previews cover that need at this scale.
 
 ## Deploy pipeline (GitHub Actions)
@@ -52,7 +52,9 @@ Two classes: CI/deploy-time (never shipped in the Worker) and app-runtime (bound
 | `SUPABASE_ANON_KEY` | Public client key, requests run under the user's RLS session. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Privileged key for RLS-bypassing server ops (e.g. admin waitlist approval). Highest-sensitivity secret — never exposed to the frontend. |
 | `DATABASE_URL` | Drizzle ORM queries (usage-metering/billing) at runtime. |
-| `ANTHROPIC_API_KEY` | Claude API — summarization, scoring, quotes, feedback. |
+| `LITELLM_API_KEY` | LiteLLM proxy — summarization, scoring, quotes, feedback. |
+| `LITELLM_BASE_URL` | LiteLLM proxy base URL (OpenAI-compatible). |
+| `LITELLM_MODEL` | Model alias requested through the LiteLLM proxy. |
 | `STRIPE_SECRET_KEY` | Server-side Stripe calls. |
 | `STRIPE_WEBHOOK_SECRET` | Verifies incoming Stripe webhook signatures. |
 | `STRIPE_PUBLISHABLE_KEY` | Frontend-facing Stripe key (not secret, env-scoped). |
@@ -73,7 +75,7 @@ price/product IDs as config, whether JWT verification needs anything beyond
 | Cloudflare Workers | Hosts frontend + API | Full outage, no fallback — monitor/alert, not redundancy |
 | Supabase (Postgres/Auth/Storage) | System of record | Full outage → "service unavailable" state; backups protect data loss, not availability |
 | Stripe | Checkout, billing, webhooks | New checkouts/tier-changes fail; keep existing users on their active tier with a grace period before webhook-driven downgrade |
-| Anthropic Claude | Core AI features | Feature-level error states; no fallback needed (no prose generation); retry/backoff + per-user throttling |
+| LiteLLM proxy | Core AI features | Feature-level error states; no fallback needed (no prose generation); retry/backoff + per-user throttling |
 | Semantic Scholar | Primary source discovery | Empty/error state, let user upload their own sources (intake decision) |
 | CrossRef | Supplementary discovery | Fall back to Semantic Scholar + manual upload |
 | Unpaywall | OA full-text resolution | Falls back to abstract-only analysis (same path as closed-access sources) |

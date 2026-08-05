@@ -1,6 +1,6 @@
 # Alvus AI — Testing Strategy
 
-Three tiers: unit (Vitest) → Worker/API integration (Vitest + `@cloudflare/vitest-pool-workers`, real Workers runtime, local Supabase Postgres) → Playwright demo specs (real `wrangler dev`, seeded fixture data). One Playwright spec per user-facing story; every prior spec re-runs on every later PR as the regression gate. **Nothing in the PR-gating suite makes a real call to Anthropic, Semantic Scholar, CrossRef, Unpaywall, or Stripe webhooks.**
+Three tiers: unit (Vitest) → Worker/API integration (Vitest + `@cloudflare/vitest-pool-workers`, real Workers runtime, local Supabase Postgres) → Playwright demo specs (real `wrangler dev`, seeded fixture data). One Playwright spec per user-facing story; every prior spec re-runs on every later PR as the regression gate. **Nothing in the PR-gating suite makes a real call to the LiteLLM proxy, Semantic Scholar, CrossRef, Unpaywall, or Stripe webhooks.**
 
 ## Playwright demo specs (one per story)
 
@@ -40,7 +40,7 @@ Upload fixtures must be synthetic/public-domain, never real or paywalled content
 
 ## Determinism / mocking boundary
 
-**Anthropic** (summaries, scores, quotes, feedback comments): mocked in CI/PR via recorded fixtures in `tests/fixtures/anthropic/*.json`, matched by request shape. Real calls limited to a small scheduled/manual smoke suite asserting response *shape* only (non-empty, score in range) — never gates a PR.
+**LiteLLM** (summaries, scores, quotes, feedback comments): mocked in CI/PR via recorded fixtures in `tests/fixtures/litellm/*.json`, matched by request shape. Real calls limited to a small scheduled/manual smoke suite asserting response *shape* only (non-empty, score in range) — never gates a PR.
 
 **Semantic Scholar / CrossRef / Unpaywall**: mocked in CI/PR via recorded fixture sets (normal results, empty results, error/rate-limited). Real calls limited to a couple of stable queries on the same scheduled/manual basis, shape-check only.
 
@@ -52,4 +52,4 @@ Upload fixtures must be synthetic/public-domain, never real or paywalled content
 
 **Does not catch**: AI output quality drift or discovery-relevance drift — all AI/academic-API content in the regression suite is pinned fixture data, so prompt regressions or model swaps won't fail any test here.
 
-**Instead**: a separate, small, human-reviewed eval set of real inputs run against the real Anthropic/academic APIs, on a manual/slow-schedule basis, explicitly out of scope for the automated PR-gating suite. Future automated LLM-as-judge eval harness is out of scope for now.
+**Instead**: a separate, small, human-reviewed eval set of real inputs run against the real LiteLLM/academic APIs, on a manual/slow-schedule basis, explicitly out of scope for the automated PR-gating suite. Future automated LLM-as-judge eval harness is out of scope for now.

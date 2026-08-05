@@ -6,8 +6,8 @@ Single Cloudflare Worker serves both the built React/Vite frontend (static-asset
 binding) and a Hono API (`/api/*`, `/webhooks/*`) from one deploy target. Same origin —
 no CORS. Backed by Supabase (Postgres via Drizzle direct connection; Auth and Storage
 via `supabase-js`) and external APIs: Semantic Scholar, CrossRef, Unpaywall (source
-discovery/full text), Anthropic Claude (AI analysis/feedback), Stripe (billing +
-webhooks).
+discovery/full text), a LiteLLM proxy (OpenAI-compatible, AI analysis/feedback),
+Stripe (billing + webhooks).
 
 ```
                     ┌───────────────────────────────────────────┐
@@ -24,7 +24,7 @@ Browser ──HTTPS──▶  │  ┌──────────────
       │ Supabase          │                    │ Semantic Scholar   │   │ Stripe        │
       │ - Postgres        │                    │ CrossRef            │   │ Checkout/     │
       │   (Drizzle)        │                    │ Unpaywall            │   │ Billing/      │
-      │ - Auth (JWT)       │                    │ Anthropic Claude     │   │ Webhooks      │
+      │ - Auth (JWT)       │                    │ LiteLLM proxy        │   │ Webhooks      │
       │ - Storage (RLS)    │                    └───────────────────┘   └──────────────┘
       └─────────────────┘
 ```
@@ -60,7 +60,7 @@ alvus-ai/
 │       │   │   ├── db/             # Drizzle schema + typed query functions (only
 │       │   │   │                   # module that issues SQL)
 │       │   │   ├── supabase/       # supabase-js, scoped to auth + storage only
-│       │   │   ├── ai/             # Anthropic client, prompts, token-cost recording
+│       │   │   ├── ai/             # LiteLLM (OpenAI SDK) client, prompts, token-cost recording
 │       │   │   ├── sources/        # Semantic Scholar/CrossRef/Unpaywall clients +
 │       │   │   │                   # full-text fallback logic
 │       │   │   ├── citation/       # MLA/APA/Chicago formatters (citation strings +
@@ -78,8 +78,8 @@ alvus-ai/
 └── drizzle.config.ts                # points drizzle-kit at DATABASE_URL
 ```
 
-Rules: frontend never talks to Postgres/Supabase/Anthropic directly — only through
-`apps/worker` routes. Only `lib/ai` calls Anthropic (consumed by `analysis.ts`,
+Rules: frontend never talks to Postgres/Supabase/the LiteLLM proxy directly — only
+through `apps/worker` routes. Only `lib/ai` calls the LiteLLM proxy (consumed by `analysis.ts`,
 `feedback.ts`, and `editor.ts` for suggestions — the latter is rate-limited but not
 metered against tier limits). Only `lib/db` issues SQL. `lib/stripe` only creates
 sessions/handles webhooks; it never decides whether an action is allowed —
@@ -96,7 +96,7 @@ sessions/handles webhooks; it never decides whether an action is allowed —
 5. User selects candidate sources in UI (no AI call triggered yet — analysis is a separate, explicit action). Actively dismissing one (vs. leaving it unselected) is a distinct reject action, step 7a below.
 6. `POST /api/projects/:projectId/sources/:sourceId/analyze` — `routes/analysis.ts`:
    a. `lib/metering` checks remaining "source analysis" actions for the user's tier; 402-style response if exhausted.
-   b. `lib/ai` prompts Claude for citation fields, strengths/weaknesses, usefulness score, key quotes + usage suggestions; `lib/citation` renders the deterministic citation string from Claude-supplied fields.
+   b. `lib/ai` prompts the LiteLLM-proxied model for citation fields, strengths/weaknesses, usefulness score, key quotes + usage suggestions; `lib/citation` renders the deterministic citation string from the model-supplied fields.
    c. Token usage recorded to metering ledger alongside the action count.
    d. Result persisted via `lib/db`, returned to frontend.
 7. On user confirmation ("add to project"), `routes/sources.ts` sets `state = 'selected'`. Bibliography is a derived view over `selected` sources, rendered by `lib/citation` — no separate authoring step.
@@ -117,7 +117,7 @@ sessions/handles webhooks; it never decides whether an action is allowed —
 
 1. `POST /api/projects/:projectId/document/feedback` — explicit, distinct metered action (not automatic).
 2. `routes/feedback.ts` checks `lib/metering` for remaining feedback-pass actions.
-3. `lib/ai` sends extracted document text to Claude with a commentary-only prompt (wording/phrasing/grammar/content) — never prose generation or rewriting.
+3. `lib/ai` sends extracted document text to the LiteLLM-proxied model with a commentary-only prompt (wording/phrasing/grammar/content) — never prose generation or rewriting.
 4. Response parsed into `{ anchor span, comment, category }` items, persisted, returned.
 5. Frontend renders items as TipTap comment-style annotations anchored to document ranges; nothing auto-applied to the document.
 6. Token usage recorded to metering ledger, same as Flow 1 step 6c.

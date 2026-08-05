@@ -547,7 +547,7 @@
       "title": "Timeout and retry/backoff policy for outbound calls",
       "userStory": "As the operator, I need outbound calls to external APIs to fail fast and retry sanely so a slow provider doesn't hang requests or silently double-charge usage.",
       "acceptanceCriteria": [
-        "Calls to Semantic Scholar, CrossRef, Unpaywall, and Anthropic have an explicit timeout and don't hang the request indefinitely",
+        "Calls to Semantic Scholar, CrossRef, Unpaywall, and the LiteLLM proxy have an explicit timeout and don't hang the request indefinitely",
         "Transient failures (timeout, 5xx) are retried with backoff before surfacing an error to the user",
         "Retries never double-charge a user's metered quota or double-write a result"
       ],
