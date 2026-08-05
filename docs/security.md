@@ -50,8 +50,8 @@ matching manual check is a bug.
 | `wrangler login` / `supabase login` session | Dev-tooling (local OAuth) | No | No |
 | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | CI secret | No | No |
 | `SUPABASE_ACCESS_TOKEN` | CI secret | No | No |
-| `SUPABASE_URL`, `SUPABASE_ANON_KEY` | App runtime (public by design) | Yes | No (env-sourced) |
-| `SUPABASE_SERVICE_ROLE_KEY` | App runtime (sensitive) | **Never** | No |
+| `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` | App runtime (Worker-only; frontend never calls Supabase directly) | No | No (env-sourced) |
+| `SUPABASE_SECRET_KEY` | App runtime (sensitive) | **Never** | No |
 | `DATABASE_URL` | App runtime (sensitive) | Never | No |
 | `LITELLM_API_KEY` | App runtime (sensitive) | Never | No |
 | `STRIPE_SECRET_KEY` | App runtime (sensitive) | Never | No |
@@ -59,7 +59,7 @@ matching manual check is a bug.
 | `SEMANTIC_SCHOLAR_API_KEY` (optional) | App runtime (sensitive) | Never | No |
 
 App runtime secrets are set per-environment via `wrangler secret put`, never as
-plaintext `vars` in `wrangler.toml`. `SUPABASE_SERVICE_ROLE_KEY` leak = full RLS
+plaintext `vars` in `wrangler.toml`. `SUPABASE_SECRET_KEY` leak = full RLS
 bypass = treat as a full data breach.
 
 ## Input validation boundaries

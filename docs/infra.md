@@ -49,8 +49,8 @@ Two classes: CI/deploy-time (never shipped in the Worker) and app-runtime (bound
 | Variable | Purpose |
 |---|---|
 | `SUPABASE_URL` | Supabase endpoint for supabase-js Auth/Storage calls. |
-| `SUPABASE_ANON_KEY` | Public client key, requests run under the user's RLS session. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Privileged key for RLS-bypassing server ops (e.g. admin waitlist approval). Highest-sensitivity secret — never exposed to the frontend. |
+| `SUPABASE_PUBLISHABLE_KEY` | Client key (current Supabase key format, replaces the legacy anon key), used server-side in the Worker's `supabase-js` client; requests run under the user's RLS session. Not exposed to the frontend — the frontend never talks to Supabase directly, only through Worker routes, so this needs no `VITE_`/build-time-exposure prefix. |
+| `SUPABASE_SECRET_KEY` | Privileged key (current Supabase key format, replaces the legacy service_role key) for RLS-bypassing server ops (e.g. admin waitlist approval). Highest-sensitivity secret — never exposed to the frontend. |
 | `DATABASE_URL` | Drizzle ORM queries (usage-metering/billing) at runtime. |
 | `LITELLM_API_KEY` | LiteLLM proxy — summarization, scoring, quotes, feedback. |
 | `LITELLM_BASE_URL` | LiteLLM proxy base URL (OpenAI-compatible). |
@@ -66,7 +66,7 @@ Two classes: CI/deploy-time (never shipped in the Worker) and app-runtime (bound
 
 First-draft list — reconcile against data-model/API docs once settled (Stripe
 price/product IDs as config, whether JWT verification needs anything beyond
-`SUPABASE_URL`/`SUPABASE_ANON_KEY`).
+`SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY`).
 
 ## External services
 
