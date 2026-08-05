@@ -1,0 +1,18 @@
+{
+  "runtime": "node",
+  "version": "22",
+  "install": "npm install",
+  "commands": {
+    "typecheck": "npm run typecheck",
+    "lint": "npm run lint",
+    "build": "npm run build",
+    "test": "npm test"
+  },
+  "serve": {
+    "ci": "npx wrangler dev --port 8787",
+    "dev": "npx wrangler dev --port 8787",
+    "url": "http://localhost:8787"
+  },
+  "services": null,
+  "existsWhen": "package.json"
+}

@@ -1,0 +1,68 @@
+name: ci
+# The required status check. Two jobs it has to do:
+#
+#   1. Be an independent gate. pr-review is an agent judging its own sibling's
+#      work; this is a deterministic check that does not negotiate.
+#   2. Exist at all, so branch protection has something to require. With an empty
+#      required-checks list, the auto-merge that implement-story arms fires the
+#      instant the PR opens — before any review has run.
+#
+# Keep this fast and boring. Deep verification belongs to pr-review.
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: setup
+        uses: ./.github/actions/setup-project
+
+      - name: Validate the pipeline state file
+        run: |
+          # Cheap, and it catches a dependsOn cycle or a malformed record here
+          # rather than as a mystery "no eligible story" three workflows later.
+          if [ -f stories.json ]; then
+            node .github/scripts/validate-stories.mjs
+          fi
+
+      - name: Typecheck, lint, build
+        env:
+          TYPECHECK: ${{ steps.setup.outputs.cmd_typecheck }}
+          LINT: ${{ steps.setup.outputs.cmd_lint }}
+          BUILD: ${{ steps.setup.outputs.cmd_build }}
+        run: |
+          set -uo pipefail
+          if [ "${{ steps.setup.outputs.scaffolded }}" != "true" ]; then
+            echo "Project not scaffolded yet — nothing to check."
+            exit 0
+          fi
+          # Whatever the manifest declares, in whatever language. A project that
+          # has no separate typecheck or lint step leaves it empty rather than
+          # failing on its absence.
+          failed=0
+          for name in TYPECHECK LINT BUILD; do
+            cmd="${!name}"
+            if [ -z "$cmd" ]; then
+              echo "No $name command declared — skipping."
+              continue
+            fi
+            echo "::group::$name: $cmd"
+            if ! eval "$cmd"; then
+              echo "::error::$name failed: $cmd"
+              failed=1
+            fi
+            echo "::endgroup::"
+          done
+          exit $failed

@@ -1,0 +1,617 @@
+{
+  "project": "alvus-ai",
+  "spineRepo": "cwnaze/Alvus-AI",
+  "repos": {
+    "app": { "ssh": "git@github.com:cwnaze/Alvus-AI.git", "root": "." }
+  },
+  "definitionOfDone": [
+    "typecheck passes",
+    "lint passes",
+    "build succeeds",
+    "story demo spec passes and regenerates its demo doc",
+    "all previously passing demo specs still pass"
+  ],
+  "stories": [
+    {
+      "id": "US-001",
+      "repo": "app",
+      "title": "Scaffold monorepo (frontend, Worker, shared package, tooling)",
+      "userStory": "As a developer, I need a working monorepo with the frontend, Worker, and shared package scaffolded so every later story has an app to build inside.",
+      "acceptanceCriteria": [
+        "npm workspaces monorepo with apps/web (React + Vite + TypeScript), apps/worker (Hono + TypeScript on Cloudflare Workers), and packages/shared",
+        "Tailwind v4 configured in apps/web",
+        "wrangler.jsonc configures the static-assets binding to apps/web/dist and the Worker entry point, so a single `wrangler dev` serves both",
+        ".env.example committed matching the infra doc's variable list",
+        "`wrangler dev` renders a placeholder page from apps/web and Hono responds on /api/*"
+      ],
+      "dependsOn": [],
+      "status": "pending",
+      "demoKind": "command",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": []
+      },
+      "demo": "docs/demos/US-001.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "repo": "app",
+      "title": "Provision Supabase (Postgres + Storage) and connect Drizzle",
+      "userStory": "As a developer, I need Supabase and the database schema baseline connected so the app has somewhere to persist data.",
+      "acceptanceCriteria": [
+        "Supabase local stack (`supabase start`) usable for dev/CI; a `source-uploads` Storage bucket created with RLS-ready policy scaffolding",
+        "Drizzle configured against DATABASE_URL; baseline schema (`users`, `waitlist_signups`, `tier_limits`) migrated via drizzle-kit",
+        "`tier_limits` seeded with the v1 catalog (free: 5/3, plus: 60/30, pro: 250/120 for source_analysis/feedback_pass)",
+        "GET /api/health returns 200 including a live DB round-trip check",
+        "db/seed.ts script exists and seeds base fixture users (waitlist-pending, waitlist-approved, admin) for local dev/CI"
+      ],
+      "dependsOn": ["US-001"],
+      "status": "pending",
+      "demoKind": "command",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": []
+      },
+      "demo": "docs/demos/US-002.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "repo": "app",
+      "title": "CI pipeline: typecheck/lint/build/test on PR, migrate+deploy on merge, PR previews",
+      "userStory": "As a developer, I need CI to verify every PR and deploy merged changes so the pipeline can trust green builds.",
+      "acceptanceCriteria": [
+        "GitHub Actions workflow runs typecheck/lint/build/test on every PR against a local Supabase Postgres service",
+        "Secret scanning (e.g. gitleaks) runs in CI and fails the build on a match",
+        "Merge to main runs migrations (drizzle-kit migrate + supabase db push) before wrangler deploy, and halts on migration failure",
+        "Every PR gets a Cloudflare Workers preview deployment with a posted-back URL, using dev-scoped secrets only",
+        "CI secrets (CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, SUPABASE_ACCESS_TOKEN, DATABASE_URL) configured in the GitHub Actions secrets store"
+      ],
+      "dependsOn": ["US-001", "US-002"],
+      "status": "pending",
+      "demoKind": "command",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": []
+      },
+      "demo": "docs/demos/US-003.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "repo": "app",
+      "title": "Bootstrap first admin account",
+      "userStory": "As the operator, I need a way to mint the first admin account outside the normal approval flow, since approval itself requires an admin to already exist.",
+      "acceptanceCriteria": [
+        "A documented, non-public script/CLI command (not an HTTP endpoint) promotes a specified email to role='admin', status='approved', creating the users/waitlist_signups rows if they don't yet exist",
+        "Requires direct DATABASE_URL access to run — cannot be triggered remotely or by an unauthenticated request",
+        "Documented in the README as the one-time production bootstrap step"
+      ],
+      "dependsOn": ["US-002"],
+      "status": "pending",
+      "demoKind": "command",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": []
+      },
+      "demo": "docs/demos/US-004.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "repo": "app",
+      "title": "Verify rollback path (Worker + migration)",
+      "userStory": "As a developer, I need the rollback procedure actually exercised, not just documented, so a bad production deploy has a proven escape hatch.",
+      "acceptanceCriteria": [
+        "A deliberately-broken deploy is rolled back via `wrangler rollback [deployment-id]` and the command output demonstrates the previous version serving again",
+        "A hand-written down-migration exists for at least one applied migration, documenting the emergency rollback procedure against DATABASE_URL",
+        "Rollback procedure documented in the README"
+      ],
+      "dependsOn": ["US-003"],
+      "status": "pending",
+      "demoKind": "command",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": []
+      },
+      "demo": "docs/demos/US-005.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "repo": "app",
+      "title": "Global error handler + structured logging with correlation ID",
+      "userStory": "As a developer, I need every request's errors captured consistently so production issues are debuggable instead of guessed at.",
+      "acceptanceCriteria": [
+        "Unhandled errors in any Hono route are caught by global middleware and returned as the standard { error: { code, message } } envelope, never a raw stack trace",
+        "Every request gets a correlation ID (generated or propagated from an incoming header), included in structured log output and in the error envelope",
+        "Server-side errors are logged with enough context (route, correlation ID, user ID if authenticated) to debug without reproducing"
+      ],
+      "dependsOn": ["US-001"],
+      "status": "pending",
+      "demoKind": "command",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": []
+      },
+      "demo": "docs/demos/US-006.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "repo": "app",
+      "title": "Waitlist signup, admin approval, and login",
+      "userStory": "As a prospective user, I need to join a waitlist and log in once approved, so access is gated the way the product requires.",
+      "acceptanceCriteria": [
+        "A visitor can submit the waitlist form (email + password) and sees a \"pending approval\" confirmation; a users row is created with status='pending'",
+        "A pending or rejected user who logs in sees a status screen (\"pending approval\" / \"not approved\") instead of the app",
+        "An admin can view the list of pending waitlist entries and approve or reject each one",
+        "Once approved, the same user can log in and reach the app (projects dashboard, empty state if no projects yet)",
+        "Waitlist/admin endpoints reject a non-admin caller with 403",
+        "Logout clears the session and a subsequent request to a protected route returns 401"
+      ],
+      "dependsOn": ["US-003", "US-004", "US-006"],
+      "status": "pending",
+      "demoKind": "browser",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": ["e2e/us-007.spec.ts"]
+      },
+      "demo": "docs/demos/US-007.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "repo": "app",
+      "title": "Password reset flow",
+      "userStory": "As a user, I need to reset my password if I forget it so I'm not permanently locked out of my account.",
+      "acceptanceCriteria": [
+        "User can request a password reset via email; response is identical whether or not the email exists (no enumeration)",
+        "Reset link/token lets the user set a new password and log in with it",
+        "Expired or invalid reset tokens are rejected with a clear error"
+      ],
+      "dependsOn": ["US-007"],
+      "status": "pending",
+      "demoKind": "browser",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": ["e2e/us-008.spec.ts"]
+      },
+      "demo": "docs/demos/US-008.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "repo": "app",
+      "title": "Admin user directory",
+      "userStory": "As an admin, I need to browse all users so I can answer support questions and audit accounts beyond just the waitlist queue.",
+      "acceptanceCriteria": [
+        "Admin can search/filter all users by tier and status",
+        "Admin can view a user's basic info (email, status, role, tier, created_at)",
+        "Non-admin gets 403 on this view"
+      ],
+      "dependsOn": ["US-007"],
+      "status": "pending",
+      "demoKind": "browser",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": ["e2e/us-009.spec.ts"]
+      },
+      "demo": "docs/demos/US-009.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "repo": "app",
+      "title": "Create, list, rename, and delete a project",
+      "userStory": "As a user, I need to create a paper project with a title and citation format so I have somewhere to gather sources and write.",
+      "acceptanceCriteria": [
+        "Approved user can create a project with a title and citation format (MLA/APA/Chicago)",
+        "Citation format cannot be changed after creation (attempting to returns a clear error)",
+        "Projects dashboard lists the user's projects; empty state shown when none exist",
+        "User can rename a project and delete it (with confirmation)",
+        "A user cannot view or modify another user's project (403)"
+      ],
+      "dependsOn": ["US-007"],
+      "status": "pending",
+      "demoKind": "browser",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": ["e2e/us-010.spec.ts"]
+      },
+      "demo": "docs/demos/US-010.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "repo": "app",
+      "title": "Source discovery search",
+      "userStory": "As a user, I need to search for sources relevant to my paper so I don't have to find them all manually.",
+      "acceptanceCriteria": [
+        "From a project, user can trigger a source search and see a list of candidate results (title, authors, year, venue, OA status)",
+        "An empty result set shows a clear empty state offering the manual-upload path",
+        "An upstream provider outage shows a clear error state, not a blank screen or raw error",
+        "Non-owner cannot search another user's project (403)"
+      ],
+      "dependsOn": ["US-010"],
+      "status": "pending",
+      "demoKind": "browser",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": ["e2e/us-011.spec.ts"]
+      },
+      "demo": "docs/demos/US-011.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "repo": "app",
+      "title": "Analyze a candidate source and select or reject it",
+      "userStory": "As a user, I need each candidate source summarized with strengths/weaknesses, a usefulness score, and key quotes, so I can decide whether to use it and add it to my bibliography.",
+      "acceptanceCriteria": [
+        "User can trigger AI analysis on a candidate source and see the generated citation, strengths/weaknesses summary, usefulness score, and key quotes with usage suggestions",
+        "User can select an analyzed source into the bibliography; it appears in the project's bibliography view",
+        "User can reject a candidate; it does not reappear if the same search is re-run",
+        "A source lacking accessible full text is analyzed from its abstract and visibly flagged as abstract-only, not shown as an error",
+        "Deselecting a selected source returns it to the candidate pool rather than deleting it",
+        "Analysis is blocked with a clear limit-reached response once the user's tier quota for source analyses is exhausted"
+      ],
+      "dependsOn": ["US-011"],
+      "status": "pending",
+      "demoKind": "browser",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": ["e2e/us-012.spec.ts"]
+      },
+      "demo": "docs/demos/US-012.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "repo": "app",
+      "title": "Upload your own PDF/TXT source",
+      "userStory": "As a user, I need to upload my own source document so I can use material the automated search doesn't find.",
+      "acceptanceCriteria": [
+        "User can upload a PDF or TXT file (≤ configured size limit) as a source; it's automatically analyzed and added to the bibliography",
+        "Uploading an unsupported file type or oversized file is rejected with a clear, specific error",
+        "A corrupted or unparseable file fails gracefully with a clear error, not a crash or silent empty analysis",
+        "A scanned-image-only PDF with no extractable text is flagged as such rather than analyzed on empty content"
+      ],
+      "dependsOn": ["US-012"],
+      "status": "pending",
+      "demoKind": "browser",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": ["e2e/us-013.spec.ts"]
+      },
+      "demo": "docs/demos/US-013.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "repo": "app",
+      "title": "Editor: autosave, live in-text citations, and full citation-format re-render",
+      "userStory": "As a user, I need to write my paper in an editor that formats citations correctly for my chosen style as I go, so I don't have to format manually.",
+      "acceptanceCriteria": [
+        "Opening a project loads its document into the rich text editor and autosaves edits",
+        "Inserting an in-text citation from the bibliography renders it correctly formatted for the project's citation style",
+        "Triggering a full re-render assembles the complete formatted paper (headers/margins/bibliography page) per the project's style",
+        "A re-render flags any in-text citation whose source is no longer in the bibliography (dangling citation)",
+        "Citation formatting is visually distinct per format (MLA vs. APA vs. Chicago) for the same source"
+      ],
+      "dependsOn": ["US-012", "US-010"],
+      "status": "pending",
+      "demoKind": "browser",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": ["e2e/us-014.spec.ts"]
+      },
+      "demo": "docs/demos/US-014.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "repo": "app",
+      "title": "Paragraph and structure suggestions in the editor",
+      "userStory": "As a user, I need suggestions on how to start a paragraph or structure a section, so I have a starting point without the tool writing for me.",
+      "acceptanceCriteria": [
+        "While writing, the user can request paragraph/structure suggestions relevant to their current position; suggestions appear as inline, non-inserted hints",
+        "Suggestions are not counted against the user's metered usage (only rate-limited)",
+        "Rapid repeated requests are throttled with a clear rate-limit response, not silently dropped"
+      ],
+      "dependsOn": ["US-014"],
+      "status": "pending",
+      "demoKind": "browser",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": ["e2e/us-015.spec.ts"]
+      },
+      "demo": "docs/demos/US-015.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "repo": "app",
+      "title": "Post-writing feedback pass",
+      "userStory": "As a user, I need feedback on wording, phrasing, grammar, and content after I write, so I can revise my own draft without the tool writing for me.",
+      "acceptanceCriteria": [
+        "User can request a feedback pass on their current draft and see wording/phrasing/grammar/content comments anchored to specific spans in the editor, rendered as margin-style annotations",
+        "Nothing is auto-applied to the document — comments are advisory only",
+        "User can view the history of past feedback passes and reopen an earlier one",
+        "Requesting a feedback pass on an empty document returns a clear error instead of an empty/nonsensical pass",
+        "Feedback is blocked with a clear limit-reached response once the user's tier quota for feedback passes is exhausted"
+      ],
+      "dependsOn": ["US-014"],
+      "status": "pending",
+      "demoKind": "browser",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": ["e2e/us-016.spec.ts"]
+      },
+      "demo": "docs/demos/US-016.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "repo": "app",
+      "title": "Usage dashboard and limit-exceeded UX",
+      "userStory": "As a user, I need to see my current usage against my plan's limits so I understand why an action was blocked and what to do about it.",
+      "acceptanceCriteria": [
+        "User can see their current usage (source analyses, feedback passes used/remaining) and plan tier",
+        "Attempting a metered action after exhausting the tier's monthly limit shows a clear \"upgrade or wait\" message rather than a generic error",
+        "Usage resets at the next billing period boundary",
+        "Tier limits reflect the seeded v1 catalog (free 5/3, plus 60/30, pro 250/120)"
+      ],
+      "dependsOn": ["US-012", "US-016"],
+      "status": "pending",
+      "demoKind": "browser",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": ["e2e/us-017.spec.ts"]
+      },
+      "demo": "docs/demos/US-017.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "repo": "app",
+      "title": "Stripe checkout, billing portal, and webhook sync",
+      "userStory": "As a user, I need to upgrade my subscription and manage billing so I can get higher usage limits.",
+      "acceptanceCriteria": [
+        "User can start a Stripe Checkout session to upgrade to Plus or Pro and, on success, their tier updates to match",
+        "User can open the Stripe Billing Portal to manage/cancel their subscription",
+        "Stripe webhook events (subscription created/updated/canceled) update subscriptions correctly and are idempotent under redelivery",
+        "An invalid webhook signature is rejected and never triggers a tier change",
+        "A user already on a tier cannot start a duplicate checkout for the same tier (clear error)"
+      ],
+      "dependsOn": ["US-017"],
+      "status": "pending",
+      "demoKind": "browser",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": ["e2e/us-018.spec.ts"]
+      },
+      "demo": "docs/demos/US-018.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "repo": "app",
+      "title": "Read-only share link",
+      "userStory": "As a user, I need to share a read-only link to my paper (e.g. with an instructor) without giving them edit access or an account.",
+      "acceptanceCriteria": [
+        "Owner can generate a read-only share link for a project and revoke it",
+        "Visiting a valid share link (no login) shows the paper's title, bibliography, and content, with no editing affordances",
+        "A revoked or unknown share link shows a clear \"this link no longer works\" state, not an error page or the owner's other data",
+        "Generating a link twice returns the existing active link rather than creating a second one"
+      ],
+      "dependsOn": ["US-014"],
+      "status": "pending",
+      "demoKind": "browser",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": ["e2e/us-019.spec.ts"]
+      },
+      "demo": "docs/demos/US-019.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "repo": "app",
+      "title": "RLS integration test suite (deny-by-default across roles)",
+      "userStory": "As a developer, I need proof at the database level — not just the API layer — that RLS denies cross-user access, so a bug in one layer doesn't leave the other undefended.",
+      "acceptanceCriteria": [
+        "Integration tests prove an authenticated non-owner cannot read or write another user's projects, sources, documents, or feedback passes, with RLS denying it even bypassing the API layer",
+        "Integration tests prove a pending/rejected user's JWT is denied by RLS, not just by API middleware",
+        "Integration tests prove the share-link read path exposes only the single linked project and nothing else",
+        "Every table reachable via the anon key has RLS enabled — a lint/test step fails the build if a new table is added without it"
+      ],
+      "dependsOn": ["US-010", "US-012", "US-014", "US-019"],
+      "status": "pending",
+      "demoKind": "command",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": []
+      },
+      "demo": "docs/demos/US-020.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "repo": "app",
+      "title": "Rate limiting on public and metered endpoints",
+      "userStory": "As the operator, I need public and AI-cost-bearing endpoints rate-limited so a script can't run up API cost or abuse signup faster than the tier quota alone would prevent.",
+      "acceptanceCriteria": [
+        "Public auth endpoints (signup, login, password-reset request) are rate-limited per IP with a clear 429 response",
+        "Metered AI endpoints (analyze, feedback) are rate-limited per user in addition to the tier-quota check",
+        "A user hitting the rate limit sees a clear \"try again shortly\" message with a Retry-After value"
+      ],
+      "dependsOn": ["US-007", "US-012", "US-016"],
+      "status": "pending",
+      "demoKind": "command",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": []
+      },
+      "demo": "docs/demos/US-021.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "repo": "app",
+      "title": "Timeout and retry/backoff policy for outbound calls",
+      "userStory": "As the operator, I need outbound calls to external APIs to fail fast and retry sanely so a slow provider doesn't hang requests or silently double-charge usage.",
+      "acceptanceCriteria": [
+        "Calls to Semantic Scholar, CrossRef, Unpaywall, and Anthropic have an explicit timeout and don't hang the request indefinitely",
+        "Transient failures (timeout, 5xx) are retried with backoff before surfacing an error to the user",
+        "Retries never double-charge a user's metered quota or double-write a result"
+      ],
+      "dependsOn": ["US-011", "US-012", "US-015", "US-016", "US-018"],
+      "status": "pending",
+      "demoKind": "command",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": []
+      },
+      "demo": "docs/demos/US-022.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "repo": "app",
+      "title": "Accessibility and responsive-layout hardening",
+      "userStory": "As a user relying on keyboard navigation, assistive tech, or a smaller screen, I need the core flows to actually work for me, not just for a mouse on a desktop browser.",
+      "acceptanceCriteria": [
+        "Core flows (signup, project creation, source review, editor, feedback, checkout) are completable via keyboard alone, with visible focus order",
+        "Interactive elements have accessible names/labels, verified via automated accessibility audit",
+        "Core flows render usably at mobile and desktop viewport widths without horizontal scrolling or hidden controls"
+      ],
+      "dependsOn": ["US-010", "US-012", "US-014", "US-016", "US-018", "US-019"],
+      "status": "pending",
+      "demoKind": "browser",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": ["e2e/us-023.spec.ts"]
+      },
+      "demo": "docs/demos/US-023.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "repo": "app",
+      "title": "README and docs finalized",
+      "userStory": "As a developer joining later, I need setup/run/test/deploy documented accurately so I can get productive without reverse-engineering CI.",
+      "acceptanceCriteria": [
+        "README documents setup, running locally, running tests, and deploying, matching what CI actually does",
+        "Every environment variable in .env.example has a one-line purpose note in the README or links to the infra doc",
+        "Architecture/decisions doc is linked from the README for anyone picking up the project later"
+      ],
+      "dependsOn": ["US-003", "US-018", "US-019", "US-023"],
+      "status": "pending",
+      "demoKind": "command",
+      "verification": {
+        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "specs": []
+      },
+      "demo": "docs/demos/US-024.md",
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": ""
+    }
+  ]
+}

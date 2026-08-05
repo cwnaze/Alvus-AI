@@ -1,0 +1,50 @@
+name: pipeline-watchdog
+# Every transition in this pipeline is triggered by a GitHub event. That is the
+# design's strength and its single point of failure: if a run dies between
+# events — runner eviction, an API 5xx, the job timeout — no further event is
+# ever produced and the pipeline stops silently, mid-story, forever.
+#
+# This is the only time-triggered thing in the repo. It re-dispatches a story
+# that has gone quiet (implement-story already knows how to resume one) and
+# otherwise re-runs the normal dispatch decision, which is a no-op when the
+# pipeline is healthy, paused, or finished.
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Report what would happen without dispatching'
+        type: boolean
+        default: true
+
+concurrency:
+  group: story-pipeline
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      # setup-project is deliberately not used here: this job only runs the
+      # pipeline's own scripts, so it needs the pipeline runtime and none of the
+      # project's toolchain. Keeping it light means the recovery path still works
+      # when the project's own build is what is broken.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Look for a stalled story
+        env:
+          GH_TOKEN: ${{ secrets.PIPELINE_PAT }}
+          REPO: ${{ github.repository }}
+          STALL_MINUTES: '90'
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        run: node .github/scripts/watchdog.mjs

@@ -1,0 +1,79 @@
+name: pr-review
+on:
+  pull_request:
+    types: [opened, synchronize]
+  pull_request_review_comment:
+    types: [created]
+
+concurrency:
+  # Same group as story-start/pr-fix/story-complete: all four commit stories.json
+  # to main, and two of them running at once means one push loses the race.
+  # Serializing is free here — the invariant is one non-terminal story at a time.
+  group: story-pipeline
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  review:
+    # never run against forks: the job holds real secrets
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-project
+        with:
+          playwright: 'true'
+      - name: Materialize .env from repo secrets
+        env:
+          ALL_SECRETS: ${{ toJSON(secrets) }}
+        run: node .github/scripts/write-env.mjs
+      - name: Restore previous demo screenshots
+        uses: actions/cache@v4
+        with:
+          path: docs/demos/assets
+          key: demos-${{ github.base_ref }}-${{ github.sha }}
+          restore-keys: demos-${{ github.base_ref }}-
+      - uses: anthropics/claude-code-action@be7b93b1907a4abad570368f3c74b6fe3807510b  # v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # PIPELINE_PAT here so the findings issue it opens actually triggers
+          # pr-fix — an issue created by GITHUB_TOKEN triggers nothing.
+          github_token: ${{ secrets.PIPELINE_PAT }}
+          prompt: /pr-review
+          claude_args: --max-turns 100
+
+      - name: Apply the review verdict
+        if: always()
+        env:
+          # Must NOT be PIPELINE_PAT: that identity opened the PR, and GitHub
+          # refuses to let an account approve its own pull request. Set
+          # REVIEWER_TOKEN to a second PAT or App token if your branch protection
+          # requires an approval from a real user; otherwise the github-actions
+          # bot approves, which satisfies a plain "require approvals" rule.
+          GH_TOKEN: ${{ secrets.REVIEWER_TOKEN || secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number || github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          if [ ! -f .pipeline/review-verdict.json ]; then
+            echo "::error::pr-review wrote no verdict — treating as inconclusive."
+            gh pr comment "$PR" --body "pr-review finished without recording a verdict. This needs a human." || true
+            gh pr edit "$PR" --add-label needs-human || true
+            exit 1
+          fi
+          verdict=$(jq -r .verdict .pipeline/review-verdict.json)
+          summary=$(jq -r '.summary // ""' .pipeline/review-verdict.json)
+          echo "Verdict: $verdict — $summary"
+          case "$verdict" in
+            approve)            gh pr review "$PR" --approve --body "$summary" ;;
+            changes-requested)  gh pr review "$PR" --request-changes --body "$summary" ;;
+            needs-human)        gh pr edit "$PR" --add-label needs-human
+                                gh pr comment "$PR" --body "$summary" ;;
+            *) echo "::error::Unrecognized verdict: $verdict"; exit 1 ;;
+          esac

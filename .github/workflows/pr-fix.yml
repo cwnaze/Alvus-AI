@@ -1,0 +1,40 @@
+name: pr-fix
+on:
+  issues:
+    types: [opened, edited]
+
+concurrency:
+  # Shared with every other workflow that commits stories.json to main.
+  group: story-pipeline
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  fix:
+    if: >
+      contains(github.event.issue.labels.*.name, 'agent-fix') &&
+      !contains(github.event.issue.labels.*.name, 'needs-human')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PIPELINE_PAT }}
+      - uses: ./.github/actions/setup-project
+        with:
+          playwright: 'true'
+      - name: Materialize .env from repo secrets
+        env:
+          ALL_SECRETS: ${{ toJSON(secrets) }}
+        run: node .github/scripts/write-env.mjs
+      - uses: anthropics/claude-code-action@be7b93b1907a4abad570368f3c74b6fe3807510b  # v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.PIPELINE_PAT }}
+          prompt: /pr-fix
+          claude_args: --max-turns 120

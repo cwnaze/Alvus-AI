@@ -1,0 +1,42 @@
+name: story-complete
+on:
+  pull_request:
+    types: [closed]
+
+concurrency:
+  group: story-pipeline
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  complete:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.PIPELINE_PAT }}
+      # Only the pipeline runtime, like pipeline-watchdog: this job runs two .mjs
+      # scripts and never touches the project's toolchain. Pinned rather than
+      # relying on whatever Node the runner image happens to ship.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Mark story done, close its issue, log
+        env:
+          GH_TOKEN: ${{ secrets.PIPELINE_PAT }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: node .github/scripts/complete-story.mjs
+      - name: Dispatch next story
+        env:
+          # PIPELINE_PAT, not GITHUB_TOKEN: a workflow's own token cannot
+          # trigger another workflow, and the chain would die here silently.
+          GH_TOKEN: ${{ secrets.PIPELINE_PAT }}
+          REPO: ${{ github.repository }}
+        run: node .github/scripts/dispatch-next.mjs
