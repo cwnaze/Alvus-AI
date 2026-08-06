@@ -17,7 +17,8 @@ app.get('/api/health', async (c) => {
   try {
     await db.execute(sql`select 1`);
     return c.json({ status: 'ok', db: 'ok' });
-  } catch {
+  } catch (err) {
+    console.error('/api/health DB round-trip failed:', err);
     return c.json({ status: 'error', db: 'error' }, 503);
   }
 });

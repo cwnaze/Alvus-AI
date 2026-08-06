@@ -15,10 +15,14 @@ describe('GET /api/health', () => {
     expect(await res.json()).toEqual({ status: 'ok', db: 'ok' });
   });
 
-  it('returns 503 when the database is unreachable', async () => {
-    execute.mockRejectedValueOnce(new Error('connection refused'));
+  it('returns 503 and logs the cause when the database is unreachable', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const dbError = new Error('connection refused');
+    execute.mockRejectedValueOnce(dbError);
     const res = await app.request('/api/health', undefined, { DATABASE_URL: 'unused' });
     expect(res.status).toBe(503);
     expect(await res.json()).toEqual({ status: 'error', db: 'error' });
+    expect(consoleError).toHaveBeenCalledWith(expect.stringContaining('/api/health'), dbError);
+    consoleError.mockRestore();
   });
 });
