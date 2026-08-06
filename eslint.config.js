@@ -6,7 +6,14 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['**/dist/**', '**/node_modules/**', 'graphify-out/**', '.wrangler/**'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      'graphify-out/**',
+      '.wrangler/**',
+      'supabase/.temp/**',
+      'supabase/.branches/**',
+    ],
   },
   js.configs.recommended,
   tseslint.configs.recommended,

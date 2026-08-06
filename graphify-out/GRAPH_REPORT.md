@@ -1,16 +1,16 @@
 # Graph Report - Alvus-AI  (2026-08-06)
 
 ## Corpus Check
-- 48 files · ~22,334 words
+- 61 files · ~25,385 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 293 nodes · 302 edges · 31 communities (25 shown, 6 thin omitted)
-- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 21 edges (avg confidence: 0.86)
+- 326 nodes · 335 edges · 34 communities (27 shown, 7 thin omitted)
+- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 21 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `1b6e5a5c`
+- Built from commit: `71f436d5`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -31,10 +31,10 @@
 - Notify workflow
 - worker/package.json
 - devDependencies
-- web/package.json
 - devDependencies
+- schema/index.ts
 - compilerOptions
-- package.json
+- scripts
 - worker/tsconfig.json
 - compilerOptions
 - shared/package.json
@@ -43,15 +43,17 @@
 - US-001 — Scaffold monorepo (frontend, Worker, shared package, tooling)
 - worker/src/index.ts
 - demo-us-001-server.sh
+- US-002 — Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema
+- demo-us-002.sh
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 12 edges
-2. `API Surface doc` - 9 edges
-3. `Security Model doc` - 9 edges
-4. `PR Review Skill` - 8 edges
-5. `projects table` - 8 edges
-6. `CLAUDE.md project guide` - 7 edges
-7. `scripts` - 6 edges
+2. `scripts` - 9 edges
+3. `API Surface doc` - 9 edges
+4. `Security Model doc` - 9 edges
+5. `PR Review Skill` - 8 edges
+6. `projects table` - 8 edges
+7. `CLAUDE.md project guide` - 7 edges
 8. `US-001 — Scaffold monorepo (frontend, Worker, shared package, tooling)` - 6 edges
 9. `Implement Story Skill` - 6 edges
 10. `setup-project composite action` - 6 edges
@@ -76,7 +78,7 @@
 - **Workflows that dispatch a Claude Code skill via claude-code-action** — github_workflows_story_start, github_workflows_pr_review, github_workflows_pr_fix, github_workflows_production_prep [EXTRACTED 1.00]
 - **Data model entities owned by projects (ON DELETE CASCADE from projects.id)** — docs_data_model_projects, docs_data_model_project_documents, docs_data_model_project_sources, docs_data_model_uploaded_files, docs_data_model_share_links, docs_data_model_feedback_passes [EXTRACTED 1.00]
 
-## Communities (31 total, 6 thin omitted)
+## Communities (34 total, 7 thin omitted)
 
 ### Community 0 - "PR Review Skill"
 Cohesion: 0.12
@@ -119,28 +121,28 @@ Cohesion: 0.40
 Nodes (4): keys, lines, missing, secrets
 
 ### Community 14 - "worker/package.json"
-Cohesion: 0.08
-Nodes (23): dependencies, @alvus-ai/shared, hono, devDependencies, @cloudflare/vitest-pool-workers, @cloudflare/workers-types, typescript, vitest (+15 more)
+Cohesion: 0.07
+Nodes (27): dependencies, @alvus-ai/shared, drizzle-orm, hono, postgres, devDependencies, @cloudflare/vitest-pool-workers, @cloudflare/workers-types (+19 more)
 
 ### Community 15 - "devDependencies"
-Cohesion: 0.12
-Nodes (17): eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals, devDependencies, eslint, @eslint/js (+9 more)
+Cohesion: 0.10
+Nodes (21): dotenv, drizzle-kit, eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals, devDependencies (+13 more)
 
-### Community 16 - "web/package.json"
-Cohesion: 0.12
-Nodes (15): dependencies, @alvus-ai/shared, react, react-dom, @alvus-ai/shared, name, private, scripts (+7 more)
+### Community 16 - "devDependencies"
+Cohesion: 0.06
+Nodes (30): dependencies, @alvus-ai/shared, react, react-dom, devDependencies, tailwindcss, @tailwindcss/vite, @types/react (+22 more)
 
-### Community 17 - "devDependencies"
-Cohesion: 0.13
-Nodes (15): devDependencies, tailwindcss, @tailwindcss/vite, @types/react, @types/react-dom, typescript, vite, @vitejs/plugin-react (+7 more)
+### Community 17 - "schema/index.ts"
+Cohesion: 0.21
+Nodes (6): Db, authSchema, authUsers, tierLimits, users, waitlistSignups
 
 ### Community 18 - "compilerOptions"
 Cohesion: 0.13
 Nodes (14): compilerOptions, jsx, lib, noEmit, types, extends, include, ES2022 (+6 more)
 
-### Community 19 - "package.json"
-Cohesion: 0.13
-Nodes (14): name, private, scripts, build, dev, lint, test, typecheck (+6 more)
+### Community 19 - "scripts"
+Cohesion: 0.11
+Nodes (17): name, private, scripts, build, db:generate, db:migrate, db:push, dev (+9 more)
 
 ### Community 20 - "worker/tsconfig.json"
 Cohesion: 0.15
@@ -166,25 +168,29 @@ Nodes (4): App(), rootEl, CITATION_FORMATS, CitationFormat
 Cohesion: 0.29
 Nodes (6): 1. Typecheck every workspace, 2. Lint the whole repo, 3. Build the frontend for the Worker's static-assets binding, 4. Run the worker's test suite, 5. Boot wrangler dev and confirm the placeholder page and the API both respond, US-001 — Scaffold monorepo (frontend, Worker, shared package, tooling)
 
+### Community 31 - "US-002 — Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema"
+Cohesion: 0.33
+Nodes (5): 1. Boot the local Supabase stack (dev/CI parity), 2. Confirm the source-uploads Storage bucket is private (RLS-ready, no public read until owner-scoped policies land in US-014/US-017), 3. Apply the baseline schema via drizzle-kit, 4. Confirm users, waitlist_signups, and tier_limits exist, including the users -> auth.users FK, US-002 — Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema
+
 ## Knowledge Gaps
-- **144 isolated node(s):** `db`, `story`, `db`, `active`, `stuck` (+139 more)
+- **160 isolated node(s):** `db`, `story`, `db`, `active`, `stuck` (+155 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Security Model doc` connect `API Surface doc` to `PR Review Skill`?**
-  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+  _High betweenness centrality (0.013) - this node is a cross-community bridge._
 - **Why does `Production Prep Skill` connect `PR Review Skill` to `API Surface doc`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
-- **Why does `devDependencies` connect `devDependencies` to `package.json`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+- **Why does `devDependencies` connect `devDependencies` to `scripts`?**
+  _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **Are the 7 inferred relationships involving `API Surface doc` (e.g. with `project_sources table` and `projects table`) actually correct?**
   _`API Surface doc` has 7 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 6 inferred relationships involving `Security Model doc` (e.g. with `API Surface doc` and `Infrastructure doc`) actually correct?**
   _`Security Model doc` has 6 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `db`, `story`, `db` to the rest of the system?**
-  _144 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _160 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `PR Review Skill` be split into smaller, more focused modules?**
   _Cohesion score 0.12 - nodes in this community are weakly interconnected._
