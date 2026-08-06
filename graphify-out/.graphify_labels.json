@@ -15,8 +15,8 @@
   "13": "Notify workflow",
   "14": "worker/package.json",
   "15": "devDependencies",
-  "16": "devDependencies",
-  "17": "schema/index.ts",
+  "16": "web/package.json",
+  "17": "seed.ts",
   "18": "compilerOptions",
   "19": "scripts",
   "20": "worker/tsconfig.json",
@@ -32,5 +32,7 @@
   "30": "eslint.config.js",
   "31": "US-002 — Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema",
   "32": "demo-us-002.sh",
-  "33": "drizzle.config.ts"
+  "33": "drizzle.config.ts",
+  "34": "devDependencies",
+  "35": "US-003 — Seed the tier_limits catalog and dev/CI fixture users"
 }
