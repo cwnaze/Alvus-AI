@@ -1,16 +1,16 @@
 # Graph Report - Alvus-AI  (2026-08-06)
 
 ## Corpus Check
-- 63 files · ~26,321 words
+- 66 files · ~27,839 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 348 nodes · 365 edges · 36 communities (29 shown, 7 thin omitted)
+- 363 nodes · 377 edges · 39 communities (30 shown, 9 thin omitted)
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 21 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `7b91e24d`
+- Built from commit: `8f3fa92b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -41,12 +41,15 @@
 - shared/tsconfig.json
 - App.tsx
 - US-001 — Scaffold monorepo (frontend, Worker, shared package, tooling)
-- worker/src/index.ts
+- index.test.ts
 - demo-us-001-server.sh
 - US-002 — Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema
 - demo-us-002.sh
 - devDependencies
 - US-003 — Seed the tier_limits catalog and dev/CI fixture users
+- US-004 — Health check reports live database connectivity
+- demo-us-004-server.sh
+- demo-us-004.sh
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 12 edges
@@ -80,7 +83,7 @@
 - **Workflows that dispatch a Claude Code skill via claude-code-action** — github_workflows_story_start, github_workflows_pr_review, github_workflows_pr_fix, github_workflows_production_prep [EXTRACTED 1.00]
 - **Data model entities owned by projects (ON DELETE CASCADE from projects.id)** — docs_data_model_projects, docs_data_model_project_documents, docs_data_model_project_sources, docs_data_model_uploaded_files, docs_data_model_share_links, docs_data_model_feedback_passes [EXTRACTED 1.00]
 
-## Communities (36 total, 7 thin omitted)
+## Communities (39 total, 9 thin omitted)
 
 ### Community 0 - "PR Review Skill"
 Cohesion: 0.12
@@ -95,8 +98,8 @@ Cohesion: 0.19
 Nodes (11): active, db, dispatch(), done, eligible, existing, isPaused(), openPrep (+3 more)
 
 ### Community 3 - "watchdog.mjs"
-Cohesion: 0.20
-Nodes (10): active, db, idleMinutes, lastTouch, quotaBlocked(), rateLimitedUntil(), runs, sh() (+2 more)
+Cohesion: 0.14
+Nodes (14): active, allRuns, db, dead, emitters, failedSinceTouch, idleMinutes, lastTouch (+6 more)
 
 ### Community 4 - "demo.ts"
 Cohesion: 0.29
@@ -122,6 +125,10 @@ Nodes (3): DEFAULT_MARKER, out, RUNTIMES
 Cohesion: 0.40
 Nodes (4): keys, lines, missing, secrets
 
+### Community 10 - "complete-story.mjs"
+Cohesion: 0.40
+Nodes (3): db, story, toClose
+
 ### Community 14 - "worker/package.json"
 Cohesion: 0.07
 Nodes (27): dependencies, @alvus-ai/shared, drizzle-orm, hono, postgres, devDependencies, @cloudflare/vitest-pool-workers, @cloudflare/workers-types (+19 more)
@@ -135,8 +142,8 @@ Cohesion: 0.12
 Nodes (15): dependencies, @alvus-ai/shared, react, react-dom, @alvus-ai/shared, name, private, scripts (+7 more)
 
 ### Community 17 - "seed.ts"
-Cohesion: 0.14
-Nodes (16): createDb(), Db, authSchema, authUsers, tierLimits, users, waitlistSignups, db (+8 more)
+Cohesion: 0.12
+Nodes (18): app, Bindings, createDb(), Db, authSchema, authUsers, tierLimits, users (+10 more)
 
 ### Community 18 - "compilerOptions"
 Cohesion: 0.13
@@ -183,24 +190,24 @@ Cohesion: 0.29
 Nodes (6): 1. Boot the local Supabase stack (dev/CI parity) and apply the baseline schema, 2. Seed the tier_limits catalog and fixture users, 3. Re-run the seed to confirm it is idempotent (no duplicate-key errors, same row counts), 4. Confirm the v1 tier_limits catalog (free 5/3, plus 60/30, pro 250/120), 5. Confirm the three fixture users exist with correct status/role and a real backing auth.users row, US-003 — Seed the tier_limits catalog and dev/CI fixture users
 
 ## Knowledge Gaps
-- **170 isolated node(s):** `db`, `story`, `db`, `active`, `stuck` (+165 more)
+- **181 isolated node(s):** `db`, `story`, `toClose`, `db`, `active` (+176 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `devDependencies` connect `devDependencies` to `scripts`?**
-  _High betweenness centrality (0.012) - this node is a cross-community bridge._
-- **Why does `Security Model doc` connect `API Surface doc` to `PR Review Skill`?**
   _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **Why does `Production Prep Skill` connect `PR Review Skill` to `API Surface doc`?**
+- **Why does `Security Model doc` connect `API Surface doc` to `PR Review Skill`?**
   _High betweenness centrality (0.010) - this node is a cross-community bridge._
+- **Why does `Production Prep Skill` connect `PR Review Skill` to `API Surface doc`?**
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **Are the 7 inferred relationships involving `API Surface doc` (e.g. with `project_sources table` and `projects table`) actually correct?**
   _`API Surface doc` has 7 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 6 inferred relationships involving `Security Model doc` (e.g. with `API Surface doc` and `Infrastructure doc`) actually correct?**
   _`Security Model doc` has 6 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `db`, `story`, `db` to the rest of the system?**
-  _170 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `db`, `story`, `toClose` to the rest of the system?**
+  _181 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `PR Review Skill` be split into smaller, more focused modules?**
   _Cohesion score 0.12 - nodes in this community are weakly interconnected._

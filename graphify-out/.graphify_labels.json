@@ -25,7 +25,7 @@
   "23": "shared/tsconfig.json",
   "24": "App.tsx",
   "25": "US-001 — Scaffold monorepo (frontend, Worker, shared package, tooling)",
-  "26": "worker/src/index.ts",
+  "26": "index.test.ts",
   "27": "demo-us-001-server.sh",
   "28": "vite.config.ts",
   "29": "vitest.config.ts",
@@ -34,5 +34,8 @@
   "32": "demo-us-002.sh",
   "33": "drizzle.config.ts",
   "34": "devDependencies",
-  "35": "US-003 — Seed the tier_limits catalog and dev/CI fixture users"
+  "35": "US-003 — Seed the tier_limits catalog and dev/CI fixture users",
+  "36": "US-004 — Health check reports live database connectivity",
+  "37": "demo-us-004-server.sh",
+  "38": "demo-us-004.sh"
 }
