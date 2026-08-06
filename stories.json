@@ -61,7 +61,7 @@
       "dependsOn": [
         "US-001"
       ],
-      "status": "in_progress",
+      "status": "pending",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -73,7 +73,7 @@
         "specs": []
       },
       "demo": "docs/demos/US-002.md",
-      "branch": "feature/us-002-provision-supabase-postgres-storage-and-connect-drizzle",
+      "branch": null,
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,
