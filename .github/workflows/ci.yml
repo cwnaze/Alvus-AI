@@ -37,11 +37,18 @@ jobs:
             node .github/scripts/validate-stories.mjs
           fi
 
-      - name: Typecheck, lint, build
+      - name: Typecheck, lint, build, test
         env:
           TYPECHECK: ${{ steps.setup.outputs.cmd_typecheck }}
           LINT: ${{ steps.setup.outputs.cmd_lint }}
           BUILD: ${{ steps.setup.outputs.cmd_build }}
+          # setup-project's "Start local services" step already ran the manifest's
+          # `services` command (`npx supabase start`) before this step, so TEST runs
+          # against a live local Postgres on the Supabase CLI's fixed local port —
+          # the same connection string docs/testing.md's Worker/API integration tier
+          # and this repo's demo scripts (e.g. scripts/demo-us-002.sh) use.
+          TEST: ${{ steps.setup.outputs.cmd_test }}
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
         run: |
           set -uo pipefail
           if [ "${{ steps.setup.outputs.scaffolded }}" != "true" ]; then
@@ -49,10 +56,10 @@ jobs:
             exit 0
           fi
           # Whatever the manifest declares, in whatever language. A project that
-          # has no separate typecheck or lint step leaves it empty rather than
-          # failing on its absence.
+          # has no separate typecheck, lint, build, or test step leaves it empty
+          # rather than failing on its absence.
           failed=0
-          for name in TYPECHECK LINT BUILD; do
+          for name in TYPECHECK LINT BUILD TEST; do
             cmd="${!name}"
             if [ -z "$cmd" ]; then
               echo "No $name command declared — skipping."

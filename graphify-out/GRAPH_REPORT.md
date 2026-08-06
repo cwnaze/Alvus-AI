@@ -1,16 +1,16 @@
 # Graph Report - Alvus-AI  (2026-08-06)
 
 ## Corpus Check
-- 66 files · ~27,839 words
+- 68 files · ~29,719 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 363 nodes · 377 edges · 39 communities (30 shown, 9 thin omitted)
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 21 edges (avg confidence: 0.86)
+- 380 nodes · 393 edges · 41 communities (31 shown, 10 thin omitted)
+- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 22 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8f3fa92b`
+- Built from commit: `80a408e4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -50,6 +50,8 @@
 - US-004 — Health check reports live database connectivity
 - demo-us-004-server.sh
 - demo-us-004.sh
+- US-005 — CI test gate: typecheck/lint/build/test against a local Supabase Postgres service
+- demo-us-005.sh
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 12 edges
@@ -58,10 +60,10 @@
 4. `Security Model doc` - 9 edges
 5. `PR Review Skill` - 8 edges
 6. `projects table` - 8 edges
-7. `CLAUDE.md project guide` - 7 edges
-8. `US-001 — Scaffold monorepo (frontend, Worker, shared package, tooling)` - 6 edges
-9. `US-003 — Seed the tier_limits catalog and dev/CI fixture users` - 6 edges
-10. `Implement Story Skill` - 6 edges
+7. `US-005 — CI test gate: typecheck/lint/build/test against a local Supabase Postgres service` - 7 edges
+8. `CLAUDE.md project guide` - 7 edges
+9. `US-001 — Scaffold monorepo (frontend, Worker, shared package, tooling)` - 6 edges
+10. `US-003 — Seed the tier_limits catalog and dev/CI fixture users` - 6 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `PR Review workflow` --references--> `PR Review Skill`  [EXTRACTED]
@@ -83,7 +85,7 @@
 - **Workflows that dispatch a Claude Code skill via claude-code-action** — github_workflows_story_start, github_workflows_pr_review, github_workflows_pr_fix, github_workflows_production_prep [EXTRACTED 1.00]
 - **Data model entities owned by projects (ON DELETE CASCADE from projects.id)** — docs_data_model_projects, docs_data_model_project_documents, docs_data_model_project_sources, docs_data_model_uploaded_files, docs_data_model_share_links, docs_data_model_feedback_passes [EXTRACTED 1.00]
 
-## Communities (39 total, 9 thin omitted)
+## Communities (41 total, 10 thin omitted)
 
 ### Community 0 - "PR Review Skill"
 Cohesion: 0.12
@@ -95,11 +97,11 @@ Nodes (24): API Surface doc, citation_format immutable after project creation (r
 
 ### Community 2 - "dispatch-next.mjs"
 Cohesion: 0.19
-Nodes (11): active, db, dispatch(), done, eligible, existing, isPaused(), openPrep (+3 more)
+Nodes (12): active, db, dispatch(), done, eligible, existing, isPaused(), openPrep (+4 more)
 
 ### Community 3 - "watchdog.mjs"
-Cohesion: 0.14
-Nodes (14): active, allRuns, db, dead, emitters, failedSinceTouch, idleMinutes, lastTouch (+6 more)
+Cohesion: 0.11
+Nodes (18): active, allRuns, db, dead, emitters, failedSinceTouch, idleMinutes, lastTouch (+10 more)
 
 ### Community 4 - "demo.ts"
 Cohesion: 0.29
@@ -126,8 +128,8 @@ Cohesion: 0.40
 Nodes (4): keys, lines, missing, secrets
 
 ### Community 10 - "complete-story.mjs"
-Cohesion: 0.40
-Nodes (3): db, story, toClose
+Cohesion: 0.29
+Nodes (4): db, issues, rounds, story
 
 ### Community 14 - "worker/package.json"
 Cohesion: 0.07
@@ -189,25 +191,29 @@ Nodes (15): devDependencies, tailwindcss, @tailwindcss/vite, @types/react, @type
 Cohesion: 0.29
 Nodes (6): 1. Boot the local Supabase stack (dev/CI parity) and apply the baseline schema, 2. Seed the tier_limits catalog and fixture users, 3. Re-run the seed to confirm it is idempotent (no duplicate-key errors, same row counts), 4. Confirm the v1 tier_limits catalog (free 5/3, plus 60/30, pro 250/120), 5. Confirm the three fixture users exist with correct status/role and a real backing auth.users row, US-003 — Seed the tier_limits catalog and dev/CI fixture users
 
+### Community 39 - "US-005 — CI test gate: typecheck/lint/build/test against a local Supabase Postgres service"
+Cohesion: 0.25
+Nodes (7): 1. Confirm the local Supabase Postgres service (started in CI by setup-project's services step) is reachable, 2. ci.yml wires typecheck/lint/build/test into the required PR status check, with DATABASE_URL bound to that service, 3. Typecheck, 4. Lint, 5. Build, 6. Test, US-005 — CI test gate: typecheck/lint/build/test against a local Supabase Postgres service
+
 ## Knowledge Gaps
-- **181 isolated node(s):** `db`, `story`, `toClose`, `db`, `active` (+176 more)
+- **193 isolated node(s):** `db`, `story`, `issues`, `rounds`, `db` (+188 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `devDependencies` connect `devDependencies` to `scripts`?**
-  _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **Why does `Security Model doc` connect `API Surface doc` to `PR Review Skill`?**
   _High betweenness centrality (0.010) - this node is a cross-community bridge._
-- **Why does `Production Prep Skill` connect `PR Review Skill` to `API Surface doc`?**
+- **Why does `Security Model doc` connect `API Surface doc` to `PR Review Skill`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
+- **Why does `Production Prep Skill` connect `PR Review Skill` to `API Surface doc`?**
+  _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **Are the 7 inferred relationships involving `API Surface doc` (e.g. with `project_sources table` and `projects table`) actually correct?**
   _`API Surface doc` has 7 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 6 inferred relationships involving `Security Model doc` (e.g. with `API Surface doc` and `Infrastructure doc`) actually correct?**
   _`Security Model doc` has 6 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `db`, `story`, `toClose` to the rest of the system?**
-  _181 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `db`, `story`, `issues` to the rest of the system?**
+  _193 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `PR Review Skill` be split into smaller, more focused modules?**
   _Cohesion score 0.12 - nodes in this community are weakly interconnected._

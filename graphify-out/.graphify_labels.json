@@ -37,5 +37,7 @@
   "35": "US-003 — Seed the tier_limits catalog and dev/CI fixture users",
   "36": "US-004 — Health check reports live database connectivity",
   "37": "demo-us-004-server.sh",
-  "38": "demo-us-004.sh"
+  "38": "demo-us-004.sh",
+  "39": "US-005 — CI test gate: typecheck/lint/build/test against a local Supabase Postgres service",
+  "40": "demo-us-005.sh"
 }
