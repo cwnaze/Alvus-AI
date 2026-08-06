@@ -12,3 +12,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-06T02:49:00.004Z | US-001 | done | PR #2 merged after 0 review round(s)
 2026-08-06T02:54:56.000Z | US-002 | in_progress | Branch feature/us-002-provision-supabase-postgres-storage-and-connect-drizzle created; starting Supabase/Drizzle provisioning.
 2026-08-06T03:00:00.000Z | US-002 | pending | Crash resume: in_progress with no branch/PR found on remote; reset to pending for re-selection.
+2026-08-06T03:01:00.000Z | US-002 | in_progress | Branch feature/us-002-provision-supabase-postgres-storage-and-connect-drizzle created; starting Supabase/Drizzle provisioning.
