@@ -88,7 +88,7 @@
       "dependsOn": [
         "US-002"
       ],
-      "status": "in_progress",
+      "status": "in_review",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -101,7 +101,7 @@
       },
       "demo": "docs/demos/US-003.md",
       "branch": "feature/us-003-seed-tier-limits-and-fixture-users",
-      "prNumber": null,
+      "prNumber": 4,
       "issueNumber": null,
       "reviewRounds": 0,
       "notes": ""
