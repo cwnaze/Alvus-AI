@@ -132,7 +132,7 @@
       "branch": "feature/us-004-health-check-reports-live-database-connectivity",
       "prNumber": 6,
       "issueNumber": 7,
-      "reviewRounds": 1,
+      "reviewRounds": 2,
       "notes": "wrangler dev needs --env-file .env to bind DATABASE_URL (and the rest of .env) as Worker bindings locally/in CI, since Workers doesn't read .env automatically; production gets these via `wrangler secret put` per docs/infra.md. Added --env-file .env to pipeline.json's serve.dev/serve.ci, the root dev script, and the US-001 demo script. Unit tests mock createDb to cover both branches deterministically without a live DB/Docker dependency for `npm test`; the real live round trip is proven by this story's demo script against the real DATABASE_URL in .env. The per-request DB connection is deliberately left unclosed -- calling .end() races the Workers postgres.js polyfill's background stream read and surfaces as an unhandled rejection."
     },
     {
