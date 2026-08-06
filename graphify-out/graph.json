@@ -658,7 +658,7 @@
       "_origin": "ast",
       "id": "apps_web_package",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "web/package.json"
     },
     {
@@ -669,7 +669,7 @@
       "_origin": "ast",
       "id": "apps_web_package_name",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "name"
     },
     {
@@ -680,7 +680,7 @@
       "_origin": "ast",
       "id": "apps_web_package_private",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "private"
     },
     {
@@ -691,7 +691,7 @@
       "_origin": "ast",
       "id": "apps_web_package_version",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "version"
     },
     {
@@ -702,7 +702,7 @@
       "_origin": "ast",
       "id": "apps_web_package_type",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "type"
     },
     {
@@ -713,7 +713,7 @@
       "_origin": "ast",
       "id": "apps_web_package_scripts",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "scripts"
     },
     {
@@ -724,7 +724,7 @@
       "_origin": "ast",
       "id": "apps_web_package_scripts_dev",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "dev"
     },
     {
@@ -735,7 +735,7 @@
       "_origin": "ast",
       "id": "apps_web_package_scripts_build",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "build"
     },
     {
@@ -746,7 +746,7 @@
       "_origin": "ast",
       "id": "apps_web_package_scripts_typecheck",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "typecheck"
     },
     {
@@ -757,7 +757,7 @@
       "_origin": "ast",
       "id": "apps_web_package_dependencies",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "dependencies"
     },
     {
@@ -768,7 +768,7 @@
       "_origin": "ast",
       "id": "apps_web_package_dependencies_alvus_ai_shared",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "@alvus-ai/shared"
     },
     {
@@ -779,7 +779,7 @@
       "_origin": "ast",
       "id": "apps_web_package_json_alvus_ai_shared",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "@alvus-ai/shared"
     },
     {
@@ -790,7 +790,7 @@
       "_origin": "ast",
       "id": "apps_web_package_dependencies_react",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "react"
     },
     {
@@ -801,7 +801,7 @@
       "_origin": "ast",
       "id": "react",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "react"
     },
     {
@@ -812,7 +812,7 @@
       "_origin": "ast",
       "id": "apps_web_package_dependencies_react_dom",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "react-dom"
     },
     {
@@ -823,7 +823,7 @@
       "_origin": "ast",
       "id": "react_dom",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "react-dom"
     },
     {
@@ -833,7 +833,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies",
-      "community": 17,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "devdependencies"
     },
@@ -844,7 +844,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_tailwindcss_vite",
-      "community": 17,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "@tailwindcss/vite"
     },
@@ -855,7 +855,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "tailwindcss_vite",
-      "community": 17,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "@tailwindcss/vite"
     },
@@ -866,7 +866,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_types_react",
-      "community": 17,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "@types/react"
     },
@@ -877,7 +877,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "types_react",
-      "community": 17,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "@types/react"
     },
@@ -888,7 +888,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_types_react_dom",
-      "community": 17,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "@types/react-dom"
     },
@@ -899,7 +899,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "types_react_dom",
-      "community": 17,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "@types/react-dom"
     },
@@ -910,7 +910,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_vitejs_plugin_react",
-      "community": 17,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "@vitejs/plugin-react"
     },
@@ -921,7 +921,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "vitejs_plugin_react",
-      "community": 17,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "@vitejs/plugin-react"
     },
@@ -932,7 +932,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_tailwindcss",
-      "community": 17,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "tailwindcss"
     },
@@ -943,7 +943,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "tailwindcss",
-      "community": 17,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "tailwindcss"
     },
@@ -954,7 +954,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_typescript",
-      "community": 17,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "typescript"
     },
@@ -965,7 +965,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "apps_web_package_json_typescript",
-      "community": 17,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "typescript"
     },
@@ -976,7 +976,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_vite",
-      "community": 17,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "vite"
     },
@@ -987,7 +987,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "vite",
-      "community": 17,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "vite"
     },
@@ -1334,10 +1334,32 @@
       "norm_label": "@alvus-ai/shared"
     },
     {
-      "label": "hono",
+      "label": "drizzle-orm",
       "file_type": "code",
       "source_file": "apps/worker/package.json",
       "source_location": "L12",
+      "_origin": "ast",
+      "id": "apps_worker_package_dependencies_drizzle_orm",
+      "community": 14,
+      "community_name": "worker/package.json",
+      "norm_label": "drizzle-orm"
+    },
+    {
+      "label": "drizzle-orm",
+      "file_type": "concept",
+      "source_file": "apps/worker/package.json",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "drizzle_orm",
+      "community": 14,
+      "community_name": "worker/package.json",
+      "norm_label": "drizzle-orm"
+    },
+    {
+      "label": "hono",
+      "file_type": "code",
+      "source_file": "apps/worker/package.json",
+      "source_location": "L13",
       "_origin": "ast",
       "id": "apps_worker_package_dependencies_hono",
       "community": 14,
@@ -1348,7 +1370,7 @@
       "label": "hono",
       "file_type": "concept",
       "source_file": "apps/worker/package.json",
-      "source_location": "L12",
+      "source_location": "L13",
       "_origin": "ast",
       "id": "hono",
       "community": 14,
@@ -1356,10 +1378,32 @@
       "norm_label": "hono"
     },
     {
-      "label": "devDependencies",
+      "label": "postgres",
       "file_type": "code",
       "source_file": "apps/worker/package.json",
       "source_location": "L14",
+      "_origin": "ast",
+      "id": "apps_worker_package_dependencies_postgres",
+      "community": 14,
+      "community_name": "worker/package.json",
+      "norm_label": "postgres"
+    },
+    {
+      "label": "postgres",
+      "file_type": "concept",
+      "source_file": "apps/worker/package.json",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "postgres",
+      "community": 14,
+      "community_name": "worker/package.json",
+      "norm_label": "postgres"
+    },
+    {
+      "label": "devDependencies",
+      "file_type": "code",
+      "source_file": "apps/worker/package.json",
+      "source_location": "L16",
       "_origin": "ast",
       "id": "apps_worker_package_devdependencies",
       "community": 14,
@@ -1370,7 +1414,7 @@
       "label": "@cloudflare/vitest-pool-workers",
       "file_type": "code",
       "source_file": "apps/worker/package.json",
-      "source_location": "L15",
+      "source_location": "L17",
       "_origin": "ast",
       "id": "apps_worker_package_devdependencies_cloudflare_vitest_pool_workers",
       "community": 14,
@@ -1381,7 +1425,7 @@
       "label": "@cloudflare/vitest-pool-workers",
       "file_type": "concept",
       "source_file": "apps/worker/package.json",
-      "source_location": "L15",
+      "source_location": "L17",
       "_origin": "ast",
       "id": "cloudflare_vitest_pool_workers",
       "community": 14,
@@ -1392,7 +1436,7 @@
       "label": "@cloudflare/workers-types",
       "file_type": "code",
       "source_file": "apps/worker/package.json",
-      "source_location": "L16",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "apps_worker_package_devdependencies_cloudflare_workers_types",
       "community": 14,
@@ -1403,7 +1447,7 @@
       "label": "@cloudflare/workers-types",
       "file_type": "concept",
       "source_file": "apps/worker/package.json",
-      "source_location": "L16",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "cloudflare_workers_types",
       "community": 14,
@@ -1414,7 +1458,7 @@
       "label": "typescript",
       "file_type": "code",
       "source_file": "apps/worker/package.json",
-      "source_location": "L17",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "apps_worker_package_devdependencies_typescript",
       "community": 14,
@@ -1425,7 +1469,7 @@
       "label": "typescript",
       "file_type": "concept",
       "source_file": "apps/worker/package.json",
-      "source_location": "L17",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "apps_worker_package_json_typescript",
       "community": 14,
@@ -1436,7 +1480,7 @@
       "label": "vitest",
       "file_type": "code",
       "source_file": "apps/worker/package.json",
-      "source_location": "L18",
+      "source_location": "L20",
       "_origin": "ast",
       "id": "apps_worker_package_devdependencies_vitest",
       "community": 14,
@@ -1447,7 +1491,7 @@
       "label": "vitest",
       "file_type": "concept",
       "source_file": "apps/worker/package.json",
-      "source_location": "L18",
+      "source_location": "L20",
       "_origin": "ast",
       "id": "vitest",
       "community": 14,
@@ -1458,7 +1502,7 @@
       "label": "wrangler",
       "file_type": "code",
       "source_file": "apps/worker/package.json",
-      "source_location": "L19",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "apps_worker_package_devdependencies_wrangler",
       "community": 14,
@@ -1469,7 +1513,7 @@
       "label": "wrangler",
       "file_type": "concept",
       "source_file": "apps/worker/package.json",
-      "source_location": "L19",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "apps_worker_package_json_wrangler",
       "community": 14,
@@ -1508,6 +1552,152 @@
       "community": 26,
       "community_name": "worker/src/index.ts",
       "norm_label": "app"
+    },
+    {
+      "label": "client.ts",
+      "file_type": "code",
+      "source_file": "apps/worker/src/lib/db/client.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "apps_worker_src_lib_db_client",
+      "community": 17,
+      "community_name": "schema/index.ts",
+      "norm_label": "client.ts"
+    },
+    {
+      "label": "Db",
+      "file_type": "code",
+      "source_file": "apps/worker/src/lib/db/client.ts",
+      "source_location": "L5",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "apps_worker_src_lib_db_client_db",
+      "community": 17,
+      "community_name": "schema/index.ts",
+      "norm_label": "db"
+    },
+    {
+      "label": "createDb()",
+      "file_type": "code",
+      "source_file": "apps/worker/src/lib/db/client.ts",
+      "source_location": "L10",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "apps_worker_src_lib_db_client_createdb",
+      "community": 17,
+      "community_name": "schema/index.ts",
+      "norm_label": "createdb()"
+    },
+    {
+      "label": "auth.ts",
+      "file_type": "code",
+      "source_file": "apps/worker/src/lib/db/schema/auth.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "apps_worker_src_lib_db_schema_auth",
+      "community": 17,
+      "community_name": "schema/index.ts",
+      "norm_label": "auth.ts"
+    },
+    {
+      "label": "authSchema",
+      "file_type": "code",
+      "source_file": "apps/worker/src/lib/db/schema/auth.ts",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "apps_worker_src_lib_db_schema_auth_authschema",
+      "community": 17,
+      "community_name": "schema/index.ts",
+      "norm_label": "authschema"
+    },
+    {
+      "label": "authUsers",
+      "file_type": "code",
+      "source_file": "apps/worker/src/lib/db/schema/auth.ts",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "apps_worker_src_lib_db_schema_auth_authusers",
+      "community": 17,
+      "community_name": "schema/index.ts",
+      "norm_label": "authusers"
+    },
+    {
+      "label": "schema/index.ts",
+      "file_type": "code",
+      "source_file": "apps/worker/src/lib/db/schema/index.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "apps_worker_src_lib_db_schema_index",
+      "community": 17,
+      "community_name": "schema/index.ts",
+      "norm_label": "schema/index.ts"
+    },
+    {
+      "label": "tier-limits.ts",
+      "file_type": "code",
+      "source_file": "apps/worker/src/lib/db/schema/tier-limits.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "apps_worker_src_lib_db_schema_tier_limits",
+      "community": 17,
+      "community_name": "schema/index.ts",
+      "norm_label": "tier-limits.ts"
+    },
+    {
+      "label": "tierLimits",
+      "file_type": "code",
+      "source_file": "apps/worker/src/lib/db/schema/tier-limits.ts",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "apps_worker_src_lib_db_schema_tier_limits_tierlimits",
+      "community": 17,
+      "community_name": "schema/index.ts",
+      "norm_label": "tierlimits"
+    },
+    {
+      "label": "users.ts",
+      "file_type": "code",
+      "source_file": "apps/worker/src/lib/db/schema/users.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "apps_worker_src_lib_db_schema_users",
+      "community": 17,
+      "community_name": "schema/index.ts",
+      "norm_label": "users.ts"
+    },
+    {
+      "label": "users",
+      "file_type": "code",
+      "source_file": "apps/worker/src/lib/db/schema/users.ts",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "apps_worker_src_lib_db_schema_users_users",
+      "community": 17,
+      "community_name": "schema/index.ts",
+      "norm_label": "users"
+    },
+    {
+      "label": "waitlist-signups.ts",
+      "file_type": "code",
+      "source_file": "apps/worker/src/lib/db/schema/waitlist-signups.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "apps_worker_src_lib_db_schema_waitlist_signups",
+      "community": 17,
+      "community_name": "schema/index.ts",
+      "norm_label": "waitlist-signups.ts"
+    },
+    {
+      "label": "waitlistSignups",
+      "file_type": "code",
+      "source_file": "apps/worker/src/lib/db/schema/waitlist-signups.ts",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "apps_worker_src_lib_db_schema_waitlist_signups_waitlistsignups",
+      "community": 17,
+      "community_name": "schema/index.ts",
+      "norm_label": "waitlistsignups"
     },
     {
       "label": "worker/tsconfig.json",
@@ -1662,6 +1852,17 @@
       "community": 29,
       "community_name": "vitest.config.ts",
       "norm_label": "vitest.config.ts"
+    },
+    {
+      "label": "drizzle.config.ts",
+      "file_type": "code",
+      "source_file": "drizzle.config.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "drizzle_config",
+      "community": 33,
+      "community_name": "drizzle.config.ts",
+      "norm_label": "drizzle.config.ts"
     },
     {
       "label": "demo-command.mjs",
@@ -1844,7 +2045,7 @@
       "_origin": "ast",
       "id": "package",
       "community": 19,
-      "community_name": "package.json",
+      "community_name": "scripts",
       "norm_label": "package.json"
     },
     {
@@ -1855,7 +2056,7 @@
       "_origin": "ast",
       "id": "package_name",
       "community": 19,
-      "community_name": "package.json",
+      "community_name": "scripts",
       "norm_label": "name"
     },
     {
@@ -1866,7 +2067,7 @@
       "_origin": "ast",
       "id": "package_private",
       "community": 19,
-      "community_name": "package.json",
+      "community_name": "scripts",
       "norm_label": "private"
     },
     {
@@ -1877,7 +2078,7 @@
       "_origin": "ast",
       "id": "package_version",
       "community": 19,
-      "community_name": "package.json",
+      "community_name": "scripts",
       "norm_label": "version"
     },
     {
@@ -1888,7 +2089,7 @@
       "_origin": "ast",
       "id": "package_type",
       "community": 19,
-      "community_name": "package.json",
+      "community_name": "scripts",
       "norm_label": "type"
     },
     {
@@ -1899,7 +2100,7 @@
       "_origin": "ast",
       "id": "package_workspaces",
       "community": 19,
-      "community_name": "package.json",
+      "community_name": "scripts",
       "norm_label": "workspaces"
     },
     {
@@ -1910,7 +2111,7 @@
       "_origin": "ast",
       "id": "ref_apps_web",
       "community": 19,
-      "community_name": "package.json",
+      "community_name": "scripts",
       "norm_label": "apps/web"
     },
     {
@@ -1921,7 +2122,7 @@
       "_origin": "ast",
       "id": "ref_apps_worker",
       "community": 19,
-      "community_name": "package.json",
+      "community_name": "scripts",
       "norm_label": "apps/worker"
     },
     {
@@ -1932,7 +2133,7 @@
       "_origin": "ast",
       "id": "ref_packages_shared",
       "community": 19,
-      "community_name": "package.json",
+      "community_name": "scripts",
       "norm_label": "packages/shared"
     },
     {
@@ -1943,7 +2144,7 @@
       "_origin": "ast",
       "id": "package_scripts",
       "community": 19,
-      "community_name": "package.json",
+      "community_name": "scripts",
       "norm_label": "scripts"
     },
     {
@@ -1954,7 +2155,7 @@
       "_origin": "ast",
       "id": "package_scripts_dev",
       "community": 19,
-      "community_name": "package.json",
+      "community_name": "scripts",
       "norm_label": "dev"
     },
     {
@@ -1965,7 +2166,7 @@
       "_origin": "ast",
       "id": "package_scripts_typecheck",
       "community": 19,
-      "community_name": "package.json",
+      "community_name": "scripts",
       "norm_label": "typecheck"
     },
     {
@@ -1976,7 +2177,7 @@
       "_origin": "ast",
       "id": "package_scripts_lint",
       "community": 19,
-      "community_name": "package.json",
+      "community_name": "scripts",
       "norm_label": "lint"
     },
     {
@@ -1987,7 +2188,7 @@
       "_origin": "ast",
       "id": "package_scripts_build",
       "community": 19,
-      "community_name": "package.json",
+      "community_name": "scripts",
       "norm_label": "build"
     },
     {
@@ -1998,14 +2199,47 @@
       "_origin": "ast",
       "id": "package_scripts_test",
       "community": 19,
-      "community_name": "package.json",
+      "community_name": "scripts",
       "norm_label": "test"
+    },
+    {
+      "label": "db:generate",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "package_scripts_db_generate",
+      "community": 19,
+      "community_name": "scripts",
+      "norm_label": "db:generate"
+    },
+    {
+      "label": "db:migrate",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "package_scripts_db_migrate",
+      "community": 19,
+      "community_name": "scripts",
+      "norm_label": "db:migrate"
+    },
+    {
+      "label": "db:push",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "package_scripts_db_push",
+      "community": 19,
+      "community_name": "scripts",
+      "norm_label": "db:push"
     },
     {
       "label": "devDependencies",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L18",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "package_devdependencies",
       "community": 15,
@@ -2016,7 +2250,7 @@
       "label": "@eslint/js",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L19",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "package_devdependencies_eslint_js",
       "community": 15,
@@ -2027,7 +2261,7 @@
       "label": "@eslint/js",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L19",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "eslint_js",
       "community": 15,
@@ -2035,10 +2269,54 @@
       "norm_label": "@eslint/js"
     },
     {
+      "label": "dotenv",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "package_devdependencies_dotenv",
+      "community": 15,
+      "community_name": "devDependencies",
+      "norm_label": "dotenv"
+    },
+    {
+      "label": "dotenv",
+      "file_type": "concept",
+      "source_file": "package.json",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "dotenv",
+      "community": 15,
+      "community_name": "devDependencies",
+      "norm_label": "dotenv"
+    },
+    {
+      "label": "drizzle-kit",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "package_devdependencies_drizzle_kit",
+      "community": 15,
+      "community_name": "devDependencies",
+      "norm_label": "drizzle-kit"
+    },
+    {
+      "label": "drizzle-kit",
+      "file_type": "concept",
+      "source_file": "package.json",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "drizzle_kit",
+      "community": 15,
+      "community_name": "devDependencies",
+      "norm_label": "drizzle-kit"
+    },
+    {
       "label": "eslint",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L20",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "package_devdependencies_eslint",
       "community": 15,
@@ -2049,7 +2327,7 @@
       "label": "eslint",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L20",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "eslint",
       "community": 15,
@@ -2060,7 +2338,7 @@
       "label": "eslint-plugin-react-hooks",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L21",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "package_devdependencies_eslint_plugin_react_hooks",
       "community": 15,
@@ -2071,7 +2349,7 @@
       "label": "eslint-plugin-react-hooks",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L21",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "eslint_plugin_react_hooks",
       "community": 15,
@@ -2082,7 +2360,7 @@
       "label": "eslint-plugin-react-refresh",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L22",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "package_devdependencies_eslint_plugin_react_refresh",
       "community": 15,
@@ -2093,7 +2371,7 @@
       "label": "eslint-plugin-react-refresh",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L22",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "eslint_plugin_react_refresh",
       "community": 15,
@@ -2104,7 +2382,7 @@
       "label": "globals",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L23",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "package_devdependencies_globals",
       "community": 15,
@@ -2115,7 +2393,7 @@
       "label": "globals",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L23",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "globals",
       "community": 15,
@@ -2126,7 +2404,7 @@
       "label": "typescript",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L24",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "package_devdependencies_typescript",
       "community": 15,
@@ -2137,7 +2415,7 @@
       "label": "typescript",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L24",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "package_json_typescript",
       "community": 15,
@@ -2148,7 +2426,7 @@
       "label": "typescript-eslint",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L25",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "package_devdependencies_typescript_eslint",
       "community": 15,
@@ -2159,7 +2437,7 @@
       "label": "typescript-eslint",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L25",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "typescript_eslint",
       "community": 15,
@@ -2170,7 +2448,7 @@
       "label": "wrangler",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L26",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "package_devdependencies_wrangler",
       "community": 15,
@@ -2181,7 +2459,7 @@
       "label": "wrangler",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L26",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "package_json_wrangler",
       "community": 15,
@@ -2533,6 +2811,36 @@
       "norm_label": "cleanup()"
     },
     {
+      "label": "demo-us-002.sh",
+      "file_type": "code",
+      "source_file": "scripts/demo-us-002.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "file"
+      },
+      "_origin": "ast",
+      "id": "scripts_demo_us_002",
+      "community": 32,
+      "community_name": "demo-us-002.sh",
+      "norm_label": "demo-us-002.sh"
+    },
+    {
+      "label": "demo-us-002.sh script",
+      "file_type": "code",
+      "source_file": "scripts/demo-us-002.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_entrypoint"
+      },
+      "_origin": "ast",
+      "id": "scripts_demo_us_002_sh__entry",
+      "community": 32,
+      "community_name": "demo-us-002.sh",
+      "norm_label": "demo-us-002.sh script"
+    },
+    {
       "label": "sync-secrets.sh",
       "file_type": "code",
       "source_file": "scripts/sync-secrets.sh",
@@ -2781,6 +3089,72 @@
       "community": 25,
       "community_name": "US-001 \u2014 Scaffold monorepo (frontend, Worker, shared package, tooling)",
       "norm_label": "5. boot wrangler dev and confirm the placeholder page and the api both respond"
+    },
+    {
+      "label": "US-002.md",
+      "file_type": "document",
+      "source_file": "docs/demos/US-002.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_demos_us_002",
+      "community": 31,
+      "community_name": "US-002 \u2014 Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema",
+      "norm_label": "us-002.md"
+    },
+    {
+      "label": "US-002 \u2014 Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema",
+      "file_type": "document",
+      "source_file": "docs/demos/US-002.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_demos_us_002_us_002_provision_supabase_postgres_storage_and_connect_drizzle_to_a_migrated_baseline_schema",
+      "community": 31,
+      "community_name": "US-002 \u2014 Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema",
+      "norm_label": "us-002 \u2014 provision supabase (postgres + storage) and connect drizzle to a migrated baseline schema"
+    },
+    {
+      "label": "1. Boot the local Supabase stack (dev/CI parity)",
+      "file_type": "document",
+      "source_file": "docs/demos/US-002.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "docs_demos_us_002_1_boot_the_local_supabase_stack_dev_ci_parity",
+      "community": 31,
+      "community_name": "US-002 \u2014 Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema",
+      "norm_label": "1. boot the local supabase stack (dev/ci parity)"
+    },
+    {
+      "label": "2. Confirm the source-uploads Storage bucket is private (RLS-ready, no public read until owner-scoped policies land in US-014/US-017)",
+      "file_type": "document",
+      "source_file": "docs/demos/US-002.md",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "docs_demos_us_002_2_confirm_the_source_uploads_storage_bucket_is_private_rls_ready_no_public_read_until_owner_scoped_policies_land_in_us_014_us_017",
+      "community": 31,
+      "community_name": "US-002 \u2014 Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema",
+      "norm_label": "2. confirm the source-uploads storage bucket is private (rls-ready, no public read until owner-scoped policies land in us-014/us-017)"
+    },
+    {
+      "label": "3. Apply the baseline schema via drizzle-kit",
+      "file_type": "document",
+      "source_file": "docs/demos/US-002.md",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "docs_demos_us_002_3_apply_the_baseline_schema_via_drizzle_kit",
+      "community": 31,
+      "community_name": "US-002 \u2014 Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema",
+      "norm_label": "3. apply the baseline schema via drizzle-kit"
+    },
+    {
+      "label": "4. Confirm users, waitlist_signups, and tier_limits exist, including the users -> auth.users FK",
+      "file_type": "document",
+      "source_file": "docs/demos/US-002.md",
+      "source_location": "L50",
+      "_origin": "ast",
+      "id": "docs_demos_us_002_4_confirm_users_waitlist_signups_and_tier_limits_exist_including_the_users_auth_users_fk",
+      "community": 31,
+      "community_name": "US-002 \u2014 Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema",
+      "norm_label": "4. confirm users, waitlist_signups, and tier_limits exist, including the users -> auth.users fk"
     },
     {
       "label": "Implement Story Skill",
@@ -4702,7 +5076,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/worker/package.json",
-      "source_location": "L14",
+      "source_location": "L16",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_worker_package",
@@ -4805,7 +5179,29 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_worker_package_dependencies",
+      "target": "apps_worker_package_dependencies_drizzle_orm",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/package.json",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_package_dependencies",
       "target": "apps_worker_package_dependencies_hono",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/package.json",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_package_dependencies",
+      "target": "apps_worker_package_dependencies_postgres",
       "confidence_score": 1.0
     },
     {
@@ -4828,30 +5224,32 @@
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
+      "source": "apps_worker_package_dependencies_drizzle_orm",
+      "target": "drizzle_orm",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/package.json",
+      "source_location": "L13",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
       "source": "apps_worker_package_dependencies_hono",
       "target": "hono",
       "confidence_score": 1.0
     },
     {
-      "relation": "contains",
+      "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/worker/package.json",
-      "source_location": "L15",
+      "source_location": "L14",
       "weight": 1.0,
+      "context": "import",
       "_origin": "ast",
-      "source": "apps_worker_package_devdependencies",
-      "target": "apps_worker_package_devdependencies_cloudflare_vitest_pool_workers",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/worker/package.json",
-      "source_location": "L16",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_worker_package_devdependencies",
-      "target": "apps_worker_package_devdependencies_cloudflare_workers_types",
+      "source": "apps_worker_package_dependencies_postgres",
+      "target": "postgres",
       "confidence_score": 1.0
     },
     {
@@ -4862,7 +5260,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_worker_package_devdependencies",
-      "target": "apps_worker_package_devdependencies_typescript",
+      "target": "apps_worker_package_devdependencies_cloudflare_vitest_pool_workers",
       "confidence_score": 1.0
     },
     {
@@ -4873,7 +5271,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_worker_package_devdependencies",
-      "target": "apps_worker_package_devdependencies_vitest",
+      "target": "apps_worker_package_devdependencies_cloudflare_workers_types",
       "confidence_score": 1.0
     },
     {
@@ -4884,6 +5282,28 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_worker_package_devdependencies",
+      "target": "apps_worker_package_devdependencies_typescript",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/package.json",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_package_devdependencies",
+      "target": "apps_worker_package_devdependencies_vitest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/package.json",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_package_devdependencies",
       "target": "apps_worker_package_devdependencies_wrangler",
       "confidence_score": 1.0
     },
@@ -4891,7 +5311,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/worker/package.json",
-      "source_location": "L15",
+      "source_location": "L17",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -4903,7 +5323,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/worker/package.json",
-      "source_location": "L16",
+      "source_location": "L18",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -4915,7 +5335,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/worker/package.json",
-      "source_location": "L17",
+      "source_location": "L19",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -4927,7 +5347,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/worker/package.json",
-      "source_location": "L18",
+      "source_location": "L20",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -4939,7 +5359,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/worker/package.json",
-      "source_location": "L19",
+      "source_location": "L21",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -4980,6 +5400,191 @@
       "_origin": "ast",
       "source": "apps_worker_src_index",
       "target": "apps_worker_src_index_app",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/lib/db/client.ts",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_lib_db_client",
+      "target": "apps_worker_src_lib_db_client_createdb",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/lib/db/client.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_lib_db_client",
+      "target": "apps_worker_src_lib_db_client_db",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/lib/db/client.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_lib_db_client",
+      "target": "apps_worker_src_lib_db_schema_index",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/lib/db/schema/auth.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_lib_db_schema_auth",
+      "target": "apps_worker_src_lib_db_schema_auth_authschema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/lib/db/schema/auth.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_lib_db_schema_auth",
+      "target": "apps_worker_src_lib_db_schema_auth_authusers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/lib/db/schema/index.ts",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_lib_db_schema_index",
+      "target": "apps_worker_src_lib_db_schema_auth",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/lib/db/schema/users.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_lib_db_schema_users",
+      "target": "apps_worker_src_lib_db_schema_auth",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/lib/db/schema/users.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_lib_db_schema_users",
+      "target": "apps_worker_src_lib_db_schema_auth_authusers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/lib/db/schema/index.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_lib_db_schema_index",
+      "target": "apps_worker_src_lib_db_schema_tier_limits",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/lib/db/schema/index.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_lib_db_schema_index",
+      "target": "apps_worker_src_lib_db_schema_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/lib/db/schema/index.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_lib_db_schema_index",
+      "target": "apps_worker_src_lib_db_schema_waitlist_signups",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/lib/db/schema/tier-limits.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_lib_db_schema_tier_limits",
+      "target": "apps_worker_src_lib_db_schema_tier_limits_tierlimits",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/lib/db/schema/users.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_lib_db_schema_users",
+      "target": "apps_worker_src_lib_db_schema_users_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/lib/db/schema/waitlist-signups.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_lib_db_schema_waitlist_signups",
+      "target": "apps_worker_src_lib_db_schema_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/lib/db/schema/waitlist-signups.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_lib_db_schema_waitlist_signups",
+      "target": "apps_worker_src_lib_db_schema_users_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/lib/db/schema/waitlist-signups.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_lib_db_schema_waitlist_signups",
+      "target": "apps_worker_src_lib_db_schema_waitlist_signups_waitlistsignups",
       "confidence_score": 1.0
     },
     {
@@ -5269,7 +5874,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L18",
+      "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
       "source": "package",
@@ -5393,6 +5998,39 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_scripts",
+      "target": "package_scripts_db_generate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_scripts",
+      "target": "package_scripts_db_migrate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_scripts",
+      "target": "package_scripts_db_push",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
       "source_location": "L12",
       "weight": 1.0,
       "_origin": "ast",
@@ -5437,55 +6075,11 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L20",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "package_devdependencies",
-      "target": "package_devdependencies_eslint",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "package.json",
-      "source_location": "L19",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "package_devdependencies",
-      "target": "package_devdependencies_eslint_js",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "package.json",
-      "source_location": "L21",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "package_devdependencies",
-      "target": "package_devdependencies_eslint_plugin_react_hooks",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "package.json",
-      "source_location": "L22",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "package_devdependencies",
-      "target": "package_devdependencies_eslint_plugin_react_refresh",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "package.json",
       "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
       "source": "package_devdependencies",
-      "target": "package_devdependencies_globals",
+      "target": "package_devdependencies_dotenv",
       "confidence_score": 1.0
     },
     {
@@ -5496,7 +6090,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "package_devdependencies",
-      "target": "package_devdependencies_typescript",
+      "target": "package_devdependencies_drizzle_kit",
       "confidence_score": 1.0
     },
     {
@@ -5507,7 +6101,18 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "package_devdependencies",
-      "target": "package_devdependencies_typescript_eslint",
+      "target": "package_devdependencies_eslint",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_eslint_js",
       "confidence_score": 1.0
     },
     {
@@ -5518,6 +6123,61 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "package_devdependencies",
+      "target": "package_devdependencies_eslint_plugin_react_hooks",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L27",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_eslint_plugin_react_refresh",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L28",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_globals",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_typescript",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_typescript_eslint",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L31",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_devdependencies",
       "target": "package_devdependencies_wrangler",
       "confidence_score": 1.0
     },
@@ -5525,7 +6185,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L19",
+      "source_location": "L22",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -5537,7 +6197,31 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L20",
+      "source_location": "L23",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "package_devdependencies_dotenv",
+      "target": "dotenv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L24",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "package_devdependencies_drizzle_kit",
+      "target": "drizzle_kit",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L25",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -5549,7 +6233,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L21",
+      "source_location": "L26",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -5561,7 +6245,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L22",
+      "source_location": "L27",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -5573,7 +6257,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L23",
+      "source_location": "L28",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -5585,7 +6269,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L24",
+      "source_location": "L29",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -5597,7 +6281,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L25",
+      "source_location": "L30",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -5609,7 +6293,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L26",
+      "source_location": "L31",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -5924,6 +6608,17 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "scripts/demo-us-002.sh",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "scripts_demo_us_002",
+      "target": "scripts_demo_us_002_sh__entry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "scripts/sync-secrets.sh",
       "source_location": "L1",
       "weight": 1.0,
@@ -6128,6 +6823,61 @@
       "_origin": "ast",
       "source": "docs_demos_us_001_us_001_scaffold_monorepo_frontend_worker_shared_package_tooling",
       "target": "docs_demos_us_001_5_boot_wrangler_dev_and_confirm_the_placeholder_page_and_the_api_both_respond",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-002.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_002",
+      "target": "docs_demos_us_002_us_002_provision_supabase_postgres_storage_and_connect_drizzle_to_a_migrated_baseline_schema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-002.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_002_us_002_provision_supabase_postgres_storage_and_connect_drizzle_to_a_migrated_baseline_schema",
+      "target": "docs_demos_us_002_1_boot_the_local_supabase_stack_dev_ci_parity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-002.md",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_002_us_002_provision_supabase_postgres_storage_and_connect_drizzle_to_a_migrated_baseline_schema",
+      "target": "docs_demos_us_002_2_confirm_the_source_uploads_storage_bucket_is_private_rls_ready_no_public_read_until_owner_scoped_policies_land_in_us_014_us_017",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-002.md",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_002_us_002_provision_supabase_postgres_storage_and_connect_drizzle_to_a_migrated_baseline_schema",
+      "target": "docs_demos_us_002_3_apply_the_baseline_schema_via_drizzle_kit",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-002.md",
+      "source_location": "L50",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_002_us_002_provision_supabase_postgres_storage_and_connect_drizzle_to_a_migrated_baseline_schema",
+      "target": "docs_demos_us_002_4_confirm_users_waitlist_signups_and_tier_limits_exist_including_the_users_auth_users_fk",
       "confidence_score": 1.0
     },
     {
@@ -6968,5 +7718,5 @@
       "source_file": "docs/data-model.md"
     }
   ],
-  "built_at_commit": "1b6e5a5ca6134210045e1fd02ef13e15a081c982"
+  "built_at_commit": "71f436d5305cbb4b9b185d9937c613e235fd6c44"
 }

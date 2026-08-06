@@ -15,10 +15,10 @@
   "13": "Notify workflow",
   "14": "worker/package.json",
   "15": "devDependencies",
-  "16": "web/package.json",
-  "17": "devDependencies",
+  "16": "devDependencies",
+  "17": "schema/index.ts",
   "18": "compilerOptions",
-  "19": "package.json",
+  "19": "scripts",
   "20": "worker/tsconfig.json",
   "21": "compilerOptions",
   "22": "shared/package.json",
@@ -29,5 +29,8 @@
   "27": "demo-us-001-server.sh",
   "28": "vite.config.ts",
   "29": "vitest.config.ts",
-  "30": "eslint.config.js"
+  "30": "eslint.config.js",
+  "31": "US-002 — Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema",
+  "32": "demo-us-002.sh",
+  "33": "drizzle.config.ts"
 }

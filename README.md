@@ -13,6 +13,20 @@ Then run the `install` and `serve.dev` commands from `pipeline.json`;
 `node .github/scripts/read-manifest.mjs --print` prints them. That file is how the
 pipeline stays stack-agnostic — CI reads the same commands you do.
 
+### Database
+
+Schema is owned by Drizzle (`apps/worker/src/lib/db/schema/`); `drizzle.config.ts` at
+the repo root points `drizzle-kit` at `DATABASE_URL`.
+
+```bash
+npm run db:generate   # diff the schema, write SQL to drizzle/migrations/ (dev-time, commit the output)
+npm run db:migrate    # apply committed migrations to DATABASE_URL
+```
+
+Storage bucket config and RLS policies are Supabase-specific and live in
+`supabase/migrations/*.sql`, applied automatically by `supabase start`/`supabase db
+reset` locally, or `supabase db push` in CI/deploy.
+
 ## Tests and demos
 ```bash
 npx playwright test
