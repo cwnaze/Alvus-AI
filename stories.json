@@ -117,7 +117,7 @@
       "dependsOn": [
         "US-002"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -129,7 +129,7 @@
         "specs": []
       },
       "demo": "docs/demos/US-004.md",
-      "branch": null,
+      "branch": "feature/us-004-health-check-reports-live-database-connectivity",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,
