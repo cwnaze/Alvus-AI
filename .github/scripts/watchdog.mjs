@@ -57,7 +57,7 @@ function rateLimitedUntil() {
   }
   if (!last || last.conclusion === 'success') return null;
 
-  let log = '';
+  let log;
   try {
     log = sh('gh', ['run', 'view', String(last.id), '--repo', repo, '--log-failed']);
   } catch (e) {
