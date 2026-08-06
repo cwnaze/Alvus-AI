@@ -43,4 +43,9 @@ jobs:
           # implement-story runs npm/wrangler/drizzle/playwright/git/gh; without this
           # every one of those calls is silently denied and the job "succeeds" having
           # done nothing (found bootstrapping US-001: 11 permission denials, 0 output).
-          claude_args: --max-turns 120 --allowedTools "Bash,Edit,Write,Glob,Grep"
+          # 200, not the default: a full story is implement + demo spec + local
+          # verification, and 120 turns ran out mid-story on US-004. Exhausting turns
+          # burns the whole run and forces a resume that re-reads all the same context,
+          # which costs more than the extra turns would have. The 60m job timeout is the
+          # real ceiling; that run used 16m.
+          claude_args: --max-turns 200 --allowedTools "Bash,Edit,Write,Glob,Grep"
