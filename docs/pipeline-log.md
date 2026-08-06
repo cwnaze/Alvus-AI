@@ -10,3 +10,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-06T02:20:01Z | US-001 | in_progress | Branch feature/us-001-scaffold-monorepo created; starting monorepo scaffold.
 2026-08-06T02:28:12Z | US-001 | in_review | PR #2 opened, auto-merge armed.
 2026-08-06T02:49:00.004Z | US-001 | done | PR #2 merged after 0 review round(s)
+2026-08-06T02:54:56.000Z | US-002 | in_progress | Branch feature/us-002-provision-supabase-postgres-storage-and-connect-drizzle created; starting Supabase/Drizzle provisioning.
