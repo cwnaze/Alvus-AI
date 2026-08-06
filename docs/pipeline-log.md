@@ -25,3 +25,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-06T12:15:00.000Z | US-004 | in_progress | Branch feature/us-004-health-check-reports-live-database-connectivity created; starting DB-connectivity health check.
 2026-08-06T13:19:45.000Z | US-004 | pending | Crash resume: in_progress with no branch/PR found on remote; reset to pending for re-selection.
 2026-08-06T13:21:00.000Z | US-004 | in_progress | Branch feature/us-004-health-check-reports-live-database-connectivity created; starting DB-connectivity health check.
+2026-08-06T13:42:00.000Z | US-004 | in_review | PR #6 opened, auto-merge armed.
