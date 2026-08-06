@@ -209,7 +209,7 @@
         "US-002",
         "US-005"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -221,7 +221,7 @@
         "specs": []
       },
       "demo": "docs/demos/US-007.md",
-      "branch": null,
+      "branch": "feature/us-007-deploy-pipeline-migrate-wrangler-deploy-on-merge-pr-previews-secrets-configured",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,

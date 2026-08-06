@@ -35,3 +35,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-06T15:37:15.658Z | US-005 | done | PR #8 merged after 1 review round(s)
 2026-08-06T15:45:58.000Z | US-006 | in_progress | Branch feature/us-006-secret-scanning-in-ci created; adding gitleaks secret scanning to ci.yml.
 2026-08-06T23:31:07.102Z | US-006 | done | PR #10 merged after 0 review round(s)
+2026-08-06T23:40:00.000Z | US-007 | in_progress | Branch feature/us-007-deploy-pipeline-migrate-wrangler-deploy-on-merge-pr-previews-secrets-configured created; wiring deploy-on-merge (migrate + wrangler deploy + worker secrets) and per-PR preview deploy workflows.
