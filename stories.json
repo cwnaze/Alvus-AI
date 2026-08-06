@@ -147,7 +147,7 @@
         "US-001",
         "US-002"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -159,7 +159,7 @@
         "specs": []
       },
       "demo": "docs/demos/US-005.md",
-      "branch": null,
+      "branch": "feature/us-005-ci-test-gate-typecheck-lint-build-test-against-a-local-supabase-postgres-service",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,
