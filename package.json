@@ -9,7 +9,7 @@
     "packages/shared"
   ],
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --env-file .env",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint .",
     "build": "npm run build --workspace apps/web",

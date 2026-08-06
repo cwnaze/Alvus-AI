@@ -9,8 +9,8 @@
     "test": "npm test"
   },
   "serve": {
-    "ci": "npx wrangler dev --port 8787",
-    "dev": "npx wrangler dev --port 8787",
+    "ci": "npx wrangler dev --port 8787 --env-file .env",
+    "dev": "npx wrangler dev --port 8787 --env-file .env",
     "url": "http://localhost:8787"
   },
   "services": "npx supabase start",
