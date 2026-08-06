@@ -658,7 +658,7 @@
       "_origin": "ast",
       "id": "apps_web_package",
       "community": 16,
-      "community_name": "devDependencies",
+      "community_name": "web/package.json",
       "norm_label": "web/package.json"
     },
     {
@@ -669,7 +669,7 @@
       "_origin": "ast",
       "id": "apps_web_package_name",
       "community": 16,
-      "community_name": "devDependencies",
+      "community_name": "web/package.json",
       "norm_label": "name"
     },
     {
@@ -680,7 +680,7 @@
       "_origin": "ast",
       "id": "apps_web_package_private",
       "community": 16,
-      "community_name": "devDependencies",
+      "community_name": "web/package.json",
       "norm_label": "private"
     },
     {
@@ -691,7 +691,7 @@
       "_origin": "ast",
       "id": "apps_web_package_version",
       "community": 16,
-      "community_name": "devDependencies",
+      "community_name": "web/package.json",
       "norm_label": "version"
     },
     {
@@ -702,7 +702,7 @@
       "_origin": "ast",
       "id": "apps_web_package_type",
       "community": 16,
-      "community_name": "devDependencies",
+      "community_name": "web/package.json",
       "norm_label": "type"
     },
     {
@@ -713,7 +713,7 @@
       "_origin": "ast",
       "id": "apps_web_package_scripts",
       "community": 16,
-      "community_name": "devDependencies",
+      "community_name": "web/package.json",
       "norm_label": "scripts"
     },
     {
@@ -724,7 +724,7 @@
       "_origin": "ast",
       "id": "apps_web_package_scripts_dev",
       "community": 16,
-      "community_name": "devDependencies",
+      "community_name": "web/package.json",
       "norm_label": "dev"
     },
     {
@@ -735,7 +735,7 @@
       "_origin": "ast",
       "id": "apps_web_package_scripts_build",
       "community": 16,
-      "community_name": "devDependencies",
+      "community_name": "web/package.json",
       "norm_label": "build"
     },
     {
@@ -746,7 +746,7 @@
       "_origin": "ast",
       "id": "apps_web_package_scripts_typecheck",
       "community": 16,
-      "community_name": "devDependencies",
+      "community_name": "web/package.json",
       "norm_label": "typecheck"
     },
     {
@@ -757,7 +757,7 @@
       "_origin": "ast",
       "id": "apps_web_package_dependencies",
       "community": 16,
-      "community_name": "devDependencies",
+      "community_name": "web/package.json",
       "norm_label": "dependencies"
     },
     {
@@ -768,7 +768,7 @@
       "_origin": "ast",
       "id": "apps_web_package_dependencies_alvus_ai_shared",
       "community": 16,
-      "community_name": "devDependencies",
+      "community_name": "web/package.json",
       "norm_label": "@alvus-ai/shared"
     },
     {
@@ -779,7 +779,7 @@
       "_origin": "ast",
       "id": "apps_web_package_json_alvus_ai_shared",
       "community": 16,
-      "community_name": "devDependencies",
+      "community_name": "web/package.json",
       "norm_label": "@alvus-ai/shared"
     },
     {
@@ -790,7 +790,7 @@
       "_origin": "ast",
       "id": "apps_web_package_dependencies_react",
       "community": 16,
-      "community_name": "devDependencies",
+      "community_name": "web/package.json",
       "norm_label": "react"
     },
     {
@@ -801,7 +801,7 @@
       "_origin": "ast",
       "id": "react",
       "community": 16,
-      "community_name": "devDependencies",
+      "community_name": "web/package.json",
       "norm_label": "react"
     },
     {
@@ -812,7 +812,7 @@
       "_origin": "ast",
       "id": "apps_web_package_dependencies_react_dom",
       "community": 16,
-      "community_name": "devDependencies",
+      "community_name": "web/package.json",
       "norm_label": "react-dom"
     },
     {
@@ -823,7 +823,7 @@
       "_origin": "ast",
       "id": "react_dom",
       "community": 16,
-      "community_name": "devDependencies",
+      "community_name": "web/package.json",
       "norm_label": "react-dom"
     },
     {
@@ -833,7 +833,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies",
-      "community": 16,
+      "community": 34,
       "community_name": "devDependencies",
       "norm_label": "devdependencies"
     },
@@ -844,7 +844,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_tailwindcss_vite",
-      "community": 16,
+      "community": 34,
       "community_name": "devDependencies",
       "norm_label": "@tailwindcss/vite"
     },
@@ -855,7 +855,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "tailwindcss_vite",
-      "community": 16,
+      "community": 34,
       "community_name": "devDependencies",
       "norm_label": "@tailwindcss/vite"
     },
@@ -866,7 +866,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_types_react",
-      "community": 16,
+      "community": 34,
       "community_name": "devDependencies",
       "norm_label": "@types/react"
     },
@@ -877,7 +877,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "types_react",
-      "community": 16,
+      "community": 34,
       "community_name": "devDependencies",
       "norm_label": "@types/react"
     },
@@ -888,7 +888,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_types_react_dom",
-      "community": 16,
+      "community": 34,
       "community_name": "devDependencies",
       "norm_label": "@types/react-dom"
     },
@@ -899,7 +899,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "types_react_dom",
-      "community": 16,
+      "community": 34,
       "community_name": "devDependencies",
       "norm_label": "@types/react-dom"
     },
@@ -910,7 +910,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_vitejs_plugin_react",
-      "community": 16,
+      "community": 34,
       "community_name": "devDependencies",
       "norm_label": "@vitejs/plugin-react"
     },
@@ -921,7 +921,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "vitejs_plugin_react",
-      "community": 16,
+      "community": 34,
       "community_name": "devDependencies",
       "norm_label": "@vitejs/plugin-react"
     },
@@ -932,7 +932,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_tailwindcss",
-      "community": 16,
+      "community": 34,
       "community_name": "devDependencies",
       "norm_label": "tailwindcss"
     },
@@ -943,7 +943,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "tailwindcss",
-      "community": 16,
+      "community": 34,
       "community_name": "devDependencies",
       "norm_label": "tailwindcss"
     },
@@ -954,7 +954,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_typescript",
-      "community": 16,
+      "community": 34,
       "community_name": "devDependencies",
       "norm_label": "typescript"
     },
@@ -965,7 +965,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "apps_web_package_json_typescript",
-      "community": 16,
+      "community": 34,
       "community_name": "devDependencies",
       "norm_label": "typescript"
     },
@@ -976,7 +976,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_vite",
-      "community": 16,
+      "community": 34,
       "community_name": "devDependencies",
       "norm_label": "vite"
     },
@@ -987,7 +987,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "vite",
-      "community": 16,
+      "community": 34,
       "community_name": "devDependencies",
       "norm_label": "vite"
     },
@@ -1561,7 +1561,7 @@
       "_origin": "ast",
       "id": "apps_worker_src_lib_db_client",
       "community": 17,
-      "community_name": "schema/index.ts",
+      "community_name": "seed.ts",
       "norm_label": "client.ts"
     },
     {
@@ -1574,7 +1574,7 @@
       "_origin": "ast",
       "id": "apps_worker_src_lib_db_client_db",
       "community": 17,
-      "community_name": "schema/index.ts",
+      "community_name": "seed.ts",
       "norm_label": "db"
     },
     {
@@ -1586,7 +1586,7 @@
       "_origin": "ast",
       "id": "apps_worker_src_lib_db_client_createdb",
       "community": 17,
-      "community_name": "schema/index.ts",
+      "community_name": "seed.ts",
       "norm_label": "createdb()"
     },
     {
@@ -1597,7 +1597,7 @@
       "_origin": "ast",
       "id": "apps_worker_src_lib_db_schema_auth",
       "community": 17,
-      "community_name": "schema/index.ts",
+      "community_name": "seed.ts",
       "norm_label": "auth.ts"
     },
     {
@@ -1608,7 +1608,7 @@
       "_origin": "ast",
       "id": "apps_worker_src_lib_db_schema_auth_authschema",
       "community": 17,
-      "community_name": "schema/index.ts",
+      "community_name": "seed.ts",
       "norm_label": "authschema"
     },
     {
@@ -1619,7 +1619,7 @@
       "_origin": "ast",
       "id": "apps_worker_src_lib_db_schema_auth_authusers",
       "community": 17,
-      "community_name": "schema/index.ts",
+      "community_name": "seed.ts",
       "norm_label": "authusers"
     },
     {
@@ -1630,7 +1630,7 @@
       "_origin": "ast",
       "id": "apps_worker_src_lib_db_schema_index",
       "community": 17,
-      "community_name": "schema/index.ts",
+      "community_name": "seed.ts",
       "norm_label": "schema/index.ts"
     },
     {
@@ -1641,7 +1641,7 @@
       "_origin": "ast",
       "id": "apps_worker_src_lib_db_schema_tier_limits",
       "community": 17,
-      "community_name": "schema/index.ts",
+      "community_name": "seed.ts",
       "norm_label": "tier-limits.ts"
     },
     {
@@ -1652,7 +1652,7 @@
       "_origin": "ast",
       "id": "apps_worker_src_lib_db_schema_tier_limits_tierlimits",
       "community": 17,
-      "community_name": "schema/index.ts",
+      "community_name": "seed.ts",
       "norm_label": "tierlimits"
     },
     {
@@ -1663,7 +1663,7 @@
       "_origin": "ast",
       "id": "apps_worker_src_lib_db_schema_users",
       "community": 17,
-      "community_name": "schema/index.ts",
+      "community_name": "seed.ts",
       "norm_label": "users.ts"
     },
     {
@@ -1674,7 +1674,7 @@
       "_origin": "ast",
       "id": "apps_worker_src_lib_db_schema_users_users",
       "community": 17,
-      "community_name": "schema/index.ts",
+      "community_name": "seed.ts",
       "norm_label": "users"
     },
     {
@@ -1685,7 +1685,7 @@
       "_origin": "ast",
       "id": "apps_worker_src_lib_db_schema_waitlist_signups",
       "community": 17,
-      "community_name": "schema/index.ts",
+      "community_name": "seed.ts",
       "norm_label": "waitlist-signups.ts"
     },
     {
@@ -1696,7 +1696,7 @@
       "_origin": "ast",
       "id": "apps_worker_src_lib_db_schema_waitlist_signups_waitlistsignups",
       "community": 17,
-      "community_name": "schema/index.ts",
+      "community_name": "seed.ts",
       "norm_label": "waitlistsignups"
     },
     {
@@ -1852,6 +1852,121 @@
       "community": 29,
       "community_name": "vitest.config.ts",
       "norm_label": "vitest.config.ts"
+    },
+    {
+      "label": "seed.ts",
+      "file_type": "code",
+      "source_file": "db/seed.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "db_seed",
+      "community": 17,
+      "community_name": "seed.ts",
+      "norm_label": "seed.ts"
+    },
+    {
+      "label": "TIER_LIMITS",
+      "file_type": "code",
+      "source_file": "db/seed.ts",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "db_seed_tier_limits",
+      "community": 17,
+      "community_name": "seed.ts",
+      "norm_label": "tier_limits"
+    },
+    {
+      "label": "FIXTURE_USERS",
+      "file_type": "code",
+      "source_file": "db/seed.ts",
+      "source_location": "L42",
+      "_origin": "ast",
+      "id": "db_seed_fixture_users",
+      "community": 17,
+      "community_name": "seed.ts",
+      "norm_label": "fixture_users"
+    },
+    {
+      "label": "supabaseAdmin",
+      "file_type": "code",
+      "source_file": "db/seed.ts",
+      "source_location": "L53",
+      "_origin": "ast",
+      "id": "db_seed_supabaseadmin",
+      "community": 17,
+      "community_name": "seed.ts",
+      "norm_label": "supabaseadmin"
+    },
+    {
+      "label": "db",
+      "file_type": "code",
+      "source_file": "db/seed.ts",
+      "source_location": "L57",
+      "_origin": "ast",
+      "id": "db_seed_db",
+      "community": 17,
+      "community_name": "seed.ts",
+      "norm_label": "db"
+    },
+    {
+      "label": "seedTierLimits()",
+      "file_type": "code",
+      "source_file": "db/seed.ts",
+      "source_location": "L59",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "db_seed_seedtierlimits",
+      "community": 17,
+      "community_name": "seed.ts",
+      "norm_label": "seedtierlimits()"
+    },
+    {
+      "label": "findAuthUserIdByEmail()",
+      "file_type": "code",
+      "source_file": "db/seed.ts",
+      "source_location": "L74",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "db_seed_findauthuseridbyemail",
+      "community": 17,
+      "community_name": "seed.ts",
+      "norm_label": "findauthuseridbyemail()"
+    },
+    {
+      "label": "ensureAuthUser()",
+      "file_type": "code",
+      "source_file": "db/seed.ts",
+      "source_location": "L80",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "db_seed_ensureauthuser",
+      "community": 17,
+      "community_name": "seed.ts",
+      "norm_label": "ensureauthuser()"
+    },
+    {
+      "label": "seedFixtureUsers()",
+      "file_type": "code",
+      "source_file": "db/seed.ts",
+      "source_location": "L93",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "db_seed_seedfixtureusers",
+      "community": 17,
+      "community_name": "seed.ts",
+      "norm_label": "seedfixtureusers()"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "db/seed.ts",
+      "source_location": "L124",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "db_seed_main",
+      "community": 17,
+      "community_name": "seed.ts",
+      "norm_label": "main()"
     },
     {
       "label": "drizzle.config.ts",
@@ -2236,10 +2351,21 @@
       "norm_label": "db:push"
     },
     {
+      "label": "db:seed",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "package_scripts_db_seed",
+      "community": 19,
+      "community_name": "scripts",
+      "norm_label": "db:seed"
+    },
+    {
       "label": "devDependencies",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L21",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "package_devdependencies",
       "community": 15,
@@ -2250,7 +2376,7 @@
       "label": "@eslint/js",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L22",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "package_devdependencies_eslint_js",
       "community": 15,
@@ -2261,7 +2387,7 @@
       "label": "@eslint/js",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L22",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "eslint_js",
       "community": 15,
@@ -2269,10 +2395,32 @@
       "norm_label": "@eslint/js"
     },
     {
+      "label": "@supabase/supabase-js",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "package_devdependencies_supabase_supabase_js",
+      "community": 15,
+      "community_name": "devDependencies",
+      "norm_label": "@supabase/supabase-js"
+    },
+    {
+      "label": "@supabase/supabase-js",
+      "file_type": "concept",
+      "source_file": "package.json",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "supabase_supabase_js",
+      "community": 15,
+      "community_name": "devDependencies",
+      "norm_label": "@supabase/supabase-js"
+    },
+    {
       "label": "dotenv",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L23",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "package_devdependencies_dotenv",
       "community": 15,
@@ -2283,7 +2431,7 @@
       "label": "dotenv",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L23",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "dotenv",
       "community": 15,
@@ -2294,7 +2442,7 @@
       "label": "drizzle-kit",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L24",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "package_devdependencies_drizzle_kit",
       "community": 15,
@@ -2305,7 +2453,7 @@
       "label": "drizzle-kit",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L24",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "drizzle_kit",
       "community": 15,
@@ -2316,7 +2464,7 @@
       "label": "eslint",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L25",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "package_devdependencies_eslint",
       "community": 15,
@@ -2327,7 +2475,7 @@
       "label": "eslint",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L25",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "eslint",
       "community": 15,
@@ -2338,7 +2486,7 @@
       "label": "eslint-plugin-react-hooks",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L26",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "package_devdependencies_eslint_plugin_react_hooks",
       "community": 15,
@@ -2349,7 +2497,7 @@
       "label": "eslint-plugin-react-hooks",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L26",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "eslint_plugin_react_hooks",
       "community": 15,
@@ -2360,7 +2508,7 @@
       "label": "eslint-plugin-react-refresh",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L27",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "package_devdependencies_eslint_plugin_react_refresh",
       "community": 15,
@@ -2371,7 +2519,7 @@
       "label": "eslint-plugin-react-refresh",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L27",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "eslint_plugin_react_refresh",
       "community": 15,
@@ -2382,7 +2530,7 @@
       "label": "globals",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L28",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "package_devdependencies_globals",
       "community": 15,
@@ -2393,7 +2541,7 @@
       "label": "globals",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L28",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "globals",
       "community": 15,
@@ -2401,10 +2549,32 @@
       "norm_label": "globals"
     },
     {
+      "label": "tsx",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L31",
+      "_origin": "ast",
+      "id": "package_devdependencies_tsx",
+      "community": 15,
+      "community_name": "devDependencies",
+      "norm_label": "tsx"
+    },
+    {
+      "label": "tsx",
+      "file_type": "concept",
+      "source_file": "package.json",
+      "source_location": "L31",
+      "_origin": "ast",
+      "id": "tsx",
+      "community": 15,
+      "community_name": "devDependencies",
+      "norm_label": "tsx"
+    },
+    {
       "label": "typescript",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L29",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "package_devdependencies_typescript",
       "community": 15,
@@ -2415,7 +2585,7 @@
       "label": "typescript",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L29",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "package_json_typescript",
       "community": 15,
@@ -2426,7 +2596,7 @@
       "label": "typescript-eslint",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L30",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "package_devdependencies_typescript_eslint",
       "community": 15,
@@ -2437,7 +2607,7 @@
       "label": "typescript-eslint",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L30",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "typescript_eslint",
       "community": 15,
@@ -2448,7 +2618,7 @@
       "label": "wrangler",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L31",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "package_devdependencies_wrangler",
       "community": 15,
@@ -2459,7 +2629,7 @@
       "label": "wrangler",
       "file_type": "concept",
       "source_file": "package.json",
-      "source_location": "L31",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "package_json_wrangler",
       "community": 15,
@@ -3127,7 +3297,7 @@
       "label": "2. Confirm the source-uploads Storage bucket is private (RLS-ready, no public read until owner-scoped policies land in US-014/US-017)",
       "file_type": "document",
       "source_file": "docs/demos/US-002.md",
-      "source_location": "L12",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "docs_demos_us_002_2_confirm_the_source_uploads_storage_bucket_is_private_rls_ready_no_public_read_until_owner_scoped_policies_land_in_us_014_us_017",
       "community": 31,
@@ -3138,7 +3308,7 @@
       "label": "3. Apply the baseline schema via drizzle-kit",
       "file_type": "document",
       "source_file": "docs/demos/US-002.md",
-      "source_location": "L22",
+      "source_location": "L24",
       "_origin": "ast",
       "id": "docs_demos_us_002_3_apply_the_baseline_schema_via_drizzle_kit",
       "community": 31,
@@ -3149,12 +3319,89 @@
       "label": "4. Confirm users, waitlist_signups, and tier_limits exist, including the users -> auth.users FK",
       "file_type": "document",
       "source_file": "docs/demos/US-002.md",
-      "source_location": "L50",
+      "source_location": "L52",
       "_origin": "ast",
       "id": "docs_demos_us_002_4_confirm_users_waitlist_signups_and_tier_limits_exist_including_the_users_auth_users_fk",
       "community": 31,
       "community_name": "US-002 \u2014 Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema",
       "norm_label": "4. confirm users, waitlist_signups, and tier_limits exist, including the users -> auth.users fk"
+    },
+    {
+      "label": "US-003.md",
+      "file_type": "document",
+      "source_file": "docs/demos/US-003.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_demos_us_003",
+      "community": 35,
+      "community_name": "US-003 \u2014 Seed the tier_limits catalog and dev/CI fixture users",
+      "norm_label": "us-003.md"
+    },
+    {
+      "label": "US-003 \u2014 Seed the tier_limits catalog and dev/CI fixture users",
+      "file_type": "document",
+      "source_file": "docs/demos/US-003.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_demos_us_003_us_003_seed_the_tier_limits_catalog_and_dev_ci_fixture_users",
+      "community": 35,
+      "community_name": "US-003 \u2014 Seed the tier_limits catalog and dev/CI fixture users",
+      "norm_label": "us-003 \u2014 seed the tier_limits catalog and dev/ci fixture users"
+    },
+    {
+      "label": "1. Boot the local Supabase stack (dev/CI parity) and apply the baseline schema",
+      "file_type": "document",
+      "source_file": "docs/demos/US-003.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "docs_demos_us_003_1_boot_the_local_supabase_stack_dev_ci_parity_and_apply_the_baseline_schema",
+      "community": 35,
+      "community_name": "US-003 \u2014 Seed the tier_limits catalog and dev/CI fixture users",
+      "norm_label": "1. boot the local supabase stack (dev/ci parity) and apply the baseline schema"
+    },
+    {
+      "label": "2. Seed the tier_limits catalog and fixture users",
+      "file_type": "document",
+      "source_file": "docs/demos/US-003.md",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "docs_demos_us_003_2_seed_the_tier_limits_catalog_and_fixture_users",
+      "community": 35,
+      "community_name": "US-003 \u2014 Seed the tier_limits catalog and dev/CI fixture users",
+      "norm_label": "2. seed the tier_limits catalog and fixture users"
+    },
+    {
+      "label": "3. Re-run the seed to confirm it is idempotent (no duplicate-key errors, same row counts)",
+      "file_type": "document",
+      "source_file": "docs/demos/US-003.md",
+      "source_location": "L47",
+      "_origin": "ast",
+      "id": "docs_demos_us_003_3_re_run_the_seed_to_confirm_it_is_idempotent_no_duplicate_key_errors_same_row_counts",
+      "community": 35,
+      "community_name": "US-003 \u2014 Seed the tier_limits catalog and dev/CI fixture users",
+      "norm_label": "3. re-run the seed to confirm it is idempotent (no duplicate-key errors, same row counts)"
+    },
+    {
+      "label": "4. Confirm the v1 tier_limits catalog (free 5/3, plus 60/30, pro 250/120)",
+      "file_type": "document",
+      "source_file": "docs/demos/US-003.md",
+      "source_location": "L61",
+      "_origin": "ast",
+      "id": "docs_demos_us_003_4_confirm_the_v1_tier_limits_catalog_free_5_3_plus_60_30_pro_250_120",
+      "community": 35,
+      "community_name": "US-003 \u2014 Seed the tier_limits catalog and dev/CI fixture users",
+      "norm_label": "4. confirm the v1 tier_limits catalog (free 5/3, plus 60/30, pro 250/120)"
+    },
+    {
+      "label": "5. Confirm the three fixture users exist with correct status/role and a real backing auth.users row",
+      "file_type": "document",
+      "source_file": "docs/demos/US-003.md",
+      "source_location": "L76",
+      "_origin": "ast",
+      "id": "docs_demos_us_003_5_confirm_the_three_fixture_users_exist_with_correct_status_role_and_a_real_backing_auth_users_row",
+      "community": 35,
+      "community_name": "US-003 \u2014 Seed the tier_limits catalog and dev/CI fixture users",
+      "norm_label": "5. confirm the three fixture users exist with correct status/role and a real backing auth.users row"
     },
     {
       "label": "Implement Story Skill",
@@ -5437,6 +5684,30 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed",
+      "target": "apps_worker_src_lib_db_client",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed",
+      "target": "apps_worker_src_lib_db_client_createdb",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/worker/src/lib/db/schema/auth.ts",
@@ -5531,6 +5802,18 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed",
+      "target": "apps_worker_src_lib_db_schema_index",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/worker/src/lib/db/schema/tier-limits.ts",
@@ -5538,6 +5821,18 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_worker_src_lib_db_schema_tier_limits",
+      "target": "apps_worker_src_lib_db_schema_tier_limits_tierlimits",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed",
       "target": "apps_worker_src_lib_db_schema_tier_limits_tierlimits",
       "confidence_score": 1.0
     },
@@ -5577,6 +5872,18 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed",
+      "target": "apps_worker_src_lib_db_schema_users_users",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/worker/src/lib/db/schema/waitlist-signups.ts",
@@ -5584,6 +5891,18 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_worker_src_lib_db_schema_waitlist_signups",
+      "target": "apps_worker_src_lib_db_schema_waitlist_signups_waitlistsignups",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed",
       "target": "apps_worker_src_lib_db_schema_waitlist_signups_waitlistsignups",
       "confidence_score": 1.0
     },
@@ -5723,6 +6042,153 @@
       "_origin": "ast",
       "source": "apps_worker_tsconfig_include",
       "target": "ref_vitest_config_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L57",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed",
+      "target": "db_seed_db",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L80",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed",
+      "target": "db_seed_ensureauthuser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L74",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed",
+      "target": "db_seed_findauthuseridbyemail",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L42",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed",
+      "target": "db_seed_fixture_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L124",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed",
+      "target": "db_seed_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L93",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed",
+      "target": "db_seed_seedfixtureusers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L59",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed",
+      "target": "db_seed_seedtierlimits",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L53",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed",
+      "target": "db_seed_supabaseadmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed",
+      "target": "db_seed_tier_limits",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L125",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed_main",
+      "target": "db_seed_seedtierlimits",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L81",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed_ensureauthuser",
+      "target": "db_seed_findauthuseridbyemail",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L95",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed_seedfixtureusers",
+      "target": "db_seed_ensureauthuser",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "db/seed.ts",
+      "source_location": "L126",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "db_seed_main",
+      "target": "db_seed_seedfixtureusers",
       "confidence_score": 1.0
     },
     {
@@ -5874,7 +6340,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L21",
+      "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
       "source": "package",
@@ -6031,6 +6497,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_scripts",
+      "target": "package_scripts_db_seed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
       "source_location": "L12",
       "weight": 1.0,
       "_origin": "ast",
@@ -6075,7 +6552,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L23",
+      "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast",
       "source": "package_devdependencies",
@@ -6086,7 +6563,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L24",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
       "source": "package_devdependencies",
@@ -6097,7 +6574,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L25",
+      "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
       "source": "package_devdependencies",
@@ -6108,7 +6585,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L22",
+      "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
       "source": "package_devdependencies",
@@ -6119,7 +6596,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L26",
+      "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast",
       "source": "package_devdependencies",
@@ -6130,7 +6607,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L27",
+      "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
       "source": "package_devdependencies",
@@ -6141,7 +6618,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L28",
+      "source_location": "L30",
       "weight": 1.0,
       "_origin": "ast",
       "source": "package_devdependencies",
@@ -6152,22 +6629,11 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L29",
+      "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
       "source": "package_devdependencies",
-      "target": "package_devdependencies_typescript",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "package.json",
-      "source_location": "L30",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "package_devdependencies",
-      "target": "package_devdependencies_typescript_eslint",
+      "target": "package_devdependencies_supabase_supabase_js",
       "confidence_score": 1.0
     },
     {
@@ -6178,6 +6644,39 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "package_devdependencies",
+      "target": "package_devdependencies_tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L32",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_typescript",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L33",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_typescript_eslint",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L34",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "package_devdependencies",
       "target": "package_devdependencies_wrangler",
       "confidence_score": 1.0
     },
@@ -6185,7 +6684,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L22",
+      "source_location": "L23",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -6197,7 +6696,19 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L23",
+      "source_location": "L24",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "package_devdependencies_supabase_supabase_js",
+      "target": "supabase_supabase_js",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L25",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -6209,7 +6720,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L24",
+      "source_location": "L26",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -6221,7 +6732,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L25",
+      "source_location": "L27",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -6233,7 +6744,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L26",
+      "source_location": "L28",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -6245,7 +6756,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L27",
+      "source_location": "L29",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -6257,7 +6768,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L28",
+      "source_location": "L30",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -6269,7 +6780,19 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L29",
+      "source_location": "L31",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "package_devdependencies_tsx",
+      "target": "tsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L32",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -6281,7 +6804,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L30",
+      "source_location": "L33",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -6293,7 +6816,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
-      "source_location": "L31",
+      "source_location": "L34",
       "weight": 1.0,
       "context": "import",
       "_origin": "ast",
@@ -6851,7 +7374,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/demos/US-002.md",
-      "source_location": "L12",
+      "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_demos_us_002_us_002_provision_supabase_postgres_storage_and_connect_drizzle_to_a_migrated_baseline_schema",
@@ -6862,7 +7385,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/demos/US-002.md",
-      "source_location": "L22",
+      "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_demos_us_002_us_002_provision_supabase_postgres_storage_and_connect_drizzle_to_a_migrated_baseline_schema",
@@ -6873,11 +7396,77 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/demos/US-002.md",
-      "source_location": "L50",
+      "source_location": "L52",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_demos_us_002_us_002_provision_supabase_postgres_storage_and_connect_drizzle_to_a_migrated_baseline_schema",
       "target": "docs_demos_us_002_4_confirm_users_waitlist_signups_and_tier_limits_exist_including_the_users_auth_users_fk",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-003.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_003",
+      "target": "docs_demos_us_003_us_003_seed_the_tier_limits_catalog_and_dev_ci_fixture_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-003.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_003_us_003_seed_the_tier_limits_catalog_and_dev_ci_fixture_users",
+      "target": "docs_demos_us_003_1_boot_the_local_supabase_stack_dev_ci_parity_and_apply_the_baseline_schema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-003.md",
+      "source_location": "L33",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_003_us_003_seed_the_tier_limits_catalog_and_dev_ci_fixture_users",
+      "target": "docs_demos_us_003_2_seed_the_tier_limits_catalog_and_fixture_users",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-003.md",
+      "source_location": "L47",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_003_us_003_seed_the_tier_limits_catalog_and_dev_ci_fixture_users",
+      "target": "docs_demos_us_003_3_re_run_the_seed_to_confirm_it_is_idempotent_no_duplicate_key_errors_same_row_counts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-003.md",
+      "source_location": "L61",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_003_us_003_seed_the_tier_limits_catalog_and_dev_ci_fixture_users",
+      "target": "docs_demos_us_003_4_confirm_the_v1_tier_limits_catalog_free_5_3_plus_60_30_pro_250_120",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-003.md",
+      "source_location": "L76",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_003_us_003_seed_the_tier_limits_catalog_and_dev_ci_fixture_users",
+      "target": "docs_demos_us_003_5_confirm_the_three_fixture_users_exist_with_correct_status_role_and_a_real_backing_auth_users_row",
       "confidence_score": 1.0
     },
     {
@@ -7718,5 +8307,5 @@
       "source_file": "docs/data-model.md"
     }
   ],
-  "built_at_commit": "71f436d5305cbb4b9b185d9937c613e235fd6c44"
+  "built_at_commit": "7b91e24d05ac0ce02f2f8a80990ea801573bd84e"
 }
