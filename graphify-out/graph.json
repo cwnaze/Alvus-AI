@@ -95,6 +95,17 @@
       "norm_label": "story"
     },
     {
+      "label": "toClose",
+      "file_type": "code",
+      "source_file": ".github/scripts/complete-story.mjs",
+      "source_location": "L40",
+      "_origin": "ast",
+      "id": "github_scripts_complete_story_toclose",
+      "community": 10,
+      "community_name": "complete-story.mjs",
+      "norm_label": "toclose"
+    },
+    {
       "label": "dispatch-next.mjs",
       "file_type": "code",
       "source_file": ".github/scripts/dispatch-next.mjs",
@@ -436,7 +447,7 @@
       "label": "quotaBlocked()",
       "file_type": "code",
       "source_file": ".github/scripts/watchdog.mjs",
-      "source_location": "L86",
+      "source_location": "L108",
       "_callable": true,
       "_origin": "ast",
       "id": "github_scripts_watchdog_quotablocked",
@@ -448,7 +459,7 @@
       "label": "db",
       "file_type": "code",
       "source_file": ".github/scripts/watchdog.mjs",
-      "source_location": "L101",
+      "source_location": "L123",
       "_origin": "ast",
       "id": "github_scripts_watchdog_db",
       "community": 3,
@@ -459,7 +470,7 @@
       "label": "active",
       "file_type": "code",
       "source_file": ".github/scripts/watchdog.mjs",
-      "source_location": "L102",
+      "source_location": "L124",
       "_origin": "ast",
       "id": "github_scripts_watchdog_active",
       "community": 3,
@@ -467,21 +478,32 @@
       "norm_label": "active"
     },
     {
-      "label": "runs",
+      "label": "allRuns",
       "file_type": "code",
       "source_file": ".github/scripts/watchdog.mjs",
-      "source_location": "L113",
+      "source_location": "L138",
       "_origin": "ast",
-      "id": "github_scripts_watchdog_runs",
+      "id": "github_scripts_watchdog_allruns",
       "community": 3,
       "community_name": "watchdog.mjs",
-      "norm_label": "runs"
+      "norm_label": "allruns"
+    },
+    {
+      "label": "pending",
+      "file_type": "code",
+      "source_file": ".github/scripts/watchdog.mjs",
+      "source_location": "L143",
+      "_origin": "ast",
+      "id": "github_scripts_watchdog_pending",
+      "community": 3,
+      "community_name": "watchdog.mjs",
+      "norm_label": "pending"
     },
     {
       "label": "lastTouch",
       "file_type": "code",
       "source_file": ".github/scripts/watchdog.mjs",
-      "source_location": "L124",
+      "source_location": "L162",
       "_origin": "ast",
       "id": "github_scripts_watchdog_lasttouch",
       "community": 3,
@@ -492,7 +514,7 @@
       "label": "idleMinutes",
       "file_type": "code",
       "source_file": ".github/scripts/watchdog.mjs",
-      "source_location": "L125",
+      "source_location": "L163",
       "_origin": "ast",
       "id": "github_scripts_watchdog_idleminutes",
       "community": 3,
@@ -500,10 +522,43 @@
       "norm_label": "idleminutes"
     },
     {
+      "label": "emitters",
+      "file_type": "code",
+      "source_file": ".github/scripts/watchdog.mjs",
+      "source_location": "L174",
+      "_origin": "ast",
+      "id": "github_scripts_watchdog_emitters",
+      "community": 3,
+      "community_name": "watchdog.mjs",
+      "norm_label": "emitters"
+    },
+    {
+      "label": "dead",
+      "file_type": "code",
+      "source_file": ".github/scripts/watchdog.mjs",
+      "source_location": "L177",
+      "_origin": "ast",
+      "id": "github_scripts_watchdog_dead",
+      "community": 3,
+      "community_name": "watchdog.mjs",
+      "norm_label": "dead"
+    },
+    {
+      "label": "failedSinceTouch",
+      "file_type": "code",
+      "source_file": ".github/scripts/watchdog.mjs",
+      "source_location": "L178",
+      "_origin": "ast",
+      "id": "github_scripts_watchdog_failedsincetouch",
+      "community": 3,
+      "community_name": "watchdog.mjs",
+      "norm_label": "failedsincetouch"
+    },
+    {
       "label": "spawnDispatch()",
       "file_type": "code",
       "source_file": ".github/scripts/watchdog.mjs",
-      "source_location": "L172",
+      "source_location": "L246",
       "_callable": true,
       "_origin": "ast",
       "id": "github_scripts_watchdog_spawndispatch",
@@ -1528,8 +1583,19 @@
       "_origin": "ast",
       "id": "apps_worker_src_index_test",
       "community": 26,
-      "community_name": "worker/src/index.ts",
+      "community_name": "index.test.ts",
       "norm_label": "index.test.ts"
+    },
+    {
+      "label": "{ execute }",
+      "file_type": "code",
+      "source_file": "apps/worker/src/index.test.ts",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "apps_worker_src_index_test_execute",
+      "community": 26,
+      "community_name": "index.test.ts",
+      "norm_label": "{ execute }"
     },
     {
       "label": "worker/src/index.ts",
@@ -1538,19 +1604,32 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_worker_src_index",
-      "community": 26,
-      "community_name": "worker/src/index.ts",
+      "community": 17,
+      "community_name": "seed.ts",
       "norm_label": "worker/src/index.ts"
+    },
+    {
+      "label": "Bindings",
+      "file_type": "code",
+      "source_file": "apps/worker/src/index.ts",
+      "source_location": "L5",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "apps_worker_src_index_bindings",
+      "community": 17,
+      "community_name": "seed.ts",
+      "norm_label": "bindings"
     },
     {
       "label": "app",
       "file_type": "code",
       "source_file": "apps/worker/src/index.ts",
-      "source_location": "L3",
+      "source_location": "L9",
       "_origin": "ast",
       "id": "apps_worker_src_index_app",
-      "community": 26,
-      "community_name": "worker/src/index.ts",
+      "community": 17,
+      "community_name": "seed.ts",
       "norm_label": "app"
     },
     {
@@ -3011,6 +3090,81 @@
       "norm_label": "demo-us-002.sh script"
     },
     {
+      "label": "demo-us-004-server.sh",
+      "file_type": "code",
+      "source_file": "scripts/demo-us-004-server.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "file"
+      },
+      "_origin": "ast",
+      "id": "scripts_demo_us_004_server",
+      "community": 37,
+      "community_name": "demo-us-004-server.sh",
+      "norm_label": "demo-us-004-server.sh"
+    },
+    {
+      "label": "demo-us-004-server.sh script",
+      "file_type": "code",
+      "source_file": "scripts/demo-us-004-server.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_entrypoint"
+      },
+      "_origin": "ast",
+      "id": "scripts_demo_us_004_server_sh__entry",
+      "community": 37,
+      "community_name": "demo-us-004-server.sh",
+      "norm_label": "demo-us-004-server.sh script"
+    },
+    {
+      "label": "cleanup()",
+      "file_type": "code",
+      "source_file": "scripts/demo-us-004-server.sh",
+      "source_location": "L9",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_function"
+      },
+      "_origin": "ast",
+      "id": "scripts_demo_us_004_server_cleanup",
+      "community": 37,
+      "community_name": "demo-us-004-server.sh",
+      "norm_label": "cleanup()"
+    },
+    {
+      "label": "demo-us-004.sh",
+      "file_type": "code",
+      "source_file": "scripts/demo-us-004.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "file"
+      },
+      "_origin": "ast",
+      "id": "scripts_demo_us_004",
+      "community": 38,
+      "community_name": "demo-us-004.sh",
+      "norm_label": "demo-us-004.sh"
+    },
+    {
+      "label": "demo-us-004.sh script",
+      "file_type": "code",
+      "source_file": "scripts/demo-us-004.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_entrypoint"
+      },
+      "_origin": "ast",
+      "id": "scripts_demo_us_004_sh__entry",
+      "community": 38,
+      "community_name": "demo-us-004.sh",
+      "norm_label": "demo-us-004.sh script"
+    },
+    {
       "label": "sync-secrets.sh",
       "file_type": "code",
       "source_file": "scripts/sync-secrets.sh",
@@ -3319,7 +3473,7 @@
       "label": "4. Confirm users, waitlist_signups, and tier_limits exist, including the users -> auth.users FK",
       "file_type": "document",
       "source_file": "docs/demos/US-002.md",
-      "source_location": "L52",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "docs_demos_us_002_4_confirm_users_waitlist_signups_and_tier_limits_exist_including_the_users_auth_users_fk",
       "community": 31,
@@ -3402,6 +3556,39 @@
       "community": 35,
       "community_name": "US-003 \u2014 Seed the tier_limits catalog and dev/CI fixture users",
       "norm_label": "5. confirm the three fixture users exist with correct status/role and a real backing auth.users row"
+    },
+    {
+      "label": "US-004.md",
+      "file_type": "document",
+      "source_file": "docs/demos/US-004.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_demos_us_004",
+      "community": 36,
+      "community_name": "US-004 \u2014 Health check reports live database connectivity",
+      "norm_label": "us-004.md"
+    },
+    {
+      "label": "US-004 \u2014 Health check reports live database connectivity",
+      "file_type": "document",
+      "source_file": "docs/demos/US-004.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_demos_us_004_us_004_health_check_reports_live_database_connectivity",
+      "community": 36,
+      "community_name": "US-004 \u2014 Health check reports live database connectivity",
+      "norm_label": "us-004 \u2014 health check reports live database connectivity"
+    },
+    {
+      "label": "1. Boot wrangler dev with DATABASE_URL bound, and hit /api/health",
+      "file_type": "document",
+      "source_file": "docs/demos/US-004.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "docs_demos_us_004_1_boot_wrangler_dev_with_database_url_bound_and_hit_api_health",
+      "community": 36,
+      "community_name": "US-004 \u2014 Health check reports live database connectivity",
+      "norm_label": "1. boot wrangler dev with database_url bound, and hit /api/health"
     },
     {
       "label": "Implement Story Skill",
@@ -4191,6 +4378,17 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": ".github/scripts/complete-story.mjs",
+      "source_location": "L40",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "github_scripts_complete_story",
+      "target": "github_scripts_complete_story_toclose",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": ".github/scripts/dispatch-next.mjs",
       "source_location": "L124",
       "weight": 1.0,
@@ -4470,7 +4668,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".github/scripts/watchdog.mjs",
-      "source_location": "L102",
+      "source_location": "L124",
       "weight": 1.0,
       "_origin": "ast",
       "source": "github_scripts_watchdog",
@@ -4481,7 +4679,18 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".github/scripts/watchdog.mjs",
-      "source_location": "L101",
+      "source_location": "L138",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "github_scripts_watchdog",
+      "target": "github_scripts_watchdog_allruns",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".github/scripts/watchdog.mjs",
+      "source_location": "L123",
       "weight": 1.0,
       "_origin": "ast",
       "source": "github_scripts_watchdog",
@@ -4492,7 +4701,40 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".github/scripts/watchdog.mjs",
-      "source_location": "L125",
+      "source_location": "L177",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "github_scripts_watchdog",
+      "target": "github_scripts_watchdog_dead",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".github/scripts/watchdog.mjs",
+      "source_location": "L174",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "github_scripts_watchdog",
+      "target": "github_scripts_watchdog_emitters",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".github/scripts/watchdog.mjs",
+      "source_location": "L178",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "github_scripts_watchdog",
+      "target": "github_scripts_watchdog_failedsincetouch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".github/scripts/watchdog.mjs",
+      "source_location": "L163",
       "weight": 1.0,
       "_origin": "ast",
       "source": "github_scripts_watchdog",
@@ -4503,7 +4745,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".github/scripts/watchdog.mjs",
-      "source_location": "L124",
+      "source_location": "L162",
       "weight": 1.0,
       "_origin": "ast",
       "source": "github_scripts_watchdog",
@@ -4514,7 +4756,18 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".github/scripts/watchdog.mjs",
-      "source_location": "L86",
+      "source_location": "L143",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "github_scripts_watchdog",
+      "target": "github_scripts_watchdog_pending",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".github/scripts/watchdog.mjs",
+      "source_location": "L108",
       "weight": 1.0,
       "_origin": "ast",
       "source": "github_scripts_watchdog",
@@ -4536,17 +4789,6 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".github/scripts/watchdog.mjs",
-      "source_location": "L113",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "github_scripts_watchdog",
-      "target": "github_scripts_watchdog_runs",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".github/scripts/watchdog.mjs",
       "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast",
@@ -4558,7 +4800,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".github/scripts/watchdog.mjs",
-      "source_location": "L172",
+      "source_location": "L246",
       "weight": 1.0,
       "_origin": "ast",
       "source": "github_scripts_watchdog",
@@ -4604,7 +4846,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": ".github/scripts/watchdog.mjs",
-      "source_location": "L87",
+      "source_location": "L109",
       "weight": 1.0,
       "_origin": "ast",
       "source": "github_scripts_watchdog_quotablocked",
@@ -5615,26 +5857,24 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "imports_from",
-      "context": "import",
+      "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/worker/src/index.test.ts",
-      "source_location": "L2",
+      "source_location": "L3",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_worker_src_index_test",
-      "target": "apps_worker_src_index",
+      "target": "apps_worker_src_index_test_execute",
       "confidence_score": 1.0
     },
     {
-      "relation": "imports",
-      "context": "import",
+      "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "apps/worker/src/index.test.ts",
-      "source_location": "L2",
+      "source_file": "apps/worker/src/index.ts",
+      "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "apps_worker_src_index_test",
+      "source": "apps_worker_src_index",
       "target": "apps_worker_src_index_app",
       "confidence_score": 1.0
     },
@@ -5642,11 +5882,35 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/worker/src/index.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_index",
+      "target": "apps_worker_src_index_bindings",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/index.ts",
       "source_location": "L3",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_worker_src_index",
-      "target": "apps_worker_src_index_app",
+      "target": "apps_worker_src_lib_db_client",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/index.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_index",
+      "target": "apps_worker_src_lib_db_client_createdb",
       "confidence_score": 1.0
     },
     {
@@ -7140,6 +7404,39 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/demo-us-004-server.sh",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "scripts_demo_us_004_server",
+      "target": "scripts_demo_us_004_server_cleanup",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/demo-us-004-server.sh",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "scripts_demo_us_004_server",
+      "target": "scripts_demo_us_004_server_sh__entry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/demo-us-004.sh",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "scripts_demo_us_004",
+      "target": "scripts_demo_us_004_sh__entry",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/sync-secrets.sh",
@@ -7396,7 +7693,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/demos/US-002.md",
-      "source_location": "L52",
+      "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_demos_us_002_us_002_provision_supabase_postgres_storage_and_connect_drizzle_to_a_migrated_baseline_schema",
@@ -7467,6 +7764,28 @@
       "_origin": "ast",
       "source": "docs_demos_us_003_us_003_seed_the_tier_limits_catalog_and_dev_ci_fixture_users",
       "target": "docs_demos_us_003_5_confirm_the_three_fixture_users_exist_with_correct_status_role_and_a_real_backing_auth_users_row",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-004.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_004",
+      "target": "docs_demos_us_004_us_004_health_check_reports_live_database_connectivity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-004.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_004_us_004_health_check_reports_live_database_connectivity",
+      "target": "docs_demos_us_004_1_boot_wrangler_dev_with_database_url_bound_and_hit_api_health",
       "confidence_score": 1.0
     },
     {
@@ -8307,5 +8626,5 @@
       "source_file": "docs/data-model.md"
     }
   ],
-  "built_at_commit": "7b91e24d05ac0ce02f2f8a80990ea801573bd84e"
+  "built_at_commit": "8f3fa92ba55848d50da55ed471f35a6addaa7c9f"
 }

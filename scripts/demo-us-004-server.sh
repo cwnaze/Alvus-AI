@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Proves the single-Worker AC: `wrangler dev` serves the built apps/web
-# placeholder page at "/" and the Hono API at "/api/health", from one process.
+# Proves US-004's AC: GET /api/health returns 200 including a live round-trip
+# check against the database, not just that the process is up.
 set -euo pipefail
 
 LOG=$(mktemp)
@@ -15,9 +15,6 @@ for _ in $(seq 1 60); do
   fi
   sleep 1
 done
-
-echo "--- GET / ---"
-curl -s http://localhost:8787/ | grep -o '<title>[^<]*</title>'
 
 echo "--- GET /api/health ---"
 curl -s http://localhost:8787/api/health
