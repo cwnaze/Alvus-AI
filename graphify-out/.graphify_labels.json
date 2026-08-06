@@ -39,5 +39,8 @@
   "37": "demo-us-004-server.sh",
   "38": "demo-us-004.sh",
   "39": "US-005 — CI test gate: typecheck/lint/build/test against a local Supabase Postgres service",
-  "40": "demo-us-005.sh"
+  "40": "demo-us-005.sh",
+  "41": "US-006 — Secret scanning in CI",
+  "42": "demo-us-006.sh",
+  "43": "demo-us-006-plant-secret.sh"
 }
