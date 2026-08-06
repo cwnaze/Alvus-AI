@@ -27,3 +27,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-06T13:21:00.000Z | US-004 | in_progress | Branch feature/us-004-health-check-reports-live-database-connectivity created; starting DB-connectivity health check.
 2026-08-06T13:42:00.000Z | US-004 | in_review | PR #6 opened, auto-merge armed.
 2026-08-06T13:55:00.000Z | US-004 | in_review | Round 1 review: PR #6 verified (typecheck/lint/build/test pass, US-004 demo proves a live DB round-trip, US-001-003 regression demos unchanged). One non-blocking finding (health-check catch swallows the DB error with no server-side log) filed as issue #7, changes-requested.
+2026-08-06T14:00:00.000Z | US-004 | fixing | Working issue #7 (round 1): log the swallowed DB error in /api/health before returning 503.
