@@ -2,7 +2,10 @@
   "project": "alvus-ai",
   "spineRepo": "cwnaze/Alvus-AI",
   "repos": {
-    "app": { "ssh": "git@github.com:cwnaze/Alvus-AI.git", "root": "." }
+    "app": {
+      "ssh": "git@github.com:cwnaze/Alvus-AI.git",
+      "root": "."
+    }
   },
   "definitionOfDone": [
     "typecheck passes",
@@ -25,10 +28,15 @@
         "`wrangler dev` renders a placeholder page from apps/web and Hono responds on /api/*"
       ],
       "dependsOn": [],
-      "status": "in_review",
+      "status": "done",
       "demoKind": "command",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
         "specs": []
       },
       "demo": "docs/demos/US-001.md",
@@ -50,11 +58,18 @@
         "GET /api/health returns 200 including a live DB round-trip check",
         "db/seed.ts script exists and seeds base fixture users (waitlist-pending, waitlist-approved, admin) for local dev/CI"
       ],
-      "dependsOn": ["US-001"],
+      "dependsOn": [
+        "US-001"
+      ],
       "status": "pending",
       "demoKind": "command",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
         "specs": []
       },
       "demo": "docs/demos/US-002.md",
@@ -76,11 +91,19 @@
         "Every PR gets a Cloudflare Workers preview deployment with a posted-back URL, using dev-scoped secrets only",
         "CI secrets (CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, SUPABASE_ACCESS_TOKEN, DATABASE_URL) configured in the GitHub Actions secrets store"
       ],
-      "dependsOn": ["US-001", "US-002"],
+      "dependsOn": [
+        "US-001",
+        "US-002"
+      ],
       "status": "pending",
       "demoKind": "command",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
         "specs": []
       },
       "demo": "docs/demos/US-003.md",
@@ -100,11 +123,18 @@
         "Requires direct DATABASE_URL access to run — cannot be triggered remotely or by an unauthenticated request",
         "Documented in the README as the one-time production bootstrap step"
       ],
-      "dependsOn": ["US-002"],
+      "dependsOn": [
+        "US-002"
+      ],
       "status": "pending",
       "demoKind": "command",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
         "specs": []
       },
       "demo": "docs/demos/US-004.md",
@@ -124,11 +154,18 @@
         "A hand-written down-migration exists for at least one applied migration, documenting the emergency rollback procedure against DATABASE_URL",
         "Rollback procedure documented in the README"
       ],
-      "dependsOn": ["US-003"],
+      "dependsOn": [
+        "US-003"
+      ],
       "status": "pending",
       "demoKind": "command",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
         "specs": []
       },
       "demo": "docs/demos/US-005.md",
@@ -148,11 +185,18 @@
         "Every request gets a correlation ID (generated or propagated from an incoming header), included in structured log output and in the error envelope",
         "Server-side errors are logged with enough context (route, correlation ID, user ID if authenticated) to debug without reproducing"
       ],
-      "dependsOn": ["US-001"],
+      "dependsOn": [
+        "US-001"
+      ],
       "status": "pending",
       "demoKind": "command",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
         "specs": []
       },
       "demo": "docs/demos/US-006.md",
@@ -175,12 +219,23 @@
         "Waitlist/admin endpoints reject a non-admin caller with 403",
         "Logout clears the session and a subsequent request to a protected route returns 401"
       ],
-      "dependsOn": ["US-003", "US-004", "US-006"],
+      "dependsOn": [
+        "US-003",
+        "US-004",
+        "US-006"
+      ],
       "status": "pending",
       "demoKind": "browser",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
-        "specs": ["e2e/us-007.spec.ts"]
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
+        "specs": [
+          "e2e/us-007.spec.ts"
+        ]
       },
       "demo": "docs/demos/US-007.md",
       "branch": null,
@@ -199,12 +254,21 @@
         "Reset link/token lets the user set a new password and log in with it",
         "Expired or invalid reset tokens are rejected with a clear error"
       ],
-      "dependsOn": ["US-007"],
+      "dependsOn": [
+        "US-007"
+      ],
       "status": "pending",
       "demoKind": "browser",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
-        "specs": ["e2e/us-008.spec.ts"]
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
+        "specs": [
+          "e2e/us-008.spec.ts"
+        ]
       },
       "demo": "docs/demos/US-008.md",
       "branch": null,
@@ -223,12 +287,21 @@
         "Admin can view a user's basic info (email, status, role, tier, created_at)",
         "Non-admin gets 403 on this view"
       ],
-      "dependsOn": ["US-007"],
+      "dependsOn": [
+        "US-007"
+      ],
       "status": "pending",
       "demoKind": "browser",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
-        "specs": ["e2e/us-009.spec.ts"]
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
+        "specs": [
+          "e2e/us-009.spec.ts"
+        ]
       },
       "demo": "docs/demos/US-009.md",
       "branch": null,
@@ -249,12 +322,21 @@
         "User can rename a project and delete it (with confirmation)",
         "A user cannot view or modify another user's project (403)"
       ],
-      "dependsOn": ["US-007"],
+      "dependsOn": [
+        "US-007"
+      ],
       "status": "pending",
       "demoKind": "browser",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
-        "specs": ["e2e/us-010.spec.ts"]
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
+        "specs": [
+          "e2e/us-010.spec.ts"
+        ]
       },
       "demo": "docs/demos/US-010.md",
       "branch": null,
@@ -274,12 +356,21 @@
         "An upstream provider outage shows a clear error state, not a blank screen or raw error",
         "Non-owner cannot search another user's project (403)"
       ],
-      "dependsOn": ["US-010"],
+      "dependsOn": [
+        "US-010"
+      ],
       "status": "pending",
       "demoKind": "browser",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
-        "specs": ["e2e/us-011.spec.ts"]
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
+        "specs": [
+          "e2e/us-011.spec.ts"
+        ]
       },
       "demo": "docs/demos/US-011.md",
       "branch": null,
@@ -301,12 +392,21 @@
         "Deselecting a selected source returns it to the candidate pool rather than deleting it",
         "Analysis is blocked with a clear limit-reached response once the user's tier quota for source analyses is exhausted"
       ],
-      "dependsOn": ["US-011"],
+      "dependsOn": [
+        "US-011"
+      ],
       "status": "pending",
       "demoKind": "browser",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
-        "specs": ["e2e/us-012.spec.ts"]
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
+        "specs": [
+          "e2e/us-012.spec.ts"
+        ]
       },
       "demo": "docs/demos/US-012.md",
       "branch": null,
@@ -326,12 +426,21 @@
         "A corrupted or unparseable file fails gracefully with a clear error, not a crash or silent empty analysis",
         "A scanned-image-only PDF with no extractable text is flagged as such rather than analyzed on empty content"
       ],
-      "dependsOn": ["US-012"],
+      "dependsOn": [
+        "US-012"
+      ],
       "status": "pending",
       "demoKind": "browser",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
-        "specs": ["e2e/us-013.spec.ts"]
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
+        "specs": [
+          "e2e/us-013.spec.ts"
+        ]
       },
       "demo": "docs/demos/US-013.md",
       "branch": null,
@@ -352,12 +461,22 @@
         "A re-render flags any in-text citation whose source is no longer in the bibliography (dangling citation)",
         "Citation formatting is visually distinct per format (MLA vs. APA vs. Chicago) for the same source"
       ],
-      "dependsOn": ["US-012", "US-010"],
+      "dependsOn": [
+        "US-012",
+        "US-010"
+      ],
       "status": "pending",
       "demoKind": "browser",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
-        "specs": ["e2e/us-014.spec.ts"]
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
+        "specs": [
+          "e2e/us-014.spec.ts"
+        ]
       },
       "demo": "docs/demos/US-014.md",
       "branch": null,
@@ -376,12 +495,21 @@
         "Suggestions are not counted against the user's metered usage (only rate-limited)",
         "Rapid repeated requests are throttled with a clear rate-limit response, not silently dropped"
       ],
-      "dependsOn": ["US-014"],
+      "dependsOn": [
+        "US-014"
+      ],
       "status": "pending",
       "demoKind": "browser",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
-        "specs": ["e2e/us-015.spec.ts"]
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
+        "specs": [
+          "e2e/us-015.spec.ts"
+        ]
       },
       "demo": "docs/demos/US-015.md",
       "branch": null,
@@ -402,12 +530,21 @@
         "Requesting a feedback pass on an empty document returns a clear error instead of an empty/nonsensical pass",
         "Feedback is blocked with a clear limit-reached response once the user's tier quota for feedback passes is exhausted"
       ],
-      "dependsOn": ["US-014"],
+      "dependsOn": [
+        "US-014"
+      ],
       "status": "pending",
       "demoKind": "browser",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
-        "specs": ["e2e/us-016.spec.ts"]
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
+        "specs": [
+          "e2e/us-016.spec.ts"
+        ]
       },
       "demo": "docs/demos/US-016.md",
       "branch": null,
@@ -427,12 +564,22 @@
         "Usage resets at the next billing period boundary",
         "Tier limits reflect the seeded v1 catalog (free 5/3, plus 60/30, pro 250/120)"
       ],
-      "dependsOn": ["US-012", "US-016"],
+      "dependsOn": [
+        "US-012",
+        "US-016"
+      ],
       "status": "pending",
       "demoKind": "browser",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
-        "specs": ["e2e/us-017.spec.ts"]
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
+        "specs": [
+          "e2e/us-017.spec.ts"
+        ]
       },
       "demo": "docs/demos/US-017.md",
       "branch": null,
@@ -456,12 +603,21 @@
         "An invalid webhook signature is rejected and never triggers a tier change",
         "A user already on a tier cannot start a duplicate checkout for the same tier (clear error)"
       ],
-      "dependsOn": ["US-017"],
+      "dependsOn": [
+        "US-017"
+      ],
       "status": "pending",
       "demoKind": "browser",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
-        "specs": ["e2e/us-018.spec.ts"]
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
+        "specs": [
+          "e2e/us-018.spec.ts"
+        ]
       },
       "demo": "docs/demos/US-018.md",
       "branch": null,
@@ -481,12 +637,21 @@
         "A revoked or unknown share link shows a clear \"this link no longer works\" state, not an error page or the owner's other data",
         "Generating a link twice returns the existing active link rather than creating a second one"
       ],
-      "dependsOn": ["US-014"],
+      "dependsOn": [
+        "US-014"
+      ],
       "status": "pending",
       "demoKind": "browser",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
-        "specs": ["e2e/us-019.spec.ts"]
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
+        "specs": [
+          "e2e/us-019.spec.ts"
+        ]
       },
       "demo": "docs/demos/US-019.md",
       "branch": null,
@@ -506,11 +671,21 @@
         "Integration tests prove the share-link read path exposes only the single linked project and nothing else",
         "Every table reachable via the anon key has RLS enabled — a lint/test step fails the build if a new table is added without it"
       ],
-      "dependsOn": ["US-010", "US-012", "US-014", "US-019"],
+      "dependsOn": [
+        "US-010",
+        "US-012",
+        "US-014",
+        "US-019"
+      ],
       "status": "pending",
       "demoKind": "command",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
         "specs": []
       },
       "demo": "docs/demos/US-020.md",
@@ -530,11 +705,20 @@
         "Metered AI endpoints (analyze, feedback) are rate-limited per user in addition to the tier-quota check",
         "A user hitting the rate limit sees a clear \"try again shortly\" message with a Retry-After value"
       ],
-      "dependsOn": ["US-007", "US-012", "US-016"],
+      "dependsOn": [
+        "US-007",
+        "US-012",
+        "US-016"
+      ],
       "status": "pending",
       "demoKind": "command",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
         "specs": []
       },
       "demo": "docs/demos/US-021.md",
@@ -554,11 +738,22 @@
         "Transient failures (timeout, 5xx) are retried with backoff before surfacing an error to the user",
         "Retries never double-charge a user's metered quota or double-write a result"
       ],
-      "dependsOn": ["US-011", "US-012", "US-015", "US-016", "US-018"],
+      "dependsOn": [
+        "US-011",
+        "US-012",
+        "US-015",
+        "US-016",
+        "US-018"
+      ],
       "status": "pending",
       "demoKind": "command",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
         "specs": []
       },
       "demo": "docs/demos/US-022.md",
@@ -578,12 +773,26 @@
         "Interactive elements have accessible names/labels, verified via automated accessibility audit",
         "Core flows render usably at mobile and desktop viewport widths without horizontal scrolling or hidden controls"
       ],
-      "dependsOn": ["US-010", "US-012", "US-014", "US-016", "US-018", "US-019"],
+      "dependsOn": [
+        "US-010",
+        "US-012",
+        "US-014",
+        "US-016",
+        "US-018",
+        "US-019"
+      ],
       "status": "pending",
       "demoKind": "browser",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
-        "specs": ["e2e/us-023.spec.ts"]
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
+        "specs": [
+          "e2e/us-023.spec.ts"
+        ]
       },
       "demo": "docs/demos/US-023.md",
       "branch": null,
@@ -602,11 +811,21 @@
         "Every environment variable in .env.example has a one-line purpose note in the README or links to the infra doc",
         "Architecture/decisions doc is linked from the README for anyone picking up the project later"
       ],
-      "dependsOn": ["US-003", "US-018", "US-019", "US-023"],
+      "dependsOn": [
+        "US-003",
+        "US-018",
+        "US-019",
+        "US-023"
+      ],
       "status": "pending",
       "demoKind": "command",
       "verification": {
-        "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
         "specs": []
       },
       "demo": "docs/demos/US-024.md",
