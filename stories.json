@@ -25,7 +25,7 @@
         "`wrangler dev` renders a placeholder page from apps/web and Hono responds on /api/*"
       ],
       "dependsOn": [],
-      "status": "in_progress",
+      "status": "in_review",
       "demoKind": "command",
       "verification": {
         "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
@@ -33,10 +33,10 @@
       },
       "demo": "docs/demos/US-001.md",
       "branch": "feature/us-001-scaffold-monorepo",
-      "prNumber": null,
+      "prNumber": 2,
       "issueNumber": null,
       "reviewRounds": 0,
-      "notes": ""
+      "notes": "wrangler.jsonc lives at repo root (not apps/worker/ as docs/tdd.md's directory sketch shows) because pipeline.json's serve commands run `wrangler dev` from the repo root with no --cwd/-c flag."
     },
     {
       "id": "US-002",
