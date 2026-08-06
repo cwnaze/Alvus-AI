@@ -34,3 +34,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-06T15:20:00.000Z | US-005 | in_progress | Branch feature/us-005-ci-test-gate-typecheck-lint-build-test-against-a-local-supabase-postgres-service created; wiring npm test into ci.yml against the local Supabase Postgres service already started by setup-project.
 2026-08-06T15:37:15.658Z | US-005 | done | PR #8 merged after 1 review round(s)
 2026-08-06T15:45:58.000Z | US-006 | in_progress | Branch feature/us-006-secret-scanning-in-ci created; adding gitleaks secret scanning to ci.yml.
+2026-08-06T23:31:07.102Z | US-006 | done | PR #10 merged after 0 review round(s)

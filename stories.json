@@ -176,7 +176,7 @@
       "dependsOn": [
         "US-001"
       ],
-      "status": "in_progress",
+      "status": "done",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -189,7 +189,7 @@
       },
       "demo": "docs/demos/US-006.md",
       "branch": "feature/us-006-secret-scanning-in-ci",
-      "prNumber": null,
+      "prNumber": 10,
       "issueNumber": null,
       "reviewRounds": 0,
       "notes": ""
