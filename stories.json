@@ -58,7 +58,7 @@
       "dependsOn": [
         "US-001"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -70,7 +70,7 @@
         "specs": []
       },
       "demo": "docs/demos/US-002.md",
-      "branch": null,
+      "branch": "feature/us-002-provision-supabase-drizzle-baseline-schema",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,
