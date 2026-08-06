@@ -6,8 +6,12 @@ build/
 .svelte-kit/
 playwright-report/
 test-results/
+.wrangler/
 # review verdict handoff, CI-only
 .pipeline/
 # machine-specific graphify paths, re-resolved automatically when missing
 graphify-out/.graphify_python
 graphify-out/.graphify_root
+graphify-out/cache/last_query_stamp
+# dated backup snapshots graphify writes before a relabel; local safety net only
+graphify-out/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/

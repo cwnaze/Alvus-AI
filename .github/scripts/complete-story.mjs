@@ -53,7 +53,7 @@ for (let attempt = 1; ; attempt++) {
     sh('git', ['push']);
     break;
   } catch (e) {
-    if (attempt === 5) throw new Error(`push failed after ${attempt} attempts: ${e.message}`);
+    if (attempt === 5) throw new Error(`push failed after ${attempt} attempts: ${e.message}`, { cause: e });
     console.error(`push rejected (attempt ${attempt}), rebasing and retrying`);
     sh('git', ['pull', '--rebase', '--autostash']);
   }
