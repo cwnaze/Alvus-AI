@@ -28,3 +28,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-06T13:42:00.000Z | US-004 | in_review | PR #6 opened, auto-merge armed.
 2026-08-06T13:55:00.000Z | US-004 | in_review | Round 1 review: PR #6 verified (typecheck/lint/build/test pass, US-004 demo proves a live DB round-trip, US-001-003 regression demos unchanged). One non-blocking finding (health-check catch swallows the DB error with no server-side log) filed as issue #7, changes-requested.
 2026-08-06T14:00:00.000Z | US-004 | fixing | Working issue #7 (round 1): log the swallowed DB error in /api/health before returning 503.
+2026-08-06T14:10:00.000Z | US-004 | in_review | Fix pushed for issue #7 (console.error before the 503, test asserts the log call); typecheck/lint/build/test pass, US-004 demo unchanged, US-001-003 regression demos re-verified. Back in review.
