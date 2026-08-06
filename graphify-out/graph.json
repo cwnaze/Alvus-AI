@@ -3273,6 +3273,66 @@
       "norm_label": "demo-us-005.sh script"
     },
     {
+      "label": "demo-us-006-plant-secret.sh",
+      "file_type": "code",
+      "source_file": "scripts/demo-us-006-plant-secret.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "file"
+      },
+      "_origin": "ast",
+      "id": "scripts_demo_us_006_plant_secret",
+      "community": 43,
+      "community_name": "demo-us-006-plant-secret.sh",
+      "norm_label": "demo-us-006-plant-secret.sh"
+    },
+    {
+      "label": "demo-us-006-plant-secret.sh script",
+      "file_type": "code",
+      "source_file": "scripts/demo-us-006-plant-secret.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_entrypoint"
+      },
+      "_origin": "ast",
+      "id": "scripts_demo_us_006_plant_secret_sh__entry",
+      "community": 43,
+      "community_name": "demo-us-006-plant-secret.sh",
+      "norm_label": "demo-us-006-plant-secret.sh script"
+    },
+    {
+      "label": "demo-us-006.sh",
+      "file_type": "code",
+      "source_file": "scripts/demo-us-006.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "file"
+      },
+      "_origin": "ast",
+      "id": "scripts_demo_us_006",
+      "community": 42,
+      "community_name": "demo-us-006.sh",
+      "norm_label": "demo-us-006.sh"
+    },
+    {
+      "label": "demo-us-006.sh script",
+      "file_type": "code",
+      "source_file": "scripts/demo-us-006.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_entrypoint"
+      },
+      "_origin": "ast",
+      "id": "scripts_demo_us_006_sh__entry",
+      "community": 42,
+      "community_name": "demo-us-006.sh",
+      "norm_label": "demo-us-006.sh script"
+    },
+    {
       "label": "sync-secrets.sh",
       "file_type": "code",
       "source_file": "scripts/sync-secrets.sh",
@@ -3785,6 +3845,61 @@
       "community": 39,
       "community_name": "US-005 \u2014 CI test gate: typecheck/lint/build/test against a local Supabase Postgres service",
       "norm_label": "6. test"
+    },
+    {
+      "label": "US-006.md",
+      "file_type": "document",
+      "source_file": "docs/demos/US-006.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_demos_us_006",
+      "community": 41,
+      "community_name": "US-006 \u2014 Secret scanning in CI",
+      "norm_label": "us-006.md"
+    },
+    {
+      "label": "US-006 \u2014 Secret scanning in CI",
+      "file_type": "document",
+      "source_file": "docs/demos/US-006.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_demos_us_006_us_006_secret_scanning_in_ci",
+      "community": 41,
+      "community_name": "US-006 \u2014 Secret scanning in CI",
+      "norm_label": "us-006 \u2014 secret scanning in ci"
+    },
+    {
+      "label": "1. ci.yml's required check job runs gitleaks against every PR",
+      "file_type": "document",
+      "source_file": "docs/demos/US-006.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "docs_demos_us_006_1_ci_yml_s_required_check_job_runs_gitleaks_against_every_pr",
+      "community": 41,
+      "community_name": "US-006 \u2014 Secret scanning in CI",
+      "norm_label": "1. ci.yml's required check job runs gitleaks against every pr"
+    },
+    {
+      "label": "2. Scan this repo's real commit history \u2014 no leaks",
+      "file_type": "document",
+      "source_file": "docs/demos/US-006.md",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "docs_demos_us_006_2_scan_this_repo_s_real_commit_history_no_leaks",
+      "community": 41,
+      "community_name": "US-006 \u2014 Secret scanning in CI",
+      "norm_label": "2. scan this repo's real commit history \u2014 no leaks"
+    },
+    {
+      "label": "3. Plant a fake secret in a scratch repo and confirm gitleaks fails the build on a match",
+      "file_type": "document",
+      "source_file": "docs/demos/US-006.md",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "docs_demos_us_006_3_plant_a_fake_secret_in_a_scratch_repo_and_confirm_gitleaks_fails_the_build_on_a_match",
+      "community": 41,
+      "community_name": "US-006 \u2014 Secret scanning in CI",
+      "norm_label": "3. plant a fake secret in a scratch repo and confirm gitleaks fails the build on a match"
     },
     {
       "label": "Implement Story Skill",
@@ -7736,6 +7851,28 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "scripts/demo-us-006-plant-secret.sh",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "scripts_demo_us_006_plant_secret",
+      "target": "scripts_demo_us_006_plant_secret_sh__entry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/demo-us-006.sh",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "scripts_demo_us_006",
+      "target": "scripts_demo_us_006_sh__entry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "scripts/sync-secrets.sh",
       "source_location": "L1",
       "weight": 1.0,
@@ -8160,6 +8297,50 @@
       "_origin": "ast",
       "source": "docs_demos_us_005_us_005_ci_test_gate_typecheck_lint_build_test_against_a_local_supabase_postgres_service",
       "target": "docs_demos_us_005_6_test",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-006.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_006",
+      "target": "docs_demos_us_006_us_006_secret_scanning_in_ci",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-006.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_006_us_006_secret_scanning_in_ci",
+      "target": "docs_demos_us_006_1_ci_yml_s_required_check_job_runs_gitleaks_against_every_pr",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-006.md",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_006_us_006_secret_scanning_in_ci",
+      "target": "docs_demos_us_006_2_scan_this_repo_s_real_commit_history_no_leaks",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-006.md",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_006_us_006_secret_scanning_in_ci",
+      "target": "docs_demos_us_006_3_plant_a_fake_secret_in_a_scratch_repo_and_confirm_gitleaks_fails_the_build_on_a_match",
       "confidence_score": 1.0
     },
     {
@@ -9000,5 +9181,5 @@
       "source_file": "docs/data-model.md"
     }
   ],
-  "built_at_commit": "80a408e414eacbd3e844adfcd813d556852536db"
+  "built_at_commit": "54d1a75df6d0793addd321551909b9370db59eb1"
 }

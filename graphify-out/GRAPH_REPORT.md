@@ -1,16 +1,16 @@
 # Graph Report - Alvus-AI  (2026-08-06)
 
 ## Corpus Check
-- 68 files · ~29,719 words
+- 71 files · ~30,255 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 380 nodes · 393 edges · 41 communities (31 shown, 10 thin omitted)
+- 389 nodes · 399 edges · 44 communities (32 shown, 12 thin omitted)
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 22 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `80a408e4`
+- Built from commit: `54d1a75d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -52,6 +52,9 @@
 - demo-us-004.sh
 - US-005 — CI test gate: typecheck/lint/build/test against a local Supabase Postgres service
 - demo-us-005.sh
+- US-006 — Secret scanning in CI
+- demo-us-006.sh
+- demo-us-006-plant-secret.sh
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 12 edges
@@ -85,7 +88,7 @@
 - **Workflows that dispatch a Claude Code skill via claude-code-action** — github_workflows_story_start, github_workflows_pr_review, github_workflows_pr_fix, github_workflows_production_prep [EXTRACTED 1.00]
 - **Data model entities owned by projects (ON DELETE CASCADE from projects.id)** — docs_data_model_projects, docs_data_model_project_documents, docs_data_model_project_sources, docs_data_model_uploaded_files, docs_data_model_share_links, docs_data_model_feedback_passes [EXTRACTED 1.00]
 
-## Communities (41 total, 10 thin omitted)
+## Communities (44 total, 12 thin omitted)
 
 ### Community 0 - "PR Review Skill"
 Cohesion: 0.12
@@ -195,10 +198,14 @@ Nodes (6): 1. Boot the local Supabase stack (dev/CI parity) and apply the baseli
 Cohesion: 0.25
 Nodes (7): 1. Confirm the local Supabase Postgres service (started in CI by setup-project's services step) is reachable, 2. ci.yml wires typecheck/lint/build/test into the required PR status check, with DATABASE_URL bound to that service, 3. Typecheck, 4. Lint, 5. Build, 6. Test, US-005 — CI test gate: typecheck/lint/build/test against a local Supabase Postgres service
 
+### Community 41 - "US-006 — Secret scanning in CI"
+Cohesion: 0.40
+Nodes (4): 1. ci.yml's required check job runs gitleaks against every PR, 2. Scan this repo's real commit history — no leaks, 3. Plant a fake secret in a scratch repo and confirm gitleaks fails the build on a match, US-006 — Secret scanning in CI
+
 ## Knowledge Gaps
-- **193 isolated node(s):** `db`, `story`, `issues`, `rounds`, `db` (+188 more)
+- **198 isolated node(s):** `db`, `story`, `issues`, `rounds`, `db` (+193 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -214,6 +221,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **Are the 6 inferred relationships involving `Security Model doc` (e.g. with `API Surface doc` and `Infrastructure doc`) actually correct?**
   _`Security Model doc` has 6 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `db`, `story`, `issues` to the rest of the system?**
-  _193 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _198 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `PR Review Skill` be split into smaller, more focused modules?**
   _Cohesion score 0.12 - nodes in this community are weakly interconnected._
