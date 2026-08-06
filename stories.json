@@ -25,14 +25,14 @@
         "`wrangler dev` renders a placeholder page from apps/web and Hono responds on /api/*"
       ],
       "dependsOn": [],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "command",
       "verification": {
         "commands": ["npm run typecheck", "npm run lint", "npm run build", "npm test"],
         "specs": []
       },
       "demo": "docs/demos/US-001.md",
-      "branch": null,
+      "branch": "feature/us-001-scaffold-monorepo",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,
