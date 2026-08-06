@@ -1,0 +1,66 @@
+name: deploy-preview
+# Every PR gets a live, shareable Cloudflare Workers preview (docs/infra.md's
+# per-PR environment) so a reviewer sees the real change running, not just a
+# diff. Uploads a Worker Version under a per-PR alias rather than running
+# `wrangler deploy` -- a version upload never receives production traffic and
+# never touches the Worker's bound secrets, so this only ever needs the
+# Cloudflare deploy-time credential, nothing DB/Stripe/LiteLLM-scoped.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: deploy-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    # Never run against forks: this job holds the Cloudflare deploy token.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      # Plain setup-node + install, not setup-project: this job never runs the
+      # test suite, so it has no need for setup-project's local Postgres service.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Upload preview version
+        id: preview
+        # Only the Cloudflare deploy-time credential -- no DB/Stripe/LiteLLM
+        # secret is loaded into this job, so a preview can never touch
+        # production data even by accident. Worker secrets already bound to
+        # the Worker (see deploy.yml) still apply to this version; nothing
+        # here sets or changes them.
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          alias="pr-${{ github.event.pull_request.number }}"
+          output=$(npx wrangler versions upload --preview-alias "$alias")
+          echo "$output"
+          url=$(echo "$output" | grep -oE 'Version Preview Alias URL: \S+' | awk '{print $NF}')
+          if [ -z "$url" ]; then
+            echo "::error::Could not parse a preview alias URL from wrangler's output."
+            exit 1
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Post preview URL to the PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --edit-last --create-if-none \
+            --body "Preview deployed: ${{ steps.preview.outputs.url }}"
