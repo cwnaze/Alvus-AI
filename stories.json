@@ -117,7 +117,7 @@
       "dependsOn": [
         "US-002"
       ],
-      "status": "fixing",
+      "status": "in_review",
       "demoKind": "command",
       "verification": {
         "commands": [
