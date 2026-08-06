@@ -19,3 +19,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-06T06:00:00.000Z | US-002 | pending | Crash resume: in_progress with no branch/PR found on remote; reset to pending for re-selection.
 2026-08-06T06:05:00.000Z | US-002 | in_progress | Branch feature/us-002-provision-supabase-drizzle-baseline-schema created; starting Supabase/Drizzle provisioning.
 2026-08-06T11:36:58.053Z | US-002 | done | PR #3 merged after 0 review round(s)
+2026-08-06T11:40:00.000Z | US-003 | in_progress | Branch feature/us-003-seed-tier-limits-and-fixture-users created; starting tier_limits catalog + fixture-user seed.
