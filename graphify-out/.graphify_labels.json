@@ -42,5 +42,8 @@
   "40": "demo-us-005.sh",
   "41": "US-006 — Secret scanning in CI",
   "42": "demo-us-006.sh",
-  "43": "demo-us-006-plant-secret.sh"
+  "43": "demo-us-006-plant-secret.sh",
+  "44": "US-007 — Deploy pipeline: migrate + wrangler deploy on merge, PR previews, secrets configured",
+  "45": "put-worker-secrets.mjs",
+  "46": "demo-us-007.sh"
 }

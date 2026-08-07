@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "dev": "wrangler dev --env-file .env",
+    "deploy": "wrangler deploy --env-file .env",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint .",
     "build": "npm run build --workspace apps/web",

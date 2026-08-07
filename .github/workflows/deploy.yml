@@ -1,0 +1,72 @@
+name: deploy
+# Runs after every merge to main. Re-runs the same gate ci.yml already ran on
+# the PR (docs/infra.md's deploy pipeline: "same gate, re-run against main"),
+# then migrates before deploying, halting on migration failure so a
+# schema-incompatible Worker never ships, then binds app-runtime secrets so a
+# value rotated in the repo secrets store reaches the Worker on the next merge.
+on:
+  push:
+    branches: [main]
+    # implement-story/story-complete each commit straight to main to move a
+    # story through pending -> in_progress -> done (see CLAUDE.md's Pipeline
+    # section) -- pure bookkeeping, never a code change worth redeploying for.
+    paths-ignore:
+      - 'stories.json'
+      - 'docs/pipeline-log.md'
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      # Brings up the local Supabase Postgres service (same as ci.yml) so the
+      # gate re-run below has something to test against -- this job's real
+      # deploy-time DB access uses the DATABASE_URL secret, not this service.
+      - uses: ./.github/actions/setup-project
+
+      - name: Typecheck, lint, build, test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+        run: |
+          set -euo pipefail
+          npm run typecheck
+          npm run lint
+          npm run build
+          npm test
+
+      - name: Materialize .env from repo secrets
+        env:
+          ALL_SECRETS: ${{ toJSON(secrets) }}
+        run: node .github/scripts/write-env.mjs
+
+      - name: Run migrations
+        run: |
+          set -euo pipefail
+          set -a
+          source .env
+          set +a
+          # drizzle-kit owns the app schema (users/waitlist_signups/tier_limits/...);
+          # supabase db push owns the Supabase-specific surface drizzle doesn't
+          # (RLS policies, Storage bucket config, Auth settings). Neither is atomic
+          # with the deploy below -- see docs/infra.md's rollback plan for why
+          # migrations default to additive/backward-compatible.
+          npx drizzle-kit migrate
+          # No SUPABASE_DB_PASSWORD secret exists to drive a non-interactive
+          # `supabase link`, so this pushes straight at DATABASE_URL instead --
+          # equivalent result, one fewer credential to provision.
+          npx supabase db push --db-url "$DATABASE_URL" --yes
+
+      - name: Deploy to Cloudflare Workers
+        run: npm run deploy
+
+      - name: Bind app-runtime secrets to the Worker
+        run: node .github/scripts/put-worker-secrets.mjs

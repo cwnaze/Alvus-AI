@@ -1,16 +1,16 @@
 # Graph Report - Alvus-AI  (2026-08-06)
 
 ## Corpus Check
-- 71 files · ~30,255 words
+- 74 files · ~32,847 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 389 nodes · 399 edges · 44 communities (32 shown, 12 thin omitted)
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 22 edges (avg confidence: 0.84)
+- 406 nodes · 413 edges · 47 communities (34 shown, 13 thin omitted)
+- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 22 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `54d1a75d`
+- Built from commit: `f9905b5d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -55,18 +55,21 @@
 - US-006 — Secret scanning in CI
 - demo-us-006.sh
 - demo-us-006-plant-secret.sh
+- US-007 — Deploy pipeline: migrate + wrangler deploy on merge, PR previews, secrets configured
+- put-worker-secrets.mjs
+- demo-us-007.sh
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 12 edges
-2. `scripts` - 10 edges
-3. `API Surface doc` - 9 edges
-4. `Security Model doc` - 9 edges
-5. `PR Review Skill` - 8 edges
-6. `projects table` - 8 edges
-7. `US-005 — CI test gate: typecheck/lint/build/test against a local Supabase Postgres service` - 7 edges
-8. `CLAUDE.md project guide` - 7 edges
-9. `US-001 — Scaffold monorepo (frontend, Worker, shared package, tooling)` - 6 edges
-10. `US-003 — Seed the tier_limits catalog and dev/CI fixture users` - 6 edges
+2. `scripts` - 11 edges
+3. `US-007 — Deploy pipeline: migrate + wrangler deploy on merge, PR previews, secrets configured` - 9 edges
+4. `API Surface doc` - 9 edges
+5. `Security Model doc` - 9 edges
+6. `PR Review Skill` - 8 edges
+7. `projects table` - 8 edges
+8. `US-005 — CI test gate: typecheck/lint/build/test against a local Supabase Postgres service` - 7 edges
+9. `CLAUDE.md project guide` - 7 edges
+10. `US-001 — Scaffold monorepo (frontend, Worker, shared package, tooling)` - 6 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `PR Review workflow` --references--> `PR Review Skill`  [EXTRACTED]
@@ -88,7 +91,7 @@
 - **Workflows that dispatch a Claude Code skill via claude-code-action** — github_workflows_story_start, github_workflows_pr_review, github_workflows_pr_fix, github_workflows_production_prep [EXTRACTED 1.00]
 - **Data model entities owned by projects (ON DELETE CASCADE from projects.id)** — docs_data_model_projects, docs_data_model_project_documents, docs_data_model_project_sources, docs_data_model_uploaded_files, docs_data_model_share_links, docs_data_model_feedback_passes [EXTRACTED 1.00]
 
-## Communities (44 total, 12 thin omitted)
+## Communities (47 total, 13 thin omitted)
 
 ### Community 0 - "PR Review Skill"
 Cohesion: 0.12
@@ -155,8 +158,8 @@ Cohesion: 0.13
 Nodes (14): compilerOptions, jsx, lib, noEmit, types, extends, include, ES2022 (+6 more)
 
 ### Community 19 - "scripts"
-Cohesion: 0.11
-Nodes (18): name, private, scripts, build, db:generate, db:migrate, db:push, db:seed (+10 more)
+Cohesion: 0.10
+Nodes (19): name, private, scripts, build, db:generate, db:migrate, db:push, db:seed (+11 more)
 
 ### Community 20 - "worker/tsconfig.json"
 Cohesion: 0.15
@@ -202,25 +205,33 @@ Nodes (7): 1. Confirm the local Supabase Postgres service (started in CI by setu
 Cohesion: 0.40
 Nodes (4): 1. ci.yml's required check job runs gitleaks against every PR, 2. Scan this repo's real commit history — no leaks, 3. Plant a fake secret in a scratch repo and confirm gitleaks fails the build on a match, US-006 — Secret scanning in CI
 
+### Community 44 - "US-007 — Deploy pipeline: migrate + wrangler deploy on merge, PR previews, secrets configured"
+Cohesion: 0.20
+Nodes (9): 1. Every PR gets a Cloudflare Workers preview: deploy-preview.yml uploads a per-PR Worker Version (never production traffic, never the Worker's bound secrets) using only the Cloudflare deploy-time credential, then posts the alias URL back to the PR, 2. Packaging a preview version succeeds end-to-end (dry run — this demo does not push a live Cloudflare deploy), 3. On merge to main, deploy.yml halts before wrangler deploy if migrations fail: migrate-then-deploy ordering, with no continue-on-error, 4. drizzle-kit migrate applies cleanly against the real deploy-time database (idempotent — a no-op once already applied), 5. supabase db push would apply cleanly against the same database (dry run — this demo does not mutate the live project), 6. CI secrets (CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, SUPABASE_ACCESS_TOKEN, DATABASE_URL) are configured in the GitHub Actions secrets store, 7. wrangler.jsonc declares no plaintext vars block — app-runtime values only ever reach the Worker as secrets, 8. Every app-runtime variable (.env.example's 'App runtime' section) is bound to the Worker via wrangler secret put, sourced from the same repo secrets (+1 more)
+
+### Community 45 - "put-worker-secrets.mjs"
+Cohesion: 0.50
+Nodes (3): env, exampleLines, runtimeKeys
+
 ## Knowledge Gaps
-- **198 isolated node(s):** `db`, `story`, `issues`, `rounds`, `db` (+193 more)
+- **211 isolated node(s):** `db`, `story`, `issues`, `rounds`, `db` (+206 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **13 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `devDependencies` connect `devDependencies` to `scripts`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
-- **Why does `Security Model doc` connect `API Surface doc` to `PR Review Skill`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
-- **Why does `Production Prep Skill` connect `PR Review Skill` to `API Surface doc`?**
+- **Why does `Security Model doc` connect `API Surface doc` to `PR Review Skill`?**
   _High betweenness centrality (0.008) - this node is a cross-community bridge._
+- **Why does `Production Prep Skill` connect `PR Review Skill` to `API Surface doc`?**
+  _High betweenness centrality (0.007) - this node is a cross-community bridge._
 - **Are the 7 inferred relationships involving `API Surface doc` (e.g. with `project_sources table` and `projects table`) actually correct?**
   _`API Surface doc` has 7 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 6 inferred relationships involving `Security Model doc` (e.g. with `API Surface doc` and `Infrastructure doc`) actually correct?**
-  _`Security Model doc` has 6 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `db`, `story`, `issues` to the rest of the system?**
-  _198 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _211 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `PR Review Skill` be split into smaller, more focused modules?**
   _Cohesion score 0.12 - nodes in this community are weakly interconnected._
+- **Should `API Surface doc` be split into smaller, more focused modules?**
+  _Cohesion score 0.12681159420289856 - nodes in this community are weakly interconnected._

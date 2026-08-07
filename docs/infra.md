@@ -15,21 +15,39 @@
 
 ## Deploy pipeline (GitHub Actions)
 
-**On every PR**: install → typecheck → lint → build → test → `wrangler deploy`
-(preview mode) → preview URL posted to the PR. Preview uses dev-scoped secrets only.
+**On every PR**: `deploy-preview.yml` runs `wrangler versions upload --preview-alias
+pr-<number>` and posts the resulting alias URL back to the PR. A Version upload never
+receives production traffic and never touches the Worker's bound secrets, so this job
+only ever needs the Cloudflare deploy-time credential — no DB/Stripe/LiteLLM secret is
+loaded into it. Runs independently of the `ci` required check (typecheck/lint/build/test
++ secret scan, `ci.yml`) rather than after it, so a Cloudflare hiccup can never block the
+merge gate.
 
-**On merge to `main`**:
-1. install → typecheck → lint → build → test (same gate, re-run against `main`).
-2. Migrations run before deploy, pipeline halts on failure:
+**On merge to `main`**, `deploy.yml` runs:
+1. install → typecheck → lint → build → test (same gate `ci.yml` ran on the PR, re-run
+   against `main`).
+2. Migrations, halting the whole job on failure so step 3 never runs against a bad
+   schema:
    - `drizzle-kit generate` (dev-time, not CI) produces committed SQL in
      `/drizzle/migrations`.
-   - CI applies them: `drizzle-kit migrate` against `DATABASE_URL`.
-   - `supabase db push` (via `SUPABASE_ACCESS_TOKEN`) applies RLS policies/Storage
-     bucket config/Auth settings from `supabase/migrations` — the Supabase-specific
-     surface Drizzle doesn't own.
+   - `drizzle-kit migrate` applies it against `DATABASE_URL`.
+   - `supabase db push --db-url "$DATABASE_URL"` applies RLS policies/Storage bucket
+     config/Auth settings from `supabase/migrations` — the Supabase-specific surface
+     Drizzle doesn't own. Uses `--db-url` rather than `supabase link` because
+     non-interactive `link` needs a `SUPABASE_DB_PASSWORD` secret this project doesn't
+     provision; `--db-url` reaches the same database with the `DATABASE_URL` secret CI
+     already has.
 3. Only after migrations succeed: `wrangler deploy` to production.
-4. Migration and deploy aren't atomic — default to additive/backward-compatible schema
+4. Every app-runtime variable (the "App runtime" section of `.env.example`) is bound to
+   the Worker via `wrangler secret put`, sourced from the same repo secrets — so a value
+   rotated in the secrets store reaches the Worker on the next merge without a manual
+   step.
+5. Migration and deploy aren't atomic — default to additive/backward-compatible schema
    changes so a Worker rollback never lands on an incompatible schema.
+
+A push to `main` that only touches `stories.json`/`docs/pipeline-log.md` (the pipeline's
+own state-tracking commits — see `CLAUDE.md`'s Pipeline section) does not trigger this
+workflow; there is no code change to deploy.
 
 ## Environment variables
 
@@ -41,7 +59,7 @@ Two classes: CI/deploy-time (never shipped in the Worker) and app-runtime (bound
 |---|---|
 | `CLOUDFLARE_API_TOKEN` | Non-interactive `wrangler deploy`/`secret put` in CI. |
 | `CLOUDFLARE_ACCOUNT_ID` | Target Cloudflare account/Worker. |
-| `SUPABASE_ACCESS_TOKEN` | Non-interactive `supabase link`/`db push` in CI. |
+| `SUPABASE_ACCESS_TOKEN` | Non-interactive Supabase Management API auth. Not currently used by `db push` (see below — that goes through `--db-url` instead of `link`); provisioned for whatever future story needs the Management API directly. |
 | `SUPABASE_PROJECT_REF` | Which Supabase project CI targets (dev vs. prod). |
 | `DATABASE_URL` | Runs `drizzle-kit migrate` before deploy; also used at runtime. |
 
