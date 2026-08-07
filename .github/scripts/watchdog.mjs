@@ -25,7 +25,10 @@ const dryRun = process.env.DRY_RUN === 'true';
 // text names no explicit reset time.
 const windowHours = Number(process.env.QUOTA_WINDOW_HOURS ?? 5);
 
-const sh = (cmd, args) => execFileSync(cmd, args, { encoding: 'utf8' }).trim();
+// Default execFileSync maxBuffer is 1MB. `actions/runs?per_page=100` alone now returns
+// ~1.19MB (100 full run objects), which crashed every tick from 2026-08-07 13:48 UTC
+// onward with `spawnSync gh ENOBUFS`. Run history only grows, so give real headroom.
+const sh = (cmd, args) => execFileSync(cmd, args, { encoding: 'utf8', maxBuffer: 20 * 1024 * 1024 }).trim();
 
 /**
  * Did the last Claude-backed run die on quota, and is that window still closed?

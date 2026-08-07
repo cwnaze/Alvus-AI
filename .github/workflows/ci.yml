@@ -39,7 +39,14 @@ jobs:
           mkdir -p "$RUNNER_TEMP/gitleaks"
           curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
             | tar -xz -C "$RUNNER_TEMP/gitleaks" gitleaks
-          "$RUNNER_TEMP/gitleaks/gitleaks" detect --source . --config .gitleaks.toml --redact --no-banner --no-color
+          # Without --log-opts, gitleaks walks every ref it can see, not just this
+          # branch's own history. fetch-depth: 0 pulls every remote branch into
+          # refs/remotes/origin/*, so that default scans sibling branches too — a
+          # secret sitting in another open PR fails *this* PR's check, and it's
+          # scanned against this branch's .gitleaks.toml, which may not have that
+          # branch's own allowlist fix. Scope to HEAD: still this branch's full
+          # history (the reason fetch-depth: 0 is set above), never anyone else's.
+          "$RUNNER_TEMP/gitleaks/gitleaks" detect --source . --config .gitleaks.toml --redact --no-banner --no-color --log-opts="HEAD"
 
       - id: setup
         uses: ./.github/actions/setup-project
