@@ -240,7 +240,7 @@
       "dependsOn": [
         "US-002"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -252,7 +252,7 @@
         "specs": []
       },
       "demo": "docs/demos/US-008.md",
-      "branch": null,
+      "branch": "feature/us-008-bootstrap-first-admin-account",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,
