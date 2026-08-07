@@ -27,6 +27,25 @@ Storage bucket config and RLS policies are Supabase-specific and live in
 `supabase/migrations/*.sql`, applied automatically by `supabase start`/`supabase db
 reset` locally, or `supabase db push` in CI/deploy.
 
+### Production bootstrap
+
+Admin approval (`POST /admin/waitlist/:userId/approve`) requires an existing admin, so
+the very first admin account can't come from that flow. Instead:
+
+1. Create the Supabase Auth account normally (sign up through the app, or create it
+   directly in Supabase Studio) using the email you want as the first admin.
+2. Promote it by running, with `DATABASE_URL`, `SUPABASE_URL`, and `SUPABASE_SECRET_KEY`
+   pointed at that environment:
+   ```bash
+   npm run db:bootstrap-admin -- you@example.com
+   ```
+
+This is a one-time, non-public CLI script (`db/bootstrap-admin.ts`), never an HTTP
+endpoint — it requires direct `DATABASE_URL` access, so it can't be triggered remotely
+or by an unauthenticated request. It sets `role='admin'`, `status='approved'` on the
+`users` row and creates/updates the matching `waitlist_signups` row, so the account
+shows up correctly in the admin queue too. Safe to re-run; it's idempotent.
+
 ## Tests and demos
 ```bash
 npx playwright test

@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
 import { createDb } from '../apps/worker/src/lib/db/client';
 import { tierLimits, users, waitlistSignups } from '../apps/worker/src/lib/db/schema';
+import { findAuthUserIdByEmail } from './lib/find-auth-user-id';
 
 // Never run against a production database by accident. This is the only environment
 // check available before US-007 stands up a real prod/dev split -- the deploy pipeline
@@ -69,16 +70,8 @@ async function seedTierLimits() {
   console.log(`Seeded ${TIER_LIMITS.length} tier_limits rows.`);
 }
 
-// supabase-js has no "get user by email" admin call, so list-and-find keeps this
-// idempotent across repeat runs; the fixture set is tiny so one page always covers it.
-async function findAuthUserIdByEmail(email: string): Promise<string | null> {
-  const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-  if (error) throw error;
-  return data.users.find((u) => u.email === email)?.id ?? null;
-}
-
 async function ensureAuthUser(email: string): Promise<string> {
-  const existingId = await findAuthUserIdByEmail(email);
+  const existingId = await findAuthUserIdByEmail(supabaseAdmin, email);
   if (existingId) return existingId;
 
   const { data, error } = await supabaseAdmin.auth.admin.createUser({
