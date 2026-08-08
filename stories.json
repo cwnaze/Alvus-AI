@@ -271,7 +271,7 @@
       "dependsOn": [
         "US-007"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -283,7 +283,7 @@
         "specs": []
       },
       "demo": "docs/demos/US-009.md",
-      "branch": null,
+      "branch": "feature/us-009-verify-rollback-path-worker-migration",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,

@@ -40,3 +40,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-07T04:34:54Z | US-008 | in_progress | Branch feature/us-008-bootstrap-first-admin-account created; starting bootstrap-admin CLI script.
 2026-08-07T12:13:15.000Z | US-008 | in_progress | Reconciliation: the in_progress marker from 04:34:54 never reached main (push gap), so dispatch-next re-selected US-008 as pending and re-dispatched; implement-story found the branch/PR already existed and wrote this marker to catch main up rather than redoing the work.
 2026-08-08T01:42:33.301Z | US-008 | done | PR #13 merged after 1 review round(s)
+2026-08-08T04:47:25.000Z | US-009 | in_progress | Branch feature/us-009-verify-rollback-path-worker-migration created; exercising wrangler rollback against a scratch Worker and hand-writing a down-migration for the emergency schema rollback path.
