@@ -302,7 +302,7 @@
       "dependsOn": [
         "US-001"
       ],
-      "status": "in_progress",
+      "status": "done",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -315,9 +315,9 @@
       },
       "demo": "docs/demos/US-010.md",
       "branch": "feature/us-010-global-error-handler-structured-logging-with-correlation-id",
-      "prNumber": null,
-      "issueNumber": null,
-      "reviewRounds": 0,
+      "prNumber": 20,
+      "issueNumber": 21,
+      "reviewRounds": 2,
       "notes": ""
     },
     {

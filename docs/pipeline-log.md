@@ -43,3 +43,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-08T04:47:25.000Z | US-009 | in_progress | Branch feature/us-009-verify-rollback-path-worker-migration created; exercising wrangler rollback against a scratch Worker and hand-writing a down-migration for the emergency schema rollback path.
 2026-08-08T05:08:01.188Z | US-009 | done | PR #18 merged after 1 review round(s)
 2026-08-08T05:20:00.000Z | US-010 | in_progress | Branch feature/us-010-global-error-handler-structured-logging-with-correlation-id created; adding a global Hono error handler + correlation ID (hono/request-id) + structured error logging.
+2026-08-08T17:33:02.991Z | US-010 | done | PR #20 merged after 2 review round(s)
