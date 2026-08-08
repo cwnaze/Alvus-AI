@@ -338,7 +338,7 @@
         "US-008",
         "US-010"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -352,7 +352,7 @@
         ]
       },
       "demo": "docs/demos/US-011.md",
-      "branch": null,
+      "branch": "feature/us-011-waitlist-signup-admin-approval-and-login",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,
