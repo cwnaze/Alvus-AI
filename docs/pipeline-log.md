@@ -45,3 +45,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-08T05:20:00.000Z | US-010 | in_progress | Branch feature/us-010-global-error-handler-structured-logging-with-correlation-id created; adding a global Hono error handler + correlation ID (hono/request-id) + structured error logging.
 2026-08-08T17:33:02.991Z | US-010 | done | PR #20 merged after 2 review round(s)
 2026-08-08T17:44:07.000Z | US-011 | in_progress | Branch feature/us-011-waitlist-signup-admin-approval-and-login created; building waitlist signup, admin approval, and login (Supabase Auth JWT middleware, /api/auth + /api/admin routes, React auth pages).
+2026-08-08T20:28:14.000Z | US-011 | in_progress | Reconciliation: the 17:44:07 marker's story-start run (31269704328) failed before the branch or PR existed on remote; no work was lost, so this run creates the branch now and resumes rather than re-selecting.
