@@ -1,16 +1,16 @@
-# Graph Report - Alvus-AI  (2026-08-07)
+# Graph Report - Alvus-AI  (2026-08-08)
 
 ## Corpus Check
-- 78 files · ~33,786 words
+- 82 files · ~35,652 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 421 nodes · 434 edges · 49 communities (35 shown, 14 thin omitted)
+- 433 nodes · 444 edges · 52 communities (36 shown, 16 thin omitted)
 - Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 22 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6b174bf2`
+- Built from commit: `badf5b35`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -60,6 +60,9 @@
 - demo-us-007.sh
 - US-008 — Bootstrap first admin account
 - demo-us-008.sh
+- US-009 — Verify rollback path (Worker + migration)
+- demo-us-009-rollback-worker.sh
+- demo-us-009.sh
 
 ## God Nodes (most connected - your core abstractions)
 1. `scripts` - 12 edges
@@ -93,7 +96,7 @@
 - **Workflows that dispatch a Claude Code skill via claude-code-action** — github_workflows_story_start, github_workflows_pr_review, github_workflows_pr_fix, github_workflows_production_prep [EXTRACTED 1.00]
 - **Data model entities owned by projects (ON DELETE CASCADE from projects.id)** — docs_data_model_projects, docs_data_model_project_documents, docs_data_model_project_sources, docs_data_model_uploaded_files, docs_data_model_share_links, docs_data_model_feedback_passes [EXTRACTED 1.00]
 
-## Communities (49 total, 14 thin omitted)
+## Communities (52 total, 16 thin omitted)
 
 ### Community 0 - "PR Review Skill"
 Cohesion: 0.12
@@ -219,24 +222,28 @@ Nodes (3): env, exampleLines, runtimeKeys
 Cohesion: 0.29
 Nodes (6): 1. Create a normal Supabase Auth account for the operator -- signing up never requires an admin to exist, 2. Confirm no users/waitlist_signups row exists yet for that account (this script creates them if missing), 3. Promote it to admin -- a CLI script run directly against DATABASE_URL, never an HTTP endpoint, 4. Confirm users.role=admin, users.status=approved, and waitlist_signups is now approved too, 5. Confirm re-running is idempotent (no duplicate-key errors, same result), US-008 — Bootstrap first admin account
 
+### Community 49 - "US-009 — Verify rollback path (Worker + migration)"
+Cohesion: 0.33
+Nodes (5): 1. A deliberately-broken deploy is rolled back via wrangler rollback [deployment-id], and the command output demonstrates the previous version serving again (exercised against a disposable scratch Worker, never the real alvus-ai production Worker, so this proof can't cause a real outage), 2. A hand-written down-migration exists for the one applied migration (drizzle/migrations/0000_simple_blockbuster.sql), 3. The down-migration runs cleanly against the real DATABASE_URL (wrapped in BEGIN/ROLLBACK so this proof does not actually drop the tables), 4. Rollback procedure is documented in the README, US-009 — Verify rollback path (Worker + migration)
+
 ## Knowledge Gaps
-- **220 isolated node(s):** `db`, `story`, `issues`, `rounds`, `db` (+215 more)
+- **225 isolated node(s):** `db`, `story`, `issues`, `rounds`, `db` (+220 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **14 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **16 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `devDependencies` connect `devDependencies` to `scripts`?**
-  _High betweenness centrality (0.009) - this node is a cross-community bridge._
-- **Why does `Security Model doc` connect `API Surface doc` to `PR Review Skill`?**
   _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **Why does `Production Prep Skill` connect `PR Review Skill` to `API Surface doc`?**
+- **Why does `Security Model doc` connect `API Surface doc` to `PR Review Skill`?**
   _High betweenness centrality (0.007) - this node is a cross-community bridge._
+- **Why does `Production Prep Skill` connect `PR Review Skill` to `API Surface doc`?**
+  _High betweenness centrality (0.006) - this node is a cross-community bridge._
 - **Are the 7 inferred relationships involving `API Surface doc` (e.g. with `project_sources table` and `projects table`) actually correct?**
   _`API Surface doc` has 7 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `db`, `story`, `issues` to the rest of the system?**
-  _220 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _225 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `PR Review Skill` be split into smaller, more focused modules?**
   _Cohesion score 0.12 - nodes in this community are weakly interconnected._
 - **Should `API Surface doc` be split into smaller, more focused modules?**
