@@ -15,7 +15,7 @@
   "13": "Notify workflow",
   "14": "worker/package.json",
   "15": "devDependencies",
-  "16": "web/package.json",
+  "16": "devDependencies",
   "17": "seed.ts",
   "18": "compilerOptions",
   "19": "scripts",
@@ -25,7 +25,7 @@
   "23": "shared/tsconfig.json",
   "24": "App.tsx",
   "25": "US-001 — Scaffold monorepo (frontend, Worker, shared package, tooling)",
-  "26": "index.test.ts",
+  "26": "worker/src/index.ts",
   "27": "demo-us-001-server.sh",
   "28": "vite.config.ts",
   "29": "vitest.config.ts",
@@ -33,7 +33,7 @@
   "31": "US-002 — Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema",
   "32": "demo-us-002.sh",
   "33": "drizzle.config.ts",
-  "34": "devDependencies",
+  "34": "US-010 — Global error handler + structured logging with correlation ID",
   "35": "US-003 — Seed the tier_limits catalog and dev/CI fixture users",
   "36": "US-004 — Health check reports live database connectivity",
   "37": "demo-us-004-server.sh",
@@ -50,5 +50,7 @@
   "48": "demo-us-008.sh",
   "49": "US-009 — Verify rollback path (Worker + migration)",
   "50": "demo-us-009-rollback-worker.sh",
-  "51": "demo-us-009.sh"
+  "51": "demo-us-009.sh",
+  "52": "demo-us-010-server.sh",
+  "53": "demo-us-010.sh"
 }

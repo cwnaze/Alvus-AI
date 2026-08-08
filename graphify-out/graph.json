@@ -835,7 +835,7 @@
       "_origin": "ast",
       "id": "apps_web_package",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "web/package.json"
     },
     {
@@ -846,7 +846,7 @@
       "_origin": "ast",
       "id": "apps_web_package_name",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "name"
     },
     {
@@ -857,7 +857,7 @@
       "_origin": "ast",
       "id": "apps_web_package_private",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "private"
     },
     {
@@ -868,7 +868,7 @@
       "_origin": "ast",
       "id": "apps_web_package_version",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "version"
     },
     {
@@ -879,7 +879,7 @@
       "_origin": "ast",
       "id": "apps_web_package_type",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "type"
     },
     {
@@ -890,7 +890,7 @@
       "_origin": "ast",
       "id": "apps_web_package_scripts",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "scripts"
     },
     {
@@ -901,7 +901,7 @@
       "_origin": "ast",
       "id": "apps_web_package_scripts_dev",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "dev"
     },
     {
@@ -912,7 +912,7 @@
       "_origin": "ast",
       "id": "apps_web_package_scripts_build",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "build"
     },
     {
@@ -923,7 +923,7 @@
       "_origin": "ast",
       "id": "apps_web_package_scripts_typecheck",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "typecheck"
     },
     {
@@ -934,7 +934,7 @@
       "_origin": "ast",
       "id": "apps_web_package_dependencies",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "dependencies"
     },
     {
@@ -945,7 +945,7 @@
       "_origin": "ast",
       "id": "apps_web_package_dependencies_alvus_ai_shared",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "@alvus-ai/shared"
     },
     {
@@ -956,7 +956,7 @@
       "_origin": "ast",
       "id": "apps_web_package_json_alvus_ai_shared",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "@alvus-ai/shared"
     },
     {
@@ -967,7 +967,7 @@
       "_origin": "ast",
       "id": "apps_web_package_dependencies_react",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "react"
     },
     {
@@ -978,7 +978,7 @@
       "_origin": "ast",
       "id": "react",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "react"
     },
     {
@@ -989,7 +989,7 @@
       "_origin": "ast",
       "id": "apps_web_package_dependencies_react_dom",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "react-dom"
     },
     {
@@ -1000,7 +1000,7 @@
       "_origin": "ast",
       "id": "react_dom",
       "community": 16,
-      "community_name": "web/package.json",
+      "community_name": "devDependencies",
       "norm_label": "react-dom"
     },
     {
@@ -1010,7 +1010,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies",
-      "community": 34,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "devdependencies"
     },
@@ -1021,7 +1021,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_tailwindcss_vite",
-      "community": 34,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "@tailwindcss/vite"
     },
@@ -1032,7 +1032,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "tailwindcss_vite",
-      "community": 34,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "@tailwindcss/vite"
     },
@@ -1043,7 +1043,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_types_react",
-      "community": 34,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "@types/react"
     },
@@ -1054,7 +1054,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "types_react",
-      "community": 34,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "@types/react"
     },
@@ -1065,7 +1065,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_types_react_dom",
-      "community": 34,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "@types/react-dom"
     },
@@ -1076,7 +1076,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "types_react_dom",
-      "community": 34,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "@types/react-dom"
     },
@@ -1087,7 +1087,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_vitejs_plugin_react",
-      "community": 34,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "@vitejs/plugin-react"
     },
@@ -1098,7 +1098,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "vitejs_plugin_react",
-      "community": 34,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "@vitejs/plugin-react"
     },
@@ -1109,7 +1109,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_tailwindcss",
-      "community": 34,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "tailwindcss"
     },
@@ -1120,7 +1120,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "tailwindcss",
-      "community": 34,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "tailwindcss"
     },
@@ -1131,7 +1131,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_typescript",
-      "community": 34,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "typescript"
     },
@@ -1142,7 +1142,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "apps_web_package_json_typescript",
-      "community": 34,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "typescript"
     },
@@ -1153,7 +1153,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_vite",
-      "community": 34,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "vite"
     },
@@ -1164,7 +1164,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "vite",
-      "community": 34,
+      "community": 16,
       "community_name": "devDependencies",
       "norm_label": "vite"
     },
@@ -1705,18 +1705,18 @@
       "_origin": "ast",
       "id": "apps_worker_src_index_test",
       "community": 26,
-      "community_name": "index.test.ts",
+      "community_name": "worker/src/index.ts",
       "norm_label": "index.test.ts"
     },
     {
       "label": "{ execute }",
       "file_type": "code",
       "source_file": "apps/worker/src/index.test.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "_origin": "ast",
       "id": "apps_worker_src_index_test_execute",
       "community": 26,
-      "community_name": "index.test.ts",
+      "community_name": "worker/src/index.ts",
       "norm_label": "{ execute }"
     },
     {
@@ -1726,32 +1726,32 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_worker_src_index",
-      "community": 17,
-      "community_name": "seed.ts",
+      "community": 26,
+      "community_name": "worker/src/index.ts",
       "norm_label": "worker/src/index.ts"
     },
     {
       "label": "Bindings",
       "file_type": "code",
       "source_file": "apps/worker/src/index.ts",
-      "source_location": "L5",
+      "source_location": "L7",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "id": "apps_worker_src_index_bindings",
-      "community": 17,
-      "community_name": "seed.ts",
+      "community": 26,
+      "community_name": "worker/src/index.ts",
       "norm_label": "bindings"
     },
     {
       "label": "app",
       "file_type": "code",
       "source_file": "apps/worker/src/index.ts",
-      "source_location": "L9",
+      "source_location": "L11",
       "_origin": "ast",
       "id": "apps_worker_src_index_app",
-      "community": 17,
-      "community_name": "seed.ts",
+      "community": 26,
+      "community_name": "worker/src/index.ts",
       "norm_label": "app"
     },
     {
@@ -1899,6 +1899,89 @@
       "community": 17,
       "community_name": "seed.ts",
       "norm_label": "waitlistsignups"
+    },
+    {
+      "label": "errors.test.ts",
+      "file_type": "code",
+      "source_file": "apps/worker/src/middleware/errors.test.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "apps_worker_src_middleware_errors_test",
+      "community": 26,
+      "community_name": "worker/src/index.ts",
+      "norm_label": "errors.test.ts"
+    },
+    {
+      "label": "ErrorEnvelope",
+      "file_type": "code",
+      "source_file": "apps/worker/src/middleware/errors.test.ts",
+      "source_location": "L6",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "apps_worker_src_middleware_errors_test_errorenvelope",
+      "community": 26,
+      "community_name": "worker/src/index.ts",
+      "norm_label": "errorenvelope"
+    },
+    {
+      "label": "buildApp()",
+      "file_type": "code",
+      "source_file": "apps/worker/src/middleware/errors.test.ts",
+      "source_location": "L8",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "apps_worker_src_middleware_errors_test_buildapp",
+      "community": 26,
+      "community_name": "worker/src/index.ts",
+      "norm_label": "buildapp()"
+    },
+    {
+      "label": "errors.ts",
+      "file_type": "code",
+      "source_file": "apps/worker/src/middleware/errors.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "apps_worker_src_middleware_errors",
+      "community": 26,
+      "community_name": "worker/src/index.ts",
+      "norm_label": "errors.ts"
+    },
+    {
+      "label": "CORRELATION_ID_HEADER",
+      "file_type": "code",
+      "source_file": "apps/worker/src/middleware/errors.ts",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "apps_worker_src_middleware_errors_correlation_id_header",
+      "community": 26,
+      "community_name": "worker/src/index.ts",
+      "norm_label": "correlation_id_header"
+    },
+    {
+      "label": "ErrorVariables",
+      "file_type": "code",
+      "source_file": "apps/worker/src/middleware/errors.ts",
+      "source_location": "L6",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "apps_worker_src_middleware_errors_errorvariables",
+      "community": 26,
+      "community_name": "worker/src/index.ts",
+      "norm_label": "errorvariables"
+    },
+    {
+      "label": "onError()",
+      "file_type": "code",
+      "source_file": "apps/worker/src/middleware/errors.ts",
+      "source_location": "L14",
+      "_callable": true,
+      "_origin": "ast",
+      "id": "apps_worker_src_middleware_errors_onerror",
+      "community": 26,
+      "community_name": "worker/src/index.ts",
+      "norm_label": "onerror()"
     },
     {
       "label": "worker/tsconfig.json",
@@ -3605,6 +3688,81 @@
       "norm_label": "demo-us-009.sh script"
     },
     {
+      "label": "demo-us-010-server.sh",
+      "file_type": "code",
+      "source_file": "scripts/demo-us-010-server.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "file"
+      },
+      "_origin": "ast",
+      "id": "scripts_demo_us_010_server",
+      "community": 52,
+      "community_name": "demo-us-010-server.sh",
+      "norm_label": "demo-us-010-server.sh"
+    },
+    {
+      "label": "demo-us-010-server.sh script",
+      "file_type": "code",
+      "source_file": "scripts/demo-us-010-server.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_entrypoint"
+      },
+      "_origin": "ast",
+      "id": "scripts_demo_us_010_server_sh__entry",
+      "community": 52,
+      "community_name": "demo-us-010-server.sh",
+      "norm_label": "demo-us-010-server.sh script"
+    },
+    {
+      "label": "cleanup()",
+      "file_type": "code",
+      "source_file": "scripts/demo-us-010-server.sh",
+      "source_location": "L10",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_function"
+      },
+      "_origin": "ast",
+      "id": "scripts_demo_us_010_server_cleanup",
+      "community": 52,
+      "community_name": "demo-us-010-server.sh",
+      "norm_label": "cleanup()"
+    },
+    {
+      "label": "demo-us-010.sh",
+      "file_type": "code",
+      "source_file": "scripts/demo-us-010.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "file"
+      },
+      "_origin": "ast",
+      "id": "scripts_demo_us_010",
+      "community": 53,
+      "community_name": "demo-us-010.sh",
+      "norm_label": "demo-us-010.sh"
+    },
+    {
+      "label": "demo-us-010.sh script",
+      "file_type": "code",
+      "source_file": "scripts/demo-us-010.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_entrypoint"
+      },
+      "_origin": "ast",
+      "id": "scripts_demo_us_010_sh__entry",
+      "community": 53,
+      "community_name": "demo-us-010.sh",
+      "norm_label": "demo-us-010.sh script"
+    },
+    {
       "label": "sync-secrets.sh",
       "file_type": "code",
       "source_file": "scripts/sync-secrets.sh",
@@ -4425,6 +4583,61 @@
       "community": 49,
       "community_name": "US-009 \u2014 Verify rollback path (Worker + migration)",
       "norm_label": "4. rollback procedure is documented in the readme"
+    },
+    {
+      "label": "US-010.md",
+      "file_type": "document",
+      "source_file": "docs/demos/US-010.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_demos_us_010",
+      "community": 34,
+      "community_name": "US-010 \u2014 Global error handler + structured logging with correlation ID",
+      "norm_label": "us-010.md"
+    },
+    {
+      "label": "US-010 \u2014 Global error handler + structured logging with correlation ID",
+      "file_type": "document",
+      "source_file": "docs/demos/US-010.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_demos_us_010_us_010_global_error_handler_structured_logging_with_correlation_id",
+      "community": 34,
+      "community_name": "US-010 \u2014 Global error handler + structured logging with correlation ID",
+      "norm_label": "us-010 \u2014 global error handler + structured logging with correlation id"
+    },
+    {
+      "label": "1. Correlation ID + global error handler are wired for every request, not one route",
+      "file_type": "document",
+      "source_file": "docs/demos/US-010.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "docs_demos_us_010_1_correlation_id_global_error_handler_are_wired_for_every_request_not_one_route",
+      "community": 34,
+      "community_name": "US-010 \u2014 Global error handler + structured logging with correlation ID",
+      "norm_label": "1. correlation id + global error handler are wired for every request, not one route"
+    },
+    {
+      "label": "2. Unhandled errors return the standard envelope with a correlation ID (never a raw stack trace), propagate a caller-supplied ID, and log route/correlation ID/user ID",
+      "file_type": "document",
+      "source_file": "docs/demos/US-010.md",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "docs_demos_us_010_2_unhandled_errors_return_the_standard_envelope_with_a_correlation_id_never_a_raw_stack_trace_propagate_a_caller_supplied_id_and_log_route_correlation_id_user_id",
+      "community": 34,
+      "community_name": "US-010 \u2014 Global error handler + structured logging with correlation ID",
+      "norm_label": "2. unhandled errors return the standard envelope with a correlation id (never a raw stack trace), propagate a caller-supplied id, and log route/correlation id/user id"
+    },
+    {
+      "label": "3. A live request against a running Worker: a caller-supplied correlation ID is echoed back on the response",
+      "file_type": "document",
+      "source_file": "docs/demos/US-010.md",
+      "source_location": "L37",
+      "_origin": "ast",
+      "id": "docs_demos_us_010_3_a_live_request_against_a_running_worker_a_caller_supplied_correlation_id_is_echoed_back_on_the_response",
+      "community": 34,
+      "community_name": "US-010 \u2014 Global error handler + structured logging with correlation ID",
+      "norm_label": "3. a live request against a running worker: a caller-supplied correlation id is echoed back on the response"
     },
     {
       "label": "Implement Story Skill",
@@ -6689,6 +6902,18 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "references",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/worker/src/middleware/errors.test.ts",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_middleware_errors_test_buildapp",
+      "target": "apps_worker_package_dependencies_hono"
+    },
+    {
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "apps/worker/package.json",
@@ -6819,7 +7044,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/worker/src/index.test.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_worker_src_index_test",
@@ -6827,10 +7052,34 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/index.test.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_index_test",
+      "target": "apps_worker_src_middleware_errors",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/index.test.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_index_test",
+      "target": "apps_worker_src_middleware_errors_correlation_id_header",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/worker/src/index.ts",
-      "source_location": "L9",
+      "source_location": "L11",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_worker_src_index",
@@ -6841,7 +7090,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/worker/src/index.ts",
-      "source_location": "L5",
+      "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_worker_src_index",
@@ -6853,7 +7102,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "apps/worker/src/index.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_worker_src_index",
@@ -6865,12 +7114,60 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "apps/worker/src/index.ts",
-      "source_location": "L3",
+      "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_worker_src_index",
       "target": "apps_worker_src_lib_db_client_createdb",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/index.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_index",
+      "target": "apps_worker_src_middleware_errors",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/index.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_index",
+      "target": "apps_worker_src_middleware_errors_correlation_id_header",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/index.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_index",
+      "target": "apps_worker_src_middleware_errors_errorvariables",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "indirect_call",
+      "context": "argument",
+      "confidence": "INFERRED",
+      "source_file": "apps/worker/src/index.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 0.8,
+      "source": "apps_worker_src_index",
+      "target": "apps_worker_src_middleware_errors_onerror"
     },
     {
       "relation": "contains",
@@ -7187,6 +7484,121 @@
       "_origin": "ast",
       "source": "db_seed",
       "target": "apps_worker_src_lib_db_schema_waitlist_signups_waitlistsignups",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/middleware/errors.test.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_middleware_errors_test",
+      "target": "apps_worker_src_middleware_errors",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/middleware/errors.test.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_middleware_errors_test",
+      "target": "apps_worker_src_middleware_errors_correlation_id_header",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/middleware/errors.test.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_middleware_errors_test",
+      "target": "apps_worker_src_middleware_errors_errorvariables",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/middleware/errors.test.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_middleware_errors_test",
+      "target": "apps_worker_src_middleware_errors_onerror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/middleware/errors.test.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_middleware_errors_test",
+      "target": "apps_worker_src_middleware_errors_test_buildapp",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/middleware/errors.test.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_middleware_errors_test",
+      "target": "apps_worker_src_middleware_errors_test_errorenvelope",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "indirect_call",
+      "context": "argument",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/worker/src/middleware/errors.test.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_middleware_errors_test_buildapp",
+      "target": "apps_worker_src_middleware_errors_onerror"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/middleware/errors.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_middleware_errors",
+      "target": "apps_worker_src_middleware_errors_correlation_id_header",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/middleware/errors.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_middleware_errors",
+      "target": "apps_worker_src_middleware_errors_errorvariables",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/worker/src/middleware/errors.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_worker_src_middleware_errors",
+      "target": "apps_worker_src_middleware_errors_onerror",
       "confidence_score": 1.0
     },
     {
@@ -8682,6 +9094,39 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/demo-us-010-server.sh",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "scripts_demo_us_010_server",
+      "target": "scripts_demo_us_010_server_cleanup",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/demo-us-010-server.sh",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "scripts_demo_us_010_server",
+      "target": "scripts_demo_us_010_server_sh__entry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/demo-us-010.sh",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "scripts_demo_us_010",
+      "target": "scripts_demo_us_010_sh__entry",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "scripts/sync-secrets.sh",
@@ -9372,6 +9817,50 @@
       "_origin": "ast",
       "source": "docs_demos_us_009_us_009_verify_rollback_path_worker_migration",
       "target": "docs_demos_us_009_4_rollback_procedure_is_documented_in_the_readme",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-010.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_010",
+      "target": "docs_demos_us_010_us_010_global_error_handler_structured_logging_with_correlation_id",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-010.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_010_us_010_global_error_handler_structured_logging_with_correlation_id",
+      "target": "docs_demos_us_010_1_correlation_id_global_error_handler_are_wired_for_every_request_not_one_route",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-010.md",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_010_us_010_global_error_handler_structured_logging_with_correlation_id",
+      "target": "docs_demos_us_010_2_unhandled_errors_return_the_standard_envelope_with_a_correlation_id_never_a_raw_stack_trace_propagate_a_caller_supplied_id_and_log_route_correlation_id_user_id",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/demos/US-010.md",
+      "source_location": "L37",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_demos_us_010_us_010_global_error_handler_structured_logging_with_correlation_id",
+      "target": "docs_demos_us_010_3_a_live_request_against_a_running_worker_a_caller_supplied_correlation_id_is_echoed_back_on_the_response",
       "confidence_score": 1.0
     },
     {
@@ -10212,5 +10701,5 @@
       "source_file": "docs/data-model.md"
     }
   ],
-  "built_at_commit": "badf5b35e13fffc9487e1665cbff4593a4a7f9c6"
+  "built_at_commit": "9bd9de10e2f02e718d32ef277db0d4d16cbd15a0"
 }

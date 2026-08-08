@@ -16,7 +16,13 @@ through to static-asset serving. All routes below are relative to `/api`.
 - **share-link token** — `/shared/:token`; no session. Middleware resolves the token
   against `share_links`, checks `revoked_at IS NULL` and expiry.
 
-**Error envelope**: `{ "error": { "code": "snake_case_code", "message": "..." } }`
+**Error envelope**: `{ "error": { "code": "snake_case_code", "message": "...", "correlationId": "..." } }`
+
+**Correlation ID**: every request carries one — read from an incoming `X-Correlation-Id`
+header if present (so a client-reported ID threads through), otherwise generated.
+Echoed back on the `X-Correlation-Id` response header and included in both the error
+envelope and the structured server-side log line for any unhandled error, so an incident
+is debuggable from logs without needing to reproduce it.
 
 **Status codes**: 400 validation, 401 auth, 402 usage/tier limit, 403 forbidden,
 404 not found / unknown share token, 409 conflict, 410 share link revoked,
