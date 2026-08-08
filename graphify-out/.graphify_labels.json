@@ -45,5 +45,7 @@
   "43": "demo-us-006-plant-secret.sh",
   "44": "US-007 — Deploy pipeline: migrate + wrangler deploy on merge, PR previews, secrets configured",
   "45": "put-worker-secrets.mjs",
-  "46": "demo-us-007.sh"
+  "46": "demo-us-007.sh",
+  "47": "US-008 — Bootstrap first admin account",
+  "48": "demo-us-008.sh"
 }

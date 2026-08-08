@@ -1,16 +1,16 @@
-# Graph Report - Alvus-AI  (2026-08-06)
+# Graph Report - Alvus-AI  (2026-08-07)
 
 ## Corpus Check
-- 74 files · ~32,847 words
+- 78 files · ~33,786 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 406 nodes · 413 edges · 47 communities (34 shown, 13 thin omitted)
+- 421 nodes · 434 edges · 49 communities (35 shown, 14 thin omitted)
 - Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 22 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f9905b5d`
+- Built from commit: `6b174bf2`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -58,10 +58,12 @@
 - US-007 — Deploy pipeline: migrate + wrangler deploy on merge, PR previews, secrets configured
 - put-worker-secrets.mjs
 - demo-us-007.sh
+- US-008 — Bootstrap first admin account
+- demo-us-008.sh
 
 ## God Nodes (most connected - your core abstractions)
-1. `compilerOptions` - 12 edges
-2. `scripts` - 11 edges
+1. `scripts` - 12 edges
+2. `compilerOptions` - 12 edges
 3. `US-007 — Deploy pipeline: migrate + wrangler deploy on merge, PR previews, secrets configured` - 9 edges
 4. `API Surface doc` - 9 edges
 5. `Security Model doc` - 9 edges
@@ -91,7 +93,7 @@
 - **Workflows that dispatch a Claude Code skill via claude-code-action** — github_workflows_story_start, github_workflows_pr_review, github_workflows_pr_fix, github_workflows_production_prep [EXTRACTED 1.00]
 - **Data model entities owned by projects (ON DELETE CASCADE from projects.id)** — docs_data_model_projects, docs_data_model_project_documents, docs_data_model_project_sources, docs_data_model_uploaded_files, docs_data_model_share_links, docs_data_model_feedback_passes [EXTRACTED 1.00]
 
-## Communities (47 total, 13 thin omitted)
+## Communities (49 total, 14 thin omitted)
 
 ### Community 0 - "PR Review Skill"
 Cohesion: 0.12
@@ -150,8 +152,8 @@ Cohesion: 0.12
 Nodes (15): dependencies, @alvus-ai/shared, react, react-dom, @alvus-ai/shared, name, private, scripts (+7 more)
 
 ### Community 17 - "seed.ts"
-Cohesion: 0.12
-Nodes (18): app, Bindings, createDb(), Db, authSchema, authUsers, tierLimits, users (+10 more)
+Cohesion: 0.11
+Nodes (21): app, Bindings, createDb(), Db, authSchema, authUsers, tierLimits, users (+13 more)
 
 ### Community 18 - "compilerOptions"
 Cohesion: 0.13
@@ -159,7 +161,7 @@ Nodes (14): compilerOptions, jsx, lib, noEmit, types, extends, include, ES2022 (
 
 ### Community 19 - "scripts"
 Cohesion: 0.10
-Nodes (19): name, private, scripts, build, db:generate, db:migrate, db:push, db:seed (+11 more)
+Nodes (20): name, private, scripts, build, db:bootstrap-admin, db:generate, db:migrate, db:push (+12 more)
 
 ### Community 20 - "worker/tsconfig.json"
 Cohesion: 0.15
@@ -213,10 +215,14 @@ Nodes (9): 1. Every PR gets a Cloudflare Workers preview: deploy-preview.yml upl
 Cohesion: 0.50
 Nodes (3): env, exampleLines, runtimeKeys
 
+### Community 47 - "US-008 — Bootstrap first admin account"
+Cohesion: 0.29
+Nodes (6): 1. Create a normal Supabase Auth account for the operator -- signing up never requires an admin to exist, 2. Confirm no users/waitlist_signups row exists yet for that account (this script creates them if missing), 3. Promote it to admin -- a CLI script run directly against DATABASE_URL, never an HTTP endpoint, 4. Confirm users.role=admin, users.status=approved, and waitlist_signups is now approved too, 5. Confirm re-running is idempotent (no duplicate-key errors, same result), US-008 — Bootstrap first admin account
+
 ## Knowledge Gaps
-- **211 isolated node(s):** `db`, `story`, `issues`, `rounds`, `db` (+206 more)
+- **220 isolated node(s):** `db`, `story`, `issues`, `rounds`, `db` (+215 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **13 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **14 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -230,7 +236,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Are the 7 inferred relationships involving `API Surface doc` (e.g. with `project_sources table` and `projects table`) actually correct?**
   _`API Surface doc` has 7 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `db`, `story`, `issues` to the rest of the system?**
-  _211 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _220 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `PR Review Skill` be split into smaller, more focused modules?**
   _Cohesion score 0.12 - nodes in this community are weakly interconnected._
 - **Should `API Surface doc` be split into smaller, more focused modules?**
