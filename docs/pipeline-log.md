@@ -38,3 +38,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-06T23:40:00.000Z | US-007 | in_progress | Branch feature/us-007-deploy-pipeline-migrate-wrangler-deploy-on-merge-pr-previews-secrets-configured created; wiring deploy-on-merge (migrate + wrangler deploy + worker secrets) and per-PR preview deploy workflows.
 2026-08-07T00:12:23.810Z | US-007 | done | PR #11 merged after 1 review round(s)
 2026-08-07T04:34:54Z | US-008 | in_progress | Branch feature/us-008-bootstrap-first-admin-account created; starting bootstrap-admin CLI script.
+2026-08-07T12:13:15.000Z | US-008 | in_progress | Reconciliation: the in_progress marker from 04:34:54 never reached main (push gap), so dispatch-next re-selected US-008 as pending and re-dispatched; implement-story found the branch/PR already existed and wrote this marker to catch main up rather than redoing the work.

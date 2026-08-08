@@ -25,7 +25,10 @@ const dryRun = process.env.DRY_RUN === 'true';
 // text names no explicit reset time.
 const windowHours = Number(process.env.QUOTA_WINDOW_HOURS ?? 5);
 
-const sh = (cmd, args) => execFileSync(cmd, args, { encoding: 'utf8' }).trim();
+// Default execFileSync maxBuffer is 1MB. `actions/runs?per_page=100` alone now returns
+// ~1.19MB (100 full run objects), which crashed every tick from 2026-08-07 13:48 UTC
+// onward with `spawnSync gh ENOBUFS`. Run history only grows, so give real headroom.
+const sh = (cmd, args) => execFileSync(cmd, args, { encoding: 'utf8', maxBuffer: 20 * 1024 * 1024 }).trim();
 
 /**
  * Did the last Claude-backed run die on quota, and is that window still closed?
@@ -290,7 +293,11 @@ try {
   // actual stuck PR unlabelled.
   if (prNumber) {
     sh('gh', ['pr', 'comment', String(prNumber), '--repo', repo, '--body', note]);
-    sh('gh', ['pr', 'edit', String(prNumber), '--repo', repo, '--add-label', 'needs-human']);
+    // Not `gh pr edit --add-label`: it builds a GraphQL query that also fetches
+    // reviewRequests' team `name`/`slug` (and assignee `login`), which need
+    // read:org/read:discussion scopes this token doesn't have — unrelated to the
+    // label itself. The REST labels endpoint sidesteps that query entirely.
+    sh('gh', ['api', `repos/${repo}/issues/${prNumber}/labels`, '-f', 'labels[]=needs-human']);
   } else {
     sh('gh', ['issue', 'create', '--repo', repo, '--title', `Pipeline stalled: ${story.id}`, '--label', 'needs-human', '--body', note]);
   }
