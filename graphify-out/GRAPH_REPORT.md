@@ -1,16 +1,16 @@
 # Graph Report - Alvus-AI  (2026-08-08)
 
 ## Corpus Check
-- 82 files · ~35,652 words
+- 87 files · ~36,806 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 433 nodes · 444 edges · 52 communities (36 shown, 16 thin omitted)
-- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 22 edges (avg confidence: 0.84)
+- 450 nodes · 468 edges · 54 communities (37 shown, 17 thin omitted)
+- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 24 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `badf5b35`
+- Built from commit: `9bd9de10`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -31,7 +31,7 @@
 - Notify workflow
 - worker/package.json
 - devDependencies
-- web/package.json
+- devDependencies
 - seed.ts
 - compilerOptions
 - scripts
@@ -41,11 +41,11 @@
 - shared/tsconfig.json
 - App.tsx
 - US-001 — Scaffold monorepo (frontend, Worker, shared package, tooling)
-- index.test.ts
+- worker/src/index.ts
 - demo-us-001-server.sh
 - US-002 — Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema
 - demo-us-002.sh
-- devDependencies
+- US-010 — Global error handler + structured logging with correlation ID
 - US-003 — Seed the tier_limits catalog and dev/CI fixture users
 - US-004 — Health check reports live database connectivity
 - demo-us-004-server.sh
@@ -63,6 +63,8 @@
 - US-009 — Verify rollback path (Worker + migration)
 - demo-us-009-rollback-worker.sh
 - demo-us-009.sh
+- demo-us-010-server.sh
+- demo-us-010.sh
 
 ## God Nodes (most connected - your core abstractions)
 1. `scripts` - 12 edges
@@ -96,7 +98,7 @@
 - **Workflows that dispatch a Claude Code skill via claude-code-action** — github_workflows_story_start, github_workflows_pr_review, github_workflows_pr_fix, github_workflows_production_prep [EXTRACTED 1.00]
 - **Data model entities owned by projects (ON DELETE CASCADE from projects.id)** — docs_data_model_projects, docs_data_model_project_documents, docs_data_model_project_sources, docs_data_model_uploaded_files, docs_data_model_share_links, docs_data_model_feedback_passes [EXTRACTED 1.00]
 
-## Communities (52 total, 16 thin omitted)
+## Communities (54 total, 17 thin omitted)
 
 ### Community 0 - "PR Review Skill"
 Cohesion: 0.12
@@ -150,13 +152,13 @@ Nodes (27): dependencies, @alvus-ai/shared, drizzle-orm, hono, postgres, devDepe
 Cohesion: 0.08
 Nodes (25): dotenv, drizzle-kit, eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals, devDependencies (+17 more)
 
-### Community 16 - "web/package.json"
-Cohesion: 0.12
-Nodes (15): dependencies, @alvus-ai/shared, react, react-dom, @alvus-ai/shared, name, private, scripts (+7 more)
+### Community 16 - "devDependencies"
+Cohesion: 0.06
+Nodes (30): dependencies, @alvus-ai/shared, react, react-dom, devDependencies, tailwindcss, @tailwindcss/vite, @types/react (+22 more)
 
 ### Community 17 - "seed.ts"
-Cohesion: 0.11
-Nodes (21): app, Bindings, createDb(), Db, authSchema, authUsers, tierLimits, users (+13 more)
+Cohesion: 0.13
+Nodes (19): createDb(), Db, authSchema, authUsers, tierLimits, users, waitlistSignups, db (+11 more)
 
 ### Community 18 - "compilerOptions"
 Cohesion: 0.13
@@ -190,13 +192,17 @@ Nodes (4): App(), rootEl, CITATION_FORMATS, CitationFormat
 Cohesion: 0.29
 Nodes (6): 1. Typecheck every workspace, 2. Lint the whole repo, 3. Build the frontend for the Worker's static-assets binding, 4. Run the worker's test suite, 5. Boot wrangler dev and confirm the placeholder page and the API both respond, US-001 — Scaffold monorepo (frontend, Worker, shared package, tooling)
 
+### Community 26 - "worker/src/index.ts"
+Cohesion: 0.29
+Nodes (8): app, Bindings, { execute }, CORRELATION_ID_HEADER, ErrorVariables, onError(), buildApp(), ErrorEnvelope
+
 ### Community 31 - "US-002 — Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema"
 Cohesion: 0.33
 Nodes (5): 1. Boot the local Supabase stack (dev/CI parity), 2. Confirm the source-uploads Storage bucket is private (RLS-ready, no public read until owner-scoped policies land in US-014/US-017), 3. Apply the baseline schema via drizzle-kit, 4. Confirm users, waitlist_signups, and tier_limits exist, including the users -> auth.users FK, US-002 — Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema
 
-### Community 34 - "devDependencies"
-Cohesion: 0.13
-Nodes (15): devDependencies, tailwindcss, @tailwindcss/vite, @types/react, @types/react-dom, typescript, vite, @vitejs/plugin-react (+7 more)
+### Community 34 - "US-010 — Global error handler + structured logging with correlation ID"
+Cohesion: 0.40
+Nodes (4): 1. Correlation ID + global error handler are wired for every request, not one route, 2. Unhandled errors return the standard envelope with a correlation ID (never a raw stack trace), propagate a caller-supplied ID, and log route/correlation ID/user ID, 3. A live request against a running Worker: a caller-supplied correlation ID is echoed back on the response, US-010 — Global error handler + structured logging with correlation ID
 
 ### Community 35 - "US-003 — Seed the tier_limits catalog and dev/CI fixture users"
 Cohesion: 0.29
@@ -227,24 +233,24 @@ Cohesion: 0.33
 Nodes (5): 1. A deliberately-broken deploy is rolled back via wrangler rollback [deployment-id], and the command output demonstrates the previous version serving again (exercised against a disposable scratch Worker, never the real alvus-ai production Worker, so this proof can't cause a real outage), 2. A hand-written down-migration exists for the one applied migration (drizzle/migrations/0000_simple_blockbuster.sql), 3. The down-migration runs cleanly against the real DATABASE_URL (wrapped in BEGIN/ROLLBACK so this proof does not actually drop the tables), 4. Rollback procedure is documented in the README, US-009 — Verify rollback path (Worker + migration)
 
 ## Knowledge Gaps
-- **225 isolated node(s):** `db`, `story`, `issues`, `rounds`, `db` (+220 more)
+- **231 isolated node(s):** `db`, `story`, `issues`, `rounds`, `db` (+226 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **16 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **17 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `devDependencies` connect `devDependencies` to `scripts`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **Why does `Security Model doc` connect `API Surface doc` to `PR Review Skill`?**
-  _High betweenness centrality (0.007) - this node is a cross-community bridge._
-- **Why does `Production Prep Skill` connect `PR Review Skill` to `API Surface doc`?**
-  _High betweenness centrality (0.006) - this node is a cross-community bridge._
+- **Why does `hono` connect `worker/package.json` to `worker/src/index.ts`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+- **Why does `buildApp()` connect `worker/src/index.ts` to `worker/package.json`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
 - **Are the 7 inferred relationships involving `API Surface doc` (e.g. with `project_sources table` and `projects table`) actually correct?**
   _`API Surface doc` has 7 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `db`, `story`, `issues` to the rest of the system?**
-  _225 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _231 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `PR Review Skill` be split into smaller, more focused modules?**
   _Cohesion score 0.12 - nodes in this community are weakly interconnected._
 - **Should `API Surface doc` be split into smaller, more focused modules?**
   _Cohesion score 0.12681159420289856 - nodes in this community are weakly interconnected._
+- **Should `watchdog.mjs` be split into smaller, more focused modules?**
+  _Cohesion score 0.11052631578947368 - nodes in this community are weakly interconnected._

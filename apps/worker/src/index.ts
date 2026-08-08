@@ -1,12 +1,17 @@
 import { sql } from 'drizzle-orm';
 import { Hono } from 'hono';
+import { requestId } from 'hono/request-id';
 import { createDb } from './lib/db/client';
+import { CORRELATION_ID_HEADER, onError, type ErrorVariables } from './middleware/errors';
 
 type Bindings = {
   DATABASE_URL: string;
 };
 
-const app = new Hono<{ Bindings: Bindings }>();
+const app = new Hono<{ Bindings: Bindings; Variables: ErrorVariables }>();
+
+app.use('*', requestId({ headerName: CORRELATION_ID_HEADER }));
+app.onError(onError);
 
 app.get('/api/health', async (c) => {
   // Deliberately not closed: one connection per request against Supabase's
