@@ -1,9 +1,24 @@
 import type { Context } from 'hono';
 import type { RequestIdVariables } from 'hono/request-id';
+import type { ContentfulStatusCode } from 'hono/utils/http-status';
 
 export const CORRELATION_ID_HEADER = 'X-Correlation-Id';
 
 export type ErrorVariables = RequestIdVariables & { userId?: string };
+
+// Typed 4xx (or other non-500) error a route can throw to get the standard
+// envelope back with its own status/code/message instead of falling through to
+// onError's generic 500 -- see docs/api.md's error envelope + status code table.
+export class AppError extends Error {
+  constructor(
+    public status: ContentfulStatusCode,
+    public code: string,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'AppError';
+  }
+}
 
 // Global catch-all for anything a route doesn't handle itself: never leak a raw
 // stack trace to the client, but keep it (plus route/user context) in the
@@ -13,6 +28,19 @@ export type ErrorVariables = RequestIdVariables & { userId?: string };
 // `app.onError` regardless of what Bindings the app declares.
 export const onError = <E extends { Variables: ErrorVariables }>(err: Error, c: Context<E>) => {
   const correlationId = c.get('requestId');
+
+  if (err instanceof AppError) {
+    return c.json(
+      {
+        error: {
+          code: err.code,
+          message: err.message,
+          correlationId,
+        },
+      },
+      err.status,
+    );
+  }
 
   console.error(
     JSON.stringify({

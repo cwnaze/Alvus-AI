@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@alvus-ai/shared": "*",
+    "@supabase/supabase-js": "^2.112.1",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.13.0",
     "postgres": "^3.4.9"
