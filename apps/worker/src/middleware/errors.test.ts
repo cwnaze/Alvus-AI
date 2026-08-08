@@ -16,6 +16,9 @@ function buildApp() {
     c.set('userId', 'user-123');
     throw new Error('kaboom');
   });
+  app.get('/boom/:id', () => {
+    throw new Error('kaboom');
+  });
   return app;
 }
 
@@ -61,6 +64,18 @@ describe('global error handler', () => {
       message: 'kaboom',
     });
     expect(typeof logged.stack).toBe('string');
+    consoleError.mockRestore();
+  });
+
+  it('logs the matched route pattern, not the resolved path, so param values are never embedded in the log line', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const app = buildApp();
+    await app.request('/boom/user-123');
+
+    const call = consoleError.mock.calls[0];
+    if (!call) throw new Error('expected console.error to have been called');
+    const logged = JSON.parse(call[0] as string);
+    expect(logged.route).toBe('/boom/:id');
     consoleError.mockRestore();
   });
 

@@ -19,7 +19,7 @@ export const onError = <E extends { Variables: ErrorVariables }>(err: Error, c: 
       level: 'error',
       correlationId,
       method: c.req.method,
-      route: c.req.path,
+      route: c.req.routePath,
       userId: c.get('userId') ?? null,
       message: err.message,
       stack: err.stack,
