@@ -338,7 +338,7 @@
         "US-008",
         "US-010"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "browser",
       "verification": {
         "commands": [
