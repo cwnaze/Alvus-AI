@@ -43,9 +43,13 @@ jobs:
           # implement-story runs npm/wrangler/drizzle/playwright/git/gh; without this
           # every one of those calls is silently denied and the job "succeeds" having
           # done nothing (found bootstrapping US-001: 11 permission denials, 0 output).
-          # 200, not the default: a full story is implement + demo spec + local
-          # verification, and 120 turns ran out mid-story on US-004. Exhausting turns
-          # burns the whole run and forces a resume that re-reads all the same context,
-          # which costs more than the extra turns would have. The 60m job timeout is the
-          # real ceiling; that run used 16m.
-          claude_args: --max-turns 200 --allowedTools "Bash,Edit,Write,Glob,Grep"
+          # 300, not 200: US-011 (auth backend + JWT middleware + admin routes + React
+          # pages + Playwright demo) hit the 200-turn wall twice in a row (2026-08-08,
+          # 201 turns / ~33-37m / ~$13-15 each, no PR opened either time) while the 60m
+          # job timeout still had 25m+ of headroom unused. Exhausting turns burns the
+          # whole run and forces a resume that re-reads all the same context, which
+          # costs more than the extra turns would have -- and a third identical failure
+          # trips the watchdog's retry breaker and escalates to needs-human instead of
+          # finishing the story. Observed rate is ~6 turns/min, so 300 targets ~50-55m of
+          # Claude runtime, leaving buffer under the 60m job timeout for setup/post steps.
+          claude_args: --max-turns 300 --allowedTools "Bash,Edit,Write,Glob,Grep"
