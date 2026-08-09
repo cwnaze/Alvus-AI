@@ -54,3 +54,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-09T00:26:22.000Z | US-012 | in_progress | Branch feature/us-012-password-reset-flow created; building password reset request/confirm endpoints (Supabase resetPasswordForEmail + verifyOtp recovery token) and frontend forgot/reset password pages.
 2026-08-09T01:27:23.008Z | US-012 | done | PR #26 merged after 2 review round(s)
 2026-08-09T01:35:00.000Z | US-013 | in_progress | Branch feature/us-013-admin-user-directory created; building admin user directory (search/filter by status+tier, view basic info, revoke an approved user's access).
+2026-08-09T02:05:00.000Z | US-013 | pending | Crash resume: the 01:35:00 in_progress marker's story-start run died before creating the branch or PR on remote (no local/remote branch found); no work exists to resume, so reset to pending for clean re-selection.
