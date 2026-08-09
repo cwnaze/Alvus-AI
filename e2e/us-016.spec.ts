@@ -115,22 +115,39 @@ test('US-016: analyze a candidate source and select or reject it', async ({ page
   await expect(page.getByTestId(/^bibliography-/)).toContainText('Climate Policy Rhetoric in the 21st Century');
   await demo.step('Selecting an analyzed source adds it to the project bibliography');
 
-  // 7. Rejecting a candidate dismisses it from the results.
+  // 7. Selecting a candidate that was never analyzed must not silently drop
+  // it -- it still needs a citation for the bibliography, computed from the
+  // same source metadata `analyze` uses rather than left blank pending an AI
+  // call that may never happen.
   const rhetoricalRow = sourceRow(page, 'Rhetorical Strategies in Environmental Advocacy');
-  await rhetoricalRow.getByRole('button', { name: 'Reject' }).click();
+  await expect(rhetoricalRow.getByText('Strengths:')).toHaveCount(0);
+  await rhetoricalRow.getByRole('button', { name: 'Add to bibliography' }).click();
   await expect(sourceRow(page, 'Rhetorical Strategies in Environmental Advocacy')).toHaveCount(0);
+  const rhetoricalEntry = page.getByTestId(/^bibliography-/).filter({ hasText: 'Rhetorical Strategies in Environmental Advocacy' });
+  await expect(rhetoricalEntry).toBeVisible();
+  await demo.step('Selecting a candidate adds it to the bibliography even without a prior analysis');
 
-  // 8. Re-running the same search never resurfaces the rejected candidate,
-  // while an undecided one is still offered.
+  // 8. Rejecting a candidate dismisses it from the results, and re-running
+  // the same search never resurfaces it -- nor a source already selected
+  // into the bibliography, which is equally decided, just the other way.
+  await discourseRow.getByRole('button', { name: 'Reject' }).click();
+  await expect(sourceRow(page, 'Discourse Analysis Methods in Policy Studies')).toHaveCount(0);
+
   await page.getByRole('button', { name: 'Search for sources' }).click();
-  await expect(page.getByText('Discourse Analysis Methods in Policy Studies')).toBeVisible();
-  await expect(page.getByText('Rhetorical Strategies in Environmental Advocacy')).not.toBeVisible();
-  await demo.step('Rejecting a candidate keeps it from reappearing on a later search');
+  await expect(page.getByText('No matching sources found')).toBeVisible();
+  await expect(sourceRow(page, 'Discourse Analysis Methods in Policy Studies')).toHaveCount(0);
+  await expect(sourceRow(page, 'Rhetorical Strategies in Environmental Advocacy')).toHaveCount(0);
+  await expect(sourceRow(page, 'Climate Policy Rhetoric in the 21st Century')).toHaveCount(0);
+  await demo.step('Rejecting a candidate, or having already selected one, keeps it from reappearing on a later search');
 
   // 9. Deselecting a selected source removes it from the bibliography and
-  // returns it to the candidate pool (state=candidate), rather than deleting it.
-  await page.getByRole('button', { name: 'Remove from bibliography' }).click();
-  await expect(page.getByText('No sources selected yet.')).toBeVisible();
+  // returns it to the candidate pool (state=candidate), rather than deleting
+  // it -- "Rhetorical Strategies" staying selected shows this only affects
+  // the one source being deselected.
+  const climateEntry = page.getByTestId(/^bibliography-/).filter({ hasText: 'Climate Policy Rhetoric in the 21st Century' });
+  await climateEntry.getByRole('button', { name: 'Remove from bibliography' }).click();
+  await expect(climateEntry).toHaveCount(0);
+  await expect(rhetoricalEntry).toBeVisible();
   const candidatesRes = await page.request.get(`/api/projects/${projectId}/sources?status=candidate`, {
     headers: { Authorization: `Bearer ${demoToken}` },
   });

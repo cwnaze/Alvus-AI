@@ -234,6 +234,19 @@ describe('POST /search', () => {
     expect(await res.json()).toEqual({ candidates: [], count: 0 });
   });
 
+  it('excludes an already-selected candidate so it does not duplicate the bibliography row', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+    searchSources.mockResolvedValueOnce({ candidates: [rawCandidate()], providersUnreachable: false });
+    upsertExternalWork.mockResolvedValueOnce(externalWorkRow());
+    findOrCreateProjectSource.mockResolvedValueOnce({ id: PROJECT_SOURCE_ID, state: 'selected' });
+
+    const res = await request(`/${PROJECT_ID}/search`, { method: 'POST' });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ candidates: [], count: 0 });
+  });
+
   it('502s when every provider is unreachable', async () => {
     asCaller();
     getProjectById.mockResolvedValueOnce(projectRow());
@@ -590,17 +603,37 @@ describe('POST /:sourceId/analyze', () => {
 describe('POST /:sourceId/select', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('transitions a candidate to selected', async () => {
+  it('transitions a candidate to selected and computes its citation from work metadata, even when never analyzed', async () => {
     asCaller();
     getProjectById.mockResolvedValueOnce(projectRow());
-    getProjectSourceById.mockResolvedValueOnce(projectSourceRow({ state: 'candidate' }));
+    getProjectSourceById.mockResolvedValueOnce(projectSourceRow({ state: 'candidate', citationString: null, analyzedAt: null }));
     updateProjectSourceState.mockResolvedValueOnce(projectSourceRow({ state: 'selected' }));
 
     const res = await request(`/${PROJECT_ID}/${PROJECT_SOURCE_ID}/select`, { method: 'POST' });
 
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ state: 'selected' });
-    expect(updateProjectSourceState).toHaveBeenCalledWith(expect.anything(), { id: PROJECT_SOURCE_ID, state: 'selected', selectedAt: expect.any(Date) });
+    expect(updateProjectSourceState).toHaveBeenCalledWith(expect.anything(), {
+      id: PROJECT_SOURCE_ID,
+      state: 'selected',
+      selectedAt: expect.any(Date),
+      citationString: 'Doe, Jane, "Climate Policy Rhetoric in the 21st Century.", Journal of Environmental Communication, 2020.',
+    });
+  });
+
+  it('keeps the existing citation when the source was already analyzed', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+    getProjectSourceById.mockResolvedValueOnce(projectSourceRow({ state: 'candidate', citationString: 'Already analyzed citation' }));
+    updateProjectSourceState.mockResolvedValueOnce(projectSourceRow({ state: 'selected' }));
+
+    const res = await request(`/${PROJECT_ID}/${PROJECT_SOURCE_ID}/select`, { method: 'POST' });
+
+    expect(res.status).toBe(200);
+    expect(updateProjectSourceState).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ citationString: 'Already analyzed citation' }),
+    );
   });
 });
 

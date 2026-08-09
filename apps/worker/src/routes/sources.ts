@@ -185,8 +185,11 @@ sources.post('/search', async (c) => {
     const projectSource = await findOrCreateProjectSource(db, { projectId: project.id, externalWorkId: work.id });
     // A previously rejected candidate stays dismissed across re-searches
     // (docs/api.md: "not re-suggested on later search") -- findOrCreateProjectSource
-    // returns the existing row as-is, so this is the one place that has to filter it.
-    if (projectSource.state === 'rejected') continue;
+    // returns the existing row as-is, so this is the one place that has to
+    // filter it. A `selected` source is already in the bibliography, shown
+    // below with its own "Remove from bibliography" action, so it's excluded
+    // here for the same reason -- it's already decided, not a fresh candidate.
+    if (projectSource.state === 'rejected' || projectSource.state === 'selected') continue;
     candidates.push(toSourceCandidate(projectSource.id, work));
   }
 
@@ -331,7 +334,25 @@ sources.post('/:sourceId/select', async (c) => {
   const project = await loadOwnedProject(db, c.req.param('projectId') ?? '', authUser.id);
   const source = await loadProjectSource(db, project.id, c.req.param('sourceId'));
 
-  const updated = await updateProjectSourceState(db, { id: source.id, state: 'selected', selectedAt: new Date() });
+  // Bibliography membership must not silently depend on a prior /analyze call
+  // (docs/tdd.md Flow 1 step 7 treats it as a derived view over `selected`
+  // sources with no separate authoring step). Citation fields for a
+  // discovered source already come from external_works metadata rather than
+  // the LLM, so compute the citation here too instead of leaving
+  // `citationString` null -- and therefore invisible from the bibliography --
+  // until analysis happens to have run first.
+  const citationString =
+    source.citationString ??
+    (source.work
+      ? formatCitation(project.citationFormat, {
+          authors: source.work.authors,
+          title: source.work.title,
+          year: source.work.publicationYear,
+          venue: source.work.venue,
+        })
+      : undefined);
+
+  const updated = await updateProjectSourceState(db, { id: source.id, state: 'selected', selectedAt: new Date(), citationString });
   const response: SourceStateResponse = { state: updated.state };
   return c.json(response, 200);
 });

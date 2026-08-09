@@ -110,11 +110,16 @@ export async function getProjectSourceById(
 
 export async function updateProjectSourceState(
   db: Db,
-  params: { id: string; state: ProjectSourceState; selectedAt: Date | null },
+  params: { id: string; state: ProjectSourceState; selectedAt: Date | null; citationString?: string },
 ): Promise<ProjectSourceRow> {
   const [updated] = await db
     .update(projectSources)
-    .set({ state: params.state, selectedAt: params.selectedAt, updatedAt: new Date() })
+    .set({
+      state: params.state,
+      selectedAt: params.selectedAt,
+      ...(params.citationString !== undefined ? { citationString: params.citationString } : {}),
+      updatedAt: new Date(),
+    })
     .where(eq(projectSources.id, params.id))
     .returning();
   if (!updated) throw new Error(`updateProjectSourceState: project_source ${params.id} vanished mid-update`);
