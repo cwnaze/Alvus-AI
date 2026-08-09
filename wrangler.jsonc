@@ -7,7 +7,14 @@
   "compatibility_date": "2024-09-23",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
-    "directory": "apps/web/dist"
+    "directory": "apps/web/dist",
+    // The frontend is a client-side-routed SPA (US-011 added react-router
+    // pages like /signup, /login) -- without this, a path with no matching
+    // built file 404s instead of falling back to index.html. /api/* is routed
+    // to the Worker unconditionally so it's never shadowed by a same-named
+    // static file.
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
   },
   // pipeline.json's serve commands run `wrangler dev`/`wrangler deploy` with no
   // prior build step, so the frontend has to be built as part of wrangler's own

@@ -42,6 +42,7 @@ the billing tier — tier lives on `subscriptions`.
 |---|---|---|---|---|---|
 | POST | `/auth/signup` | unauthenticated | `{ email, password }` | `201 { message: "pending_approval" }` | `400`, `409` email exists, `429` |
 | POST | `/auth/login` | unauthenticated | `{ email, password }` | `200 { access_token, refresh_token, user }` — always 200 for correct credentials regardless of waitlist status (Supabase issues the token before our app-level status applies); frontend branches on `user.status`. Token only works for `/auth/me`/`/auth/logout` until approved — middleware rejects everything else. | `401`, `429` |
+| POST | `/auth/refresh` | unauthenticated (bears a refresh token, not an access token) | `{ refresh_token }` | `200 { access_token, refresh_token }` — rotates the refresh token | `401 invalid_refresh_token` |
 | POST | `/auth/logout` | authenticated | — | `204` | `401` |
 | POST | `/auth/password-reset/request` | unauthenticated | `{ email }` | `202 {}` (always) | `429` |
 | POST | `/auth/password-reset/confirm` | unauthenticated | `{ token, new_password }` | `200 {}` | `400` |
