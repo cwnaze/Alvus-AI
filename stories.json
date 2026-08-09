@@ -405,7 +405,7 @@
       "dependsOn": [
         "US-011"
       ],
-      "status": "in_progress",
+      "status": "done",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -420,10 +420,10 @@
       },
       "demo": "docs/demos/US-013.md",
       "branch": "feature/us-013-admin-user-directory",
-      "prNumber": null,
-      "issueNumber": null,
-      "reviewRounds": 0,
-      "notes": ""
+      "prNumber": 28,
+      "issueNumber": 29,
+      "reviewRounds": 2,
+      "notes": "No subscriptions table exists yet (that is US-023/024's Stripe billing work) -- until then no account can be on a paid plan, so GET /admin/users returns tier: \"free\" for every user (a filter for plus/pro is a valid but always-empty query, not an error). Revoke reuses the waitlist_signups-mirrors-users.status invariant from docs/data-model.md via a new revokeUserAccess query, gated on the target currently being approved (409 not_approved otherwise). Also fixed a pre-existing playwright.config.ts gap: fullyParallel:false only serializes tests within one file, so separate spec files were still running concurrently (default worker count) and racing on the shared admin@example.test fixture session across files -- pinned workers:1 so cross-file demo specs sharing seeded fixture state (as the file already intended) actually run serially."
     },
     {
       "id": "US-014",
@@ -440,7 +440,7 @@
       "dependsOn": [
         "US-011"
       ],
-      "status": "pending",
+      "status": "done",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -454,10 +454,10 @@
         ]
       },
       "demo": "docs/demos/US-014.md",
-      "branch": null,
-      "prNumber": null,
-      "issueNumber": null,
-      "reviewRounds": 0,
+      "branch": "feature/us-014-create-list-rename-and-delete-a-project",
+      "prNumber": 30,
+      "issueNumber": 31,
+      "reviewRounds": 2,
       "notes": ""
     },
     {
@@ -474,7 +474,7 @@
       "dependsOn": [
         "US-014"
       ],
-      "status": "pending",
+      "status": "done",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -488,10 +488,10 @@
         ]
       },
       "demo": "docs/demos/US-015.md",
-      "branch": null,
-      "prNumber": null,
-      "issueNumber": null,
-      "reviewRounds": 0,
+      "branch": "feature/us-015-source-discovery-search",
+      "prNumber": 32,
+      "issueNumber": 33,
+      "reviewRounds": 1,
       "notes": ""
     },
     {
@@ -510,7 +510,7 @@
       "dependsOn": [
         "US-015"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -524,7 +524,7 @@
         ]
       },
       "demo": "docs/demos/US-016.md",
-      "branch": null,
+      "branch": "feature/us-016-analyze-a-candidate-source-and-select-or-reject-it",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,

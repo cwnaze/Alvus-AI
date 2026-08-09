@@ -55,7 +55,8 @@ the billing tier — tier lives on `subscriptions`.
 | GET | `/admin/waitlist` | admin | `?status=&cursor=` | `200 { entries[], next_cursor }` | `403` |
 | POST | `/admin/waitlist/:userId/approve` | admin | — | `200 { userId, status: "approved" }` | `404`, `409` |
 | POST | `/admin/waitlist/:userId/reject` | admin | `{ reason? }` | `200 { userId, status: "rejected" }` | `404`, `409` |
-| GET | `/admin/users` | admin | `?q=&tier=&cursor=` | `200 { users[], next_cursor }` | `403` |
+| GET | `/admin/users` | admin | `?q=&status=&tier=&cursor=` | `200 { users[], next_cursor }` | `403` |
+| POST | `/admin/users/:userId/revoke` | admin | `{ reason? }` | `200 { userId, status: "rejected" }` — only an `approved` user | `403`, `404`, `409 not_approved` |
 
 ## Projects
 
@@ -64,7 +65,7 @@ Citation format is set at creation and immutable thereafter.
 | Method | Path | Auth | Request | Response | Errors |
 |---|---|---|---|---|---|
 | POST | `/projects` | authenticated | `{ title, citation_format: "mla"\|"apa"\|"chicago" }` | `201 <project>` | `400`, `402` project-count limit |
-| GET | `/projects` | authenticated | `?cursor=` | `200 { projects[], next_cursor }` | `401` |
+| GET | `/projects` | authenticated | `?cursor=` | `200 { projects[], next_cursor }` | `400 invalid_cursor`, `401` |
 | GET | `/projects/:projectId` | authenticated | — | `200 <project>` | `403` not owner, `404` |
 | PATCH | `/projects/:projectId` | authenticated | `{ title }` | `200 <project>` | `403`, `404`, `422 citation_format_immutable` |
 | DELETE | `/projects/:projectId` | authenticated | — | `204` (cascades sources, document, feedback, share links) | `403`, `404` |

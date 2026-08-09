@@ -1,4 +1,14 @@
-import type { AuthUser, LoginResponse, RefreshResponse, WaitlistEntriesResponse } from '@alvus-ai/shared';
+import type {
+  AdminUsersResponse,
+  AuthUser,
+  CitationFormat,
+  LoginResponse,
+  Project,
+  ProjectsResponse,
+  RefreshResponse,
+  SourceSearchResponse,
+  WaitlistEntriesResponse,
+} from '@alvus-ai/shared';
 import { clearSession, getAccessToken, getRefreshToken, setTokens } from './session';
 
 type ApiErrorBody = { error: { code: string; message: string; correlationId: string } };
@@ -110,4 +120,47 @@ export function approveWaitlistEntry(userId: string): Promise<{ userId: string; 
 
 export function rejectWaitlistEntry(userId: string, reason?: string): Promise<{ userId: string; status: string }> {
   return request(`/admin/waitlist/${userId}/reject`, { method: 'POST', body: JSON.stringify({ reason }) });
+}
+
+export function fetchAdminUsers(params: { q?: string; status?: string; tier?: string } = {}): Promise<AdminUsersResponse> {
+  const query = new URLSearchParams();
+  if (params.q) query.set('q', params.q);
+  if (params.status) query.set('status', params.status);
+  if (params.tier) query.set('tier', params.tier);
+  const qs = query.toString();
+  return request(`/admin/users${qs ? `?${qs}` : ''}`);
+}
+
+export function revokeUserAccess(userId: string, reason?: string): Promise<{ userId: string; status: string }> {
+  return request(`/admin/users/${userId}/revoke`, { method: 'POST', body: JSON.stringify({ reason }) });
+}
+
+export function fetchProjects(cursor?: string | null): Promise<ProjectsResponse> {
+  return request(`/projects${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ''}`);
+}
+
+export function createProject(title: string, citationFormat: CitationFormat): Promise<Project> {
+  return request('/projects', { method: 'POST', body: JSON.stringify({ title, citation_format: citationFormat }) });
+}
+
+export function renameProject(projectId: string, title: string): Promise<Project> {
+  return request(`/projects/${projectId}`, { method: 'PATCH', body: JSON.stringify({ title }) });
+}
+
+export function deleteProject(projectId: string): Promise<void> {
+  return request(`/projects/${projectId}`, { method: 'DELETE' });
+}
+
+export function fetchProject(projectId: string): Promise<Project> {
+  return request(`/projects/${projectId}`);
+}
+
+export function searchSources(
+  projectId: string,
+  params: { query?: string; openAccessOnly?: boolean } = {},
+): Promise<SourceSearchResponse> {
+  return request(`/projects/${projectId}/sources/search`, {
+    method: 'POST',
+    body: JSON.stringify({ query: params.query, open_access_only: params.openAccessOnly }),
+  });
 }

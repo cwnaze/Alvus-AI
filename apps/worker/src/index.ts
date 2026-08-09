@@ -6,12 +6,18 @@ import type { AuthVariables } from './middleware/auth';
 import { CORRELATION_ID_HEADER, onError, type ErrorVariables } from './middleware/errors';
 import adminRoutes from './routes/admin';
 import authRoutes from './routes/auth';
+import projectsRoutes from './routes/projects';
+import sourcesRoutes from './routes/sources';
 
 type Bindings = {
   DATABASE_URL: string;
   SUPABASE_URL: string;
   SUPABASE_SECRET_KEY: string;
   PUBLIC_APP_URL: string;
+  SOURCES_PROVIDER_MODE?: string;
+  SEMANTIC_SCHOLAR_API_KEY?: string;
+  CROSSREF_CONTACT_EMAIL?: string;
+  UNPAYWALL_CONTACT_EMAIL?: string;
 };
 
 const app = new Hono<{ Bindings: Bindings; Variables: ErrorVariables & AuthVariables }>();
@@ -21,6 +27,8 @@ app.onError(onError);
 
 app.route('/api/auth', authRoutes);
 app.route('/api/admin', adminRoutes);
+app.route('/api/projects', projectsRoutes);
+app.route('/api/projects/:projectId/sources', sourcesRoutes);
 
 app.get('/api/health', async (c) => {
   // Deliberately not closed: one connection per request against Supabase's

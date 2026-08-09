@@ -58,3 +58,9 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-09T02:07:00.000Z | US-013 | in_progress | Branch feature/us-013-admin-user-directory created; building admin user directory (search/filter by status+tier, view basic info, revoke an approved user's access).
 2026-08-09T02:40:00.000Z | US-013 | pending | Crash resume: the 02:07:00 in_progress marker's story-start run also died before creating the branch or PR on remote (no local/remote branch found); no work exists to resume, so reset to pending for clean re-selection.
 2026-08-09T02:45:00.000Z | US-013 | in_progress | Branch feature/us-013-admin-user-directory created; building admin user directory (search/filter by status+tier, view basic info, revoke an approved user's access).
+2026-08-09T16:01:21.993Z | US-013 | done | PR #28 merged after 2 review round(s)
+2026-08-09T16:15:00.000Z | US-014 | in_progress | Branch feature/us-014-create-list-rename-and-delete-a-project created; building projects CRUD (create with title+citation format, list dashboard, rename, delete with confirmation, owner-only access).
+2026-08-09T16:53:00.314Z | US-014 | done | PR #30 merged after 2 review round(s)
+2026-08-09T17:00:00.000Z | US-015 | in_progress | Branch feature/us-015-source-discovery-search created; building source discovery search (Semantic Scholar + CrossRef search with Unpaywall OA resolution, external_works/project_sources schema, candidate results list with empty/error states, owner-only access).
+2026-08-09T17:31:38.793Z | US-015 | done | PR #32 merged after 1 review round(s)
+2026-08-09T17:38:25.000Z | US-016 | in_progress | Branch feature/us-016-analyze-a-candidate-source-and-select-or-reject-it created; building AI source analysis (LiteLLM-backed citation/strengths-weaknesses/usefulness-score/key-quotes), select/deselect/reject state transitions, abstract-only flagging, bibliography view, and source-analysis tier metering.

@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './lib/AuthContext';
+import AdminUsersPage from './pages/AdminUsersPage';
 import AdminWaitlistPage from './pages/AdminWaitlistPage';
 import DashboardPage from './pages/DashboardPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import LoginPage from './pages/LoginPage';
+import ProjectPage from './pages/ProjectPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import SignupPage from './pages/SignupPage';
 import StatusScreen from './pages/StatusScreen';
@@ -24,6 +26,13 @@ function HomeRoute() {
   if (user.status === 'pending') return <StatusScreen status="pending" />;
   if (user.status === 'rejected') return <StatusScreen status="rejected" />;
   return <DashboardPage />;
+}
+
+function ProjectRoute({ children }: { children: ReactNode }) {
+  const { user, loading } = useAuth();
+  if (loading) return <LoadingScreen />;
+  if (!user || user.status !== 'approved') return <Navigate to="/" replace />;
+  return children;
 }
 
 function AdminRoute({ children }: { children: ReactNode }) {
@@ -50,6 +59,22 @@ export default function App() {
               <AdminRoute>
                 <AdminWaitlistPage />
               </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <AdminRoute>
+                <AdminUsersPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/projects/:projectId"
+            element={
+              <ProjectRoute>
+                <ProjectPage />
+              </ProjectRoute>
             }
           />
           <Route path="/" element={<HomeRoute />} />

@@ -8,6 +8,20 @@
       "when": 1786011129311,
       "tag": "0000_simple_blockbuster",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786291800075,
+      "tag": "0001_sleepy_power_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786294927377,
+      "tag": "0002_awesome_next_avengers",
+      "breakpoints": true
     }
   ]
 }
