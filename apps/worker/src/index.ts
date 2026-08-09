@@ -11,6 +11,7 @@ type Bindings = {
   DATABASE_URL: string;
   SUPABASE_URL: string;
   SUPABASE_SECRET_KEY: string;
+  PUBLIC_APP_URL: string;
 };
 
 const app = new Hono<{ Bindings: Bindings; Variables: ErrorVariables & AuthVariables }>();

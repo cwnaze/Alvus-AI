@@ -65,6 +65,14 @@ jobs:
           # equivalent result, one fewer credential to provision.
           npx supabase db push --db-url "$DATABASE_URL" --yes
 
+      - name: Push Supabase auth config
+        # supabase/config.toml's [auth] section (site_url, additional_redirect_urls)
+        # isn't part of `supabase/migrations`, so `db push` above never touches it --
+        # config.toml only applies to local `supabase start` stacks unless explicitly
+        # pushed. See the script and docs/infra.md for why this goes through a
+        # narrow Management API PATCH rather than `supabase config push`.
+        run: node .github/scripts/push-supabase-auth-config.mjs
+
       - name: Deploy to Cloudflare Workers
         run: npm run deploy
 

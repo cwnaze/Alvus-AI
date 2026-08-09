@@ -18,6 +18,7 @@ export type AuthBindings = {
   DATABASE_URL: string;
   SUPABASE_URL: string;
   SUPABASE_SECRET_KEY: string;
+  PUBLIC_APP_URL: string;
 };
 
 export function extractBearerToken(c: Context): string {
