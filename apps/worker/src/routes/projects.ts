@@ -37,6 +37,14 @@ function parseTitle(value: unknown): string {
   return title;
 }
 
+function parseCursor(value: string | null): string | null {
+  if (!value) return null;
+  if (Number.isNaN(new Date(value).getTime())) {
+    throw new AppError(400, 'invalid_cursor', 'cursor must be a valid ISO 8601 timestamp');
+  }
+  return value;
+}
+
 // Unauthorized project access is 403, not a leaky 404 -- see docs/api.md's
 // cross-cutting rules. A malformed/nonexistent id is still 404: there is no
 // row to be unauthorized *about*.
@@ -76,7 +84,7 @@ projects.post('/', async (c) => {
 projects.get('/', async (c) => {
   const authUser = c.get('authUser');
   if (!authUser) throw new AppError(401, 'unauthorized', 'Authentication required');
-  const cursor = c.req.query('cursor') ?? null;
+  const cursor = parseCursor(c.req.query('cursor') ?? null);
 
   const db = createDb(c.env.DATABASE_URL);
   const { projects: rows, nextCursor } = await listProjects(db, { ownerId: authUser.id, cursor });

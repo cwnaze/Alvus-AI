@@ -148,6 +148,31 @@ describe('GET /', () => {
     expect(body.projects).toHaveLength(1);
     expect(body.next_cursor).toBeNull();
   });
+
+  it('accepts a valid ISO cursor and forwards it to the query layer', async () => {
+    asCaller();
+    listProjects.mockResolvedValueOnce({ projects: [], nextCursor: null });
+
+    const res = await request('/?cursor=2026-01-02T00%3A00%3A00.000Z');
+
+    expect(res.status).toBe(200);
+    expect(listProjects).toHaveBeenCalledWith(expect.anything(), {
+      ownerId: OWNER_ID,
+      cursor: '2026-01-02T00:00:00.000Z',
+    });
+  });
+
+  it('400s a malformed cursor instead of erroring in the query layer', async () => {
+    asCaller();
+    const callsBefore = listProjects.mock.calls.length;
+
+    const res = await request('/?cursor=not-a-date');
+
+    expect(res.status).toBe(400);
+    expect(listProjects.mock.calls.length).toBe(callsBefore);
+    const body = (await res.json()) as ErrorEnvelope;
+    expect(body.error.code).toBe('invalid_cursor');
+  });
 });
 
 describe('GET /:projectId', () => {
