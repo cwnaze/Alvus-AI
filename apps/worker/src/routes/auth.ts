@@ -144,12 +144,24 @@ auth.post('/password-reset/confirm', async (c) => {
 
   const supabase = createSupabaseAdmin(c.env.SUPABASE_URL, c.env.SUPABASE_SECRET_KEY);
   const { data, error } = await supabase.auth.verifyOtp({ token_hash: token, type: 'recovery' });
-  if (error || !data.user) {
+  if (error || !data.user || !data.session) {
     throw new AppError(400, 'invalid_token', 'This reset link is invalid or has expired');
   }
 
   const { error: updateError } = await supabase.auth.admin.updateUserById(data.user.id, { password: newPassword });
   if (updateError) throw new AppError(400, 'reset_failed', 'Could not reset your password. Please try again.');
+
+  // admin.updateUserById already revokes every other session for this user as
+  // part of the password change itself -- verified directly against this
+  // project: a pre-existing access token starts failing authenticate()'s
+  // getUser() check immediately after the call above, before this line ever
+  // runs. (authenticate() network-verifies every token via getUser() rather
+  // than decoding it locally for exactly this class of revocation-timing gap
+  // -- see middleware/auth.ts.) This call is defense-in-depth against that
+  // becoming untrue on a future Supabase Auth version, not the primary
+  // mechanism, so its result -- expected to report "no session" on the common
+  // path, since updateUserById already cleared it -- isn't checked or logged.
+  await supabase.auth.admin.signOut(data.session.access_token, 'global');
 
   return c.json({}, 200);
 });

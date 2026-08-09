@@ -270,9 +270,13 @@ describe('POST /password-reset/confirm', () => {
     expect(((await res.json()) as ErrorEnvelope).error.code).toBe('invalid_token');
   });
 
-  it('verifies the token, updates the password, and returns 200', async () => {
-    verifyOtp.mockResolvedValueOnce({ data: { user: { id: 'user-1' } }, error: null });
+  it('verifies the token, updates the password, revokes existing sessions, and returns 200', async () => {
+    verifyOtp.mockResolvedValueOnce({
+      data: { user: { id: 'user-1' }, session: { access_token: 'recovery-tok' } },
+      error: null,
+    });
     updateUserById.mockResolvedValueOnce({ data: {}, error: null });
+    signOut.mockResolvedValueOnce({ data: {}, error: null });
 
     const res = await jsonRequest('/password-reset/confirm', { token: 'good-tok', new_password: 'longenough1' });
 
@@ -280,16 +284,33 @@ describe('POST /password-reset/confirm', () => {
     expect(await res.json()).toEqual({});
     expect(verifyOtp).toHaveBeenCalledWith({ token_hash: 'good-tok', type: 'recovery' });
     expect(updateUserById).toHaveBeenCalledWith('user-1', { password: 'longenough1' });
+    expect(signOut).toHaveBeenCalledWith('recovery-tok', 'global');
   });
 
   it('400s if the password update itself fails', async () => {
-    verifyOtp.mockResolvedValueOnce({ data: { user: { id: 'user-1' } }, error: null });
+    verifyOtp.mockResolvedValueOnce({
+      data: { user: { id: 'user-1' }, session: { access_token: 'recovery-tok' } },
+      error: null,
+    });
     updateUserById.mockResolvedValueOnce({ data: {}, error: { message: 'db down' } });
 
     const res = await jsonRequest('/password-reset/confirm', { token: 'good-tok', new_password: 'longenough1' });
 
     expect(res.status).toBe(400);
     expect(((await res.json()) as ErrorEnvelope).error.code).toBe('reset_failed');
+  });
+
+  it('still 200s if session revocation itself fails, since the password change already succeeded', async () => {
+    verifyOtp.mockResolvedValueOnce({
+      data: { user: { id: 'user-1' }, session: { access_token: 'recovery-tok' } },
+      error: null,
+    });
+    updateUserById.mockResolvedValueOnce({ data: {}, error: null });
+    signOut.mockResolvedValueOnce({ data: null, error: { message: 'gotrue unavailable' } });
+
+    const res = await jsonRequest('/password-reset/confirm', { token: 'good-tok', new_password: 'longenough1' });
+
+    expect(res.status).toBe(200);
   });
 });
 
