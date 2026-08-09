@@ -1,7 +1,10 @@
 import type {
   AdminUsersResponse,
   AuthUser,
+  CitationFormat,
   LoginResponse,
+  Project,
+  ProjectsResponse,
   RefreshResponse,
   WaitlistEntriesResponse,
 } from '@alvus-ai/shared';
@@ -129,4 +132,20 @@ export function fetchAdminUsers(params: { q?: string; status?: string; tier?: st
 
 export function revokeUserAccess(userId: string, reason?: string): Promise<{ userId: string; status: string }> {
   return request(`/admin/users/${userId}/revoke`, { method: 'POST', body: JSON.stringify({ reason }) });
+}
+
+export function fetchProjects(): Promise<ProjectsResponse> {
+  return request('/projects');
+}
+
+export function createProject(title: string, citationFormat: CitationFormat): Promise<Project> {
+  return request('/projects', { method: 'POST', body: JSON.stringify({ title, citation_format: citationFormat }) });
+}
+
+export function renameProject(projectId: string, title: string): Promise<Project> {
+  return request(`/projects/${projectId}`, { method: 'PATCH', body: JSON.stringify({ title }) });
+}
+
+export function deleteProject(projectId: string): Promise<void> {
+  return request(`/projects/${projectId}`, { method: 'DELETE' });
 }

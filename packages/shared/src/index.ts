@@ -1,4 +1,5 @@
 export { CITATION_FORMATS, type CitationFormat } from './citation';
+export { PROJECT_STATUSES, type ProjectStatus, type Project, type ProjectsResponse } from './projects';
 export {
   WAITLIST_STATUSES,
   type WaitlistStatus,
