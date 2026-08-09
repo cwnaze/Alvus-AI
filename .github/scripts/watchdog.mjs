@@ -24,7 +24,7 @@
  */
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
-import { checkQuotaText } from './quota-signal.mjs';
+import { checkQuotaText, parseQuotaUntilMarker } from './quota-signal.mjs';
 
 const repo = process.env.REPO;
 if (!repo) throw new Error('REPO is required');
@@ -108,6 +108,35 @@ function quotaBlocked() {
 }
 
 /**
+ * The reset time pr-review.yml computed and stamped into its own PR comment when it
+ * applied the `quota-blocked` label (see quota-signal.mjs's formatQuotaUntilMarker).
+ * This is the anchor recoverQuotaBlockedPrs() below gates its retry on — it is per-PR
+ * data, unlike rateLimitedUntil()'s log scrape, which reads the *last* Claude-backed
+ * run repo-wide and is structurally blind to this signal in the first place (see the
+ * module docstring).
+ *
+ * @returns {Date|null} the newest marker found in `prNumber`'s comments, or null if
+ *   it carries none (e.g. labeled before this marker existed, or the comment API
+ *   call failed) — callers fall back to the log-based quotaBlocked() in that case.
+ */
+function quotaUntilFromComments(prNumber) {
+  let comments;
+  try {
+    comments = JSON.parse(
+      sh('gh', ['pr', 'view', String(prNumber), '--repo', repo, '--json', 'comments']),
+    ).comments;
+  } catch (e) {
+    console.error(`Could not read comments for PR #${prNumber} (${e.message}).`);
+    return null;
+  }
+  for (let i = comments.length - 1; i >= 0; i--) {
+    const until = parseQuotaUntilMarker(comments[i].body);
+    if (until) return until;
+  }
+  return null;
+}
+
+/**
  * PRs pr-review.yml's verdict step labeled `quota-blocked` — a real quota signal
  * found in the Claude action's own execution_file, not a needs-human crash (see
  * quota-signal.mjs) — sit outside the story-status-driven logic below entirely.
@@ -138,12 +167,27 @@ function recoverQuotaBlockedPrs() {
   }
   if (!prs.length) return false;
 
-  if (quotaBlocked()) {
-    console.log(`${prs.length} quota-blocked PR(s); window not yet open.`);
-    return true;
-  }
+  // Computed at most once, and only if some PR turns out to carry no marker — the
+  // common case (every PR labeled by the current pr-review.yml) never needs it.
+  let logBasedFallback;
+  const stillBlocked = (pr) => {
+    const until = quotaUntilFromComments(pr.number);
+    if (until) {
+      if (until > new Date()) {
+        const mins = Math.round((until - Date.now()) / 60000);
+        console.log(`PR #${pr.number}: quota window not yet open (expected back ~${mins}m, per its own comment).`);
+        return true;
+      }
+      return false;
+    }
+    console.log(`PR #${pr.number}: no quota-until marker on its comments; falling back to the log-based check.`);
+    if (logBasedFallback === undefined) logBasedFallback = quotaBlocked();
+    return logBasedFallback;
+  };
 
   for (const pr of prs) {
+    if (stillBlocked(pr)) continue;
+
     // Re-check immediately before acting: a human may already have pushed a real
     // fix (which re-runs pr-review and clears the label itself) or closed the PR
     // since the listing above.

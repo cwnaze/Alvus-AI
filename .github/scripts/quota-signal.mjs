@@ -85,6 +85,30 @@ export function checkQuotaText(text, since, windowHours) {
 }
 
 /**
+ * Machine-readable marker for the reset time computed when a PR is labeled
+ * `quota-blocked`, embedded in the comment pr-review.yml posts alongside the label.
+ *
+ * A label's `--description` is a repository-wide property of the label itself, not
+ * per-issue, so it can't carry a per-PR timestamp — two PRs quota-blocked minutes
+ * apart would stomp each other's reset time. A PR comment is per-PR, so
+ * watchdog.mjs's recoverQuotaBlockedPrs() reads this marker back to gate its retry
+ * on the exact window pr-review.yml computed, rather than re-deriving "still
+ * blocked" through rateLimitedUntil()'s log scrape — which is structurally blind to
+ * this signal (see the module docstring above).
+ */
+export function formatQuotaUntilMarker(until) {
+  return `<!-- quota-until:${until.toISOString()} -->`;
+}
+
+/** @returns {Date|null} the reset time in `text`'s marker, or null if absent/invalid. */
+export function parseQuotaUntilMarker(text) {
+  const m = typeof text === 'string' ? text.match(/<!-- quota-until:(\S+) -->/) : null;
+  if (!m) return null;
+  const d = new Date(m[1]);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/**
  * Narrow a raw execution_file down to the only text in it that's safe to run
  * a quota check against.
  *
