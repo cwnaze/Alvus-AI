@@ -405,7 +405,7 @@
       "dependsOn": [
         "US-011"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -419,7 +419,7 @@
         ]
       },
       "demo": "docs/demos/US-013.md",
-      "branch": null,
+      "branch": "feature/us-013-admin-user-directory",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,
