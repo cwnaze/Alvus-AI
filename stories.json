@@ -474,7 +474,7 @@
       "dependsOn": [
         "US-014"
       ],
-      "status": "in_progress",
+      "status": "done",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -489,9 +489,9 @@
       },
       "demo": "docs/demos/US-015.md",
       "branch": "feature/us-015-source-discovery-search",
-      "prNumber": null,
-      "issueNumber": null,
-      "reviewRounds": 0,
+      "prNumber": 32,
+      "issueNumber": 33,
+      "reviewRounds": 1,
       "notes": ""
     },
     {
