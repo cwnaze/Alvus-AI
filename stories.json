@@ -510,7 +510,7 @@
       "dependsOn": [
         "US-015"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -524,7 +524,7 @@
         ]
       },
       "demo": "docs/demos/US-016.md",
-      "branch": null,
+      "branch": "feature/us-016-analyze-a-candidate-source-and-select-or-reject-it",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,
