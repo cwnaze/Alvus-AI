@@ -1,16 +1,16 @@
-# Graph Report - Alvus-AI  (2026-08-08)
+# Graph Report - Alvus-AI  (2026-08-09)
 
 ## Corpus Check
-- 107 files · ~48,818 words
+- 170 files · ~108,687 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 565 nodes · 740 edges · 54 communities (37 shown, 17 thin omitted)
-- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 34 edges (avg confidence: 0.83)
+- 850 nodes · 1409 edges · 77 communities (58 shown, 19 thin omitted)
+- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 45 edges (avg confidence: 0.79)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e17a314f`
+- Built from commit: `441e61c6`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -32,16 +32,16 @@
 - worker/package.json
 - devDependencies
 - devDependencies
-- seed.ts
+- metering/index.ts
 - compilerOptions
-- scripts
+- routes/auth.test.ts
 - worker/tsconfig.json
 - compilerOptions
 - shared/package.json
 - shared/tsconfig.json
-- api.ts
+- App.tsx
 - US-001 — Scaffold monorepo (frontend, Worker, shared package, tooling)
-- admin.ts
+- shared/src/index.ts
 - demo-us-001-server.sh
 - US-002 — Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema
 - demo-us-002.sh
@@ -65,18 +65,41 @@
 - demo-us-009.sh
 - demo-us-010-server.sh
 - demo-us-010.sh
+- sources/index.ts
+- US-012 — password reset flow
+- US-014 — create, list, rename, and delete a project
+- US-015 — source discovery search
+- US-013 — admin user directory
+- push-supabase-auth-config.mjs
+- routes/sources.ts
+- api.ts
+- admin.ts
+- findAuthUserIdByEmail
+- citation/index.ts
+- AuthContext.tsx
+- errors.ts
+- middleware/auth.ts
+- routes/projects.ts
+- sources.test.ts
+- projects.test.ts
+- US-016 — analyze a candidate source and select or reject it
+- admin.test.ts
+- AppError
+- DashboardPage.tsx
+- client.test.ts
+- AdminWaitlistPage.tsx
 
 ## God Nodes (most connected - your core abstractions)
-1. `scripts` - 12 edges
-2. `compilerOptions` - 12 edges
-3. `useAuth()` - 10 edges
-4. `request()` - 10 edges
-5. `createDb()` - 9 edges
-6. `US-007 — Deploy pipeline: migrate + wrangler deploy on merge, PR previews, secrets configured` - 9 edges
-7. `API Surface doc` - 9 edges
-8. `Security Model doc` - 9 edges
-9. `authenticate()` - 8 edges
-10. `onError()` - 8 edges
+1. `request()` - 27 edges
+2. `scripts` - 12 edges
+3. `compilerOptions` - 12 edges
+4. `useAuth()` - 11 edges
+5. `createDb()` - 11 edges
+6. `AuthVariables` - 11 edges
+7. `findAuthUserIdByEmail()` - 11 edges
+8. `ApiError` - 10 edges
+9. `AuthBindings` - 10 edges
+10. `authenticate()` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `PR Review workflow` --references--> `PR Review Skill`  [EXTRACTED]
@@ -85,10 +108,10 @@
   .claude/skills/production-prep/SKILL.md → docs/security.md
 - `Production Prep workflow` --references--> `Production Prep Skill`  [EXTRACTED]
   .github/workflows/production-prep.yml → .claude/skills/production-prep/SKILL.md
-- `buildApp()` --indirect_call--> `onError()`  [INFERRED]
-  apps/worker/src/middleware/errors.test.ts → apps/worker/src/middleware/errors.ts
-- `Implement Story Skill` --references--> `Steering issue / authorAssociation trust rule (rationale: agents run with write+dispatch tokens, so untrusted text in issues/PR comments could be prompt injection; only OWNER/MEMBER/COLLABORATOR comments are binding)`  [EXTRACTED]
-  .claude/skills/implement-story/SKILL.md → CLAUDE.md
+- `seedUsageAtLimit()` --calls--> `currentBillingPeriod()`  [EXTRACTED]
+  db/seed.ts → apps/worker/src/lib/metering/index.ts
+- `mergeCandidates()` --indirect_call--> `candidate()`  [INFERRED]
+  apps/worker/src/lib/sources/merge.ts → apps/worker/src/lib/sources/merge.test.ts
 
 ## Import Cycles
 - None detected.
@@ -98,7 +121,7 @@
 - **Workflows that dispatch a Claude Code skill via claude-code-action** — github_workflows_story_start, github_workflows_pr_review, github_workflows_pr_fix, github_workflows_production_prep [EXTRACTED 1.00]
 - **Data model entities owned by projects (ON DELETE CASCADE from projects.id)** — docs_data_model_projects, docs_data_model_project_documents, docs_data_model_project_sources, docs_data_model_uploaded_files, docs_data_model_share_links, docs_data_model_feedback_passes [EXTRACTED 1.00]
 
-## Communities (54 total, 17 thin omitted)
+## Communities (77 total, 19 thin omitted)
 
 ### Community 0 - "PR Review Skill"
 Cohesion: 0.12
@@ -145,28 +168,40 @@ Cohesion: 0.29
 Nodes (4): db, issues, rounds, story
 
 ### Community 14 - "worker/package.json"
-Cohesion: 0.07
-Nodes (29): dependencies, @alvus-ai/shared, drizzle-orm, hono, postgres, @supabase/supabase-js, devDependencies, @cloudflare/vitest-pool-workers (+21 more)
+Cohesion: 0.06
+Nodes (31): dependencies, @alvus-ai/shared, drizzle-orm, hono, openai, postgres, @supabase/supabase-js, devDependencies (+23 more)
 
 ### Community 15 - "devDependencies"
-Cohesion: 0.07
-Nodes (27): dotenv, drizzle-kit, eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals, devDependencies (+19 more)
+Cohesion: 0.04
+Nodes (47): dotenv, drizzle-kit, eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals, devDependencies (+39 more)
 
 ### Community 16 - "devDependencies"
 Cohesion: 0.06
 Nodes (32): dependencies, @alvus-ai/shared, react, react-dom, react-router-dom, devDependencies, tailwindcss, @tailwindcss/vite (+24 more)
 
-### Community 17 - "seed.ts"
-Cohesion: 0.10
-Nodes (20): authSchema, authUsers, tierLimits, users, waitlistSignups, db, main(), supabaseAdmin (+12 more)
+### Community 17 - "metering/index.ts"
+Cohesion: 0.08
+Nodes (35): Db, getMonthlyLimit(), ActionType, recordUsageEvent(), sumUsage(), authSchema, authUsers, externalWorks (+27 more)
 
 ### Community 18 - "compilerOptions"
 Cohesion: 0.13
 Nodes (14): compilerOptions, jsx, lib, noEmit, types, extends, include, ES2022 (+6 more)
 
-### Community 19 - "scripts"
-Cohesion: 0.10
-Nodes (20): name, private, scripts, build, db:bootstrap-admin, db:generate, db:migrate, db:push (+12 more)
+### Community 19 - "routes/auth.test.ts"
+Cohesion: 0.16
+Nodes (11): AuthBindings, AuthVariables, ENV, ErrorEnvelope, { getUser, getUserById }, app, {
+  createUser,
+  deleteUser,
+  signOut,
+  updateUserById,
+  signInWithPassword,
+  getUser,
+  refreshSession,
+  resetPasswordForEmail,
+  verifyOtp,
+  createPendingUser,
+  getUserById,
+}, ENV (+3 more)
 
 ### Community 20 - "worker/tsconfig.json"
 Cohesion: 0.15
@@ -184,17 +219,17 @@ Nodes (11): devDependencies, typescript, exports, typescript, name, private, scr
 Cohesion: 0.22
 Nodes (8): compilerOptions, lib, noEmit, extends, include, ES2022, src, ../../tsconfig.base.json
 
-### Community 24 - "api.ts"
-Cohesion: 0.08
-Nodes (40): AdminRoute(), App(), HomeRoute(), AuthLayout(), ApiError, ApiErrorBody, apiLogout(), approveWaitlistEntry() (+32 more)
+### Community 24 - "App.tsx"
+Cohesion: 0.14
+Nodes (17): AdminRoute(), App(), HomeRoute(), ProjectRoute(), AuthLayout(), ApiError, useAuth(), rootEl (+9 more)
 
 ### Community 25 - "US-001 — Scaffold monorepo (frontend, Worker, shared package, tooling)"
 Cohesion: 0.29
 Nodes (6): 1. Typecheck every workspace, 2. Lint the whole repo, 3. Build the frontend for the Worker's static-assets binding, 4. Run the worker's test suite, 5. Boot wrangler dev and confirm the placeholder page and the API both respond, US-001 — Scaffold monorepo (frontend, Worker, shared package, tooling)
 
-### Community 26 - "admin.ts"
-Cohesion: 0.07
-Nodes (47): app, Bindings, { execute }, createDb(), Db, approveWaitlistUser(), createPendingUser(), getUserById() (+39 more)
+### Community 26 - "shared/src/index.ts"
+Cohesion: 0.12
+Nodes (28): AdminUsersResponse, LoginResponse, RefreshResponse, TIERS, USER_ROLES, UserRole, WAITLIST_STATUSES, WaitlistEntriesResponse (+20 more)
 
 ### Community 31 - "US-002 — Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema"
 Cohesion: 0.33
@@ -232,22 +267,121 @@ Nodes (6): 1. Create a normal Supabase Auth account for the operator -- signing 
 Cohesion: 0.33
 Nodes (5): 1. A deliberately-broken deploy is rolled back via wrangler rollback [deployment-id], and the command output demonstrates the previous version serving again (exercised against a disposable scratch Worker, never the real alvus-ai production Worker, so this proof can't cause a real outage), 2. A hand-written down-migration exists for the one applied migration (drizzle/migrations/0000_simple_blockbuster.sql), 3. The down-migration runs cleanly against the real DATABASE_URL (wrapped in BEGIN/ROLLBACK so this proof does not actually drop the tables), 4. Rollback procedure is documented in the README, US-009 — Verify rollback path (Worker + migration)
 
+### Community 54 - "sources/index.ts"
+Cohesion: 0.11
+Nodes (33): authorName(), CrossrefItem, CrossrefResponse, searchCrossref(), toRawCandidate(), crossrefFixture(), FixtureKind, fixtureKindForQuery() (+25 more)
+
+### Community 55 - "US-012 — password reset flow"
+Cohesion: 0.33
+Nodes (5): 1. Requesting a password reset shows a generic confirmation screen, 2. An invalid reset token is rejected with a clear error, 3. A valid reset token lets the user set a new password, 4. Logging in with the new password reaches the app; the old password no longer works, US-012 — password reset flow
+
+### Community 56 - "US-014 — create, list, rename, and delete a project"
+Cohesion: 0.33
+Nodes (5): 1. A newly-approved user sees the empty projects dashboard, 2. The user creates a project with a title and citation format (APA), 3. The user renames the project; the citation format stays APA, 4. Deleting requires confirmation; confirming removes the project and the empty state returns, US-014 — create, list, rename, and delete a project
+
+### Community 57 - "US-015 — source discovery search"
+Cohesion: 0.33
+Nodes (5): 1. Opening a project shows its source-discovery view, 2. Searching returns candidate sources with title, authors, year, venue, and OA status, 3. An empty result set shows a clear empty state offering the manual-upload path, 4. An upstream provider outage shows a clear error state, US-015 — source discovery search
+
+### Community 58 - "US-013 — admin user directory"
+Cohesion: 0.40
+Nodes (4): 1. The admin searches and filters the directory, and views the user's status, role, and tier, 2. Filtering by a paid tier returns nobody -- no account can be on a paid plan before billing ships, 3. The admin revokes the user's access; their status flips to rejected in the directory, US-013 — admin user directory
+
+### Community 60 - "routes/sources.ts"
+Cohesion: 0.08
+Nodes (37): normalizeAnalysis(), requestSourceAnalysis(), analysisFixture(), FixtureKind, fixtureKindForSource(), isLiveMode(), buildAnalysisPrompt(), AiEnv (+29 more)
+
+### Community 61 - "api.ts"
+Cohesion: 0.13
+Nodes (29): analyzeSource(), ApiErrorBody, approveWaitlistEntry(), confirmPasswordReset(), deleteProject(), deselectSource(), fetchAdminUsers(), fetchBibliography() (+21 more)
+
+### Community 62 - "admin.ts"
+Cohesion: 0.21
+Nodes (12): listUsers(), revokeUserAccess(), approveWaitlistUser(), createPendingUser(), listWaitlistEntries(), rejectWaitlistUser(), UserRow, WaitlistSignupRow (+4 more)
+
+### Community 63 - "findAuthUserIdByEmail"
+Cohesion: 0.26
+Nodes (4): findAuthUserIdByEmail(), Demo, Step, test
+
+### Community 64 - "citation/index.ts"
+Cohesion: 0.24
+Nodes (13): apaAuthor(), CitationFields, formatApa(), formatAuthorsApa(), formatAuthorsChicago(), formatAuthorsMla(), formatChicago(), formatCitation() (+5 more)
+
+### Community 65 - "AuthContext.tsx"
+Cohesion: 0.24
+Nodes (13): apiLogout(), refreshAccessToken(), AuthContext, AuthContextValue, AuthProvider(), clearSession(), getAccessToken(), getRefreshToken() (+5 more)
+
+### Community 66 - "errors.ts"
+Cohesion: 0.21
+Nodes (11): app, Bindings, { execute }, CORRELATION_ID_HEADER, ErrorVariables, onError(), buildApp(), ErrorEnvelope (+3 more)
+
+### Community 67 - "middleware/auth.ts"
+Cohesion: 0.28
+Nodes (9): createDb(), getUserById(), createSupabaseAdmin(), authenticate(), AuthUser, extractBearerToken(), requireAdmin(), requireApproved() (+1 more)
+
+### Community 68 - "routes/projects.ts"
+Cohesion: 0.24
+Nodes (8): createProject(), deleteProject(), getProjectById(), listProjects(), ProjectRow, renameProject(), Env, loadOwnedProject()
+
+### Community 69 - "sources.test.ts"
+Cohesion: 0.20
+Nodes (8): app, asCaller(), callerRow(), ENV, ErrorEnvelope, externalWorkRow(), {
+  getUser,
+  getUserById,
+  getProjectById,
+  upsertExternalWork,
+  findOrCreateProjectSource,
+  getProjectSourceById,
+  listProjectSources,
+  saveProjectSourceAnalysis,
+  updateProjectSourceState,
+  deleteProjectSource,
+  searchSources,
+  requestSourceAnalysis,
+  assertWithinUsageLimit,
+  recordUsage,
+}, projectSourceRow()
+
+### Community 70 - "projects.test.ts"
+Cohesion: 0.25
+Nodes (6): app, asCaller(), callerRow(), ENV, ErrorEnvelope, { getUser, getUserById, createProject, listProjects, getProjectById, renameProject, deleteProject, listProjectSources }
+
+### Community 71 - "US-016 — analyze a candidate source and select or reject it"
+Cohesion: 0.22
+Nodes (8): 1. Searching returns candidate sources ready for AI analysis, 2. Triggering AI analysis shows the generated citation, summary, usefulness score, and key quotes, 3. A source lacking accessible full text is analyzed from its abstract and flagged as abstract-only, 4. Selecting an analyzed source adds it to the project bibliography, 5. Rejecting a candidate keeps it from reappearing on a later search, 6. Deselecting a source removes it from the bibliography and returns it to the candidate pool, 7. Analysis is blocked with a clear limit-reached message once the tier quota is exhausted, US-016 — analyze a candidate source and select or reject it
+
+### Community 72 - "admin.test.ts"
+Cohesion: 0.29
+Nodes (6): app, asCaller(), callerRow(), ENV, ErrorEnvelope, { getUser, getUserById, listWaitlistEntries, approveWaitlistUser, rejectWaitlistUser, listUsers, revokeUserAccess }
+
+### Community 73 - "AppError"
+Cohesion: 0.33
+Nodes (4): DB, { getMonthlyLimit, sumUsage, recordUsageEvent }, NOW, AppError
+
+### Community 74 - "DashboardPage.tsx"
+Cohesion: 0.50
+Nodes (4): createProject(), CITATION_FORMAT_LABELS, NewProjectForm(), Project
+
+### Community 75 - "client.test.ts"
+Cohesion: 0.40
+Nodes (3): { create }, INPUT, LIVE_ENV
+
 ## Knowledge Gaps
-- **256 isolated node(s):** `db`, `story`, `issues`, `rounds`, `UNCOUNTED_WORKFLOWS` (+251 more)
+- **315 isolated node(s):** `db`, `story`, `issues`, `rounds`, `UNCOUNTED_WORKFLOWS` (+310 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **17 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **19 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `createDb()` connect `admin.ts` to `seed.ts`?**
+- **Why does `createDb()` connect `middleware/auth.ts` to `errors.ts`, `routes/projects.ts`, `metering/index.ts`, `routes/sources.ts`, `admin.ts`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
-- **Why does `AuthUser` connect `api.ts` to `admin.ts`?**
-  _High betweenness centrality (0.006) - this node is a cross-community bridge._
-- **Why does `devDependencies` connect `devDependencies` to `scripts`?**
-  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+- **Why does `findAuthUserIdByEmail()` connect `findAuthUserIdByEmail` to `metering/index.ts`?**
+  _High betweenness centrality (0.008) - this node is a cross-community bridge._
+- **Why does `AuthVariables` connect `routes/auth.test.ts` to `errors.ts`, `middleware/auth.ts`, `routes/projects.ts`, `sources.test.ts`, `projects.test.ts`, `admin.test.ts`, `routes/sources.ts`, `admin.ts`?**
+  _High betweenness centrality (0.007) - this node is a cross-community bridge._
 - **What connects `db`, `story`, `issues` to the rest of the system?**
-  _256 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _315 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `PR Review Skill` be split into smaller, more focused modules?**
   _Cohesion score 0.12 - nodes in this community are weakly interconnected._
 - **Should `API Surface doc` be split into smaller, more focused modules?**

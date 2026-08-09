@@ -1,4 +1,4 @@
-import type { Project, ProjectsResponse } from '@alvus-ai/shared';
+import type { BibliographyResponse, Project, ProjectsResponse } from '@alvus-ai/shared';
 import { CITATION_FORMATS } from '@alvus-ai/shared';
 import { Hono } from 'hono';
 import { createDb, type Db } from '../lib/db/client';
@@ -10,6 +10,7 @@ import {
   renameProject,
   type ProjectRow,
 } from '../lib/db/queries/projects';
+import { listProjectSources } from '../lib/db/queries/sources';
 import { authenticate, requireApproved, type AuthBindings, type AuthVariables } from '../middleware/auth';
 import { AppError } from '../middleware/errors';
 
@@ -116,6 +117,23 @@ projects.patch('/:projectId', async (c) => {
 
   const updated = await renameProject(db, { id: project.id, title });
   return c.json(toProject(updated), 200);
+});
+
+projects.get('/:projectId/bibliography', async (c) => {
+  const authUser = c.get('authUser');
+  if (!authUser) throw new AppError(401, 'unauthorized', 'Authentication required');
+
+  const db = createDb(c.env.DATABASE_URL);
+  const project = await loadOwnedProject(db, c.req.param('projectId'), authUser.id);
+
+  // Bibliography is a derived view over `selected` sources -- no separate
+  // authoring step (docs/tdd.md's Flow 1 step 7).
+  const rows = await listProjectSources(db, { projectId: project.id, state: 'selected' });
+  const entries = rows
+    .filter((row): row is typeof row & { citationString: string } => row.citationString !== null)
+    .map((row) => ({ source_id: row.id, citation_text: row.citationString }));
+  const response: BibliographyResponse = { citation_format: project.citationFormat, entries };
+  return c.json(response, 200);
 });
 
 projects.delete('/:projectId', async (c) => {

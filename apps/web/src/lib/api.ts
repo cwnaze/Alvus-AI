@@ -1,23 +1,28 @@
 import type {
   AdminUsersResponse,
   AuthUser,
+  BibliographyResponse,
   CitationFormat,
   LoginResponse,
   Project,
+  ProjectSourcesResponse,
   ProjectsResponse,
   RefreshResponse,
+  SourceAnalysis,
   SourceSearchResponse,
+  SourceStateResponse,
   WaitlistEntriesResponse,
 } from '@alvus-ai/shared';
 import { clearSession, getAccessToken, getRefreshToken, setTokens } from './session';
 
-type ApiErrorBody = { error: { code: string; message: string; correlationId: string } };
+type ApiErrorBody = { error: { code: string; message: string; correlationId: string; meta?: Record<string, unknown> } };
 
 export class ApiError extends Error {
   constructor(
     public status: number,
     public code: string,
     message: string,
+    public meta?: Record<string, unknown>,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -76,7 +81,7 @@ async function request<T>(path: string, init: RequestInit = {}, isRetry = false)
     // next render treats the user as signed out instead of retrying forever.
     if (res.status === 401) clearSession();
     const body = (await res.json().catch(() => null)) as ApiErrorBody | null;
-    throw new ApiError(res.status, body?.error.code ?? 'unknown_error', body?.error.message ?? 'Something went wrong');
+    throw new ApiError(res.status, body?.error.code ?? 'unknown_error', body?.error.message ?? 'Something went wrong', body?.error.meta);
   }
 
   if (res.status === 204) return undefined as T;
@@ -163,4 +168,31 @@ export function searchSources(
     method: 'POST',
     body: JSON.stringify({ query: params.query, open_access_only: params.openAccessOnly }),
   });
+}
+
+export function fetchSources(projectId: string, status?: 'candidate' | 'selected'): Promise<ProjectSourcesResponse> {
+  return request(`/projects/${projectId}/sources${status ? `?status=${status}` : ''}`);
+}
+
+export function analyzeSource(projectId: string, sourceId: string, forceRefresh = false): Promise<SourceAnalysis> {
+  return request(`/projects/${projectId}/sources/${sourceId}/analyze`, {
+    method: 'POST',
+    body: JSON.stringify({ force_refresh: forceRefresh }),
+  });
+}
+
+export function selectSource(projectId: string, sourceId: string): Promise<SourceStateResponse> {
+  return request(`/projects/${projectId}/sources/${sourceId}/select`, { method: 'POST' });
+}
+
+export function deselectSource(projectId: string, sourceId: string): Promise<SourceStateResponse> {
+  return request(`/projects/${projectId}/sources/${sourceId}/deselect`, { method: 'POST' });
+}
+
+export function rejectSource(projectId: string, sourceId: string): Promise<SourceStateResponse> {
+  return request(`/projects/${projectId}/sources/${sourceId}/reject`, { method: 'POST' });
+}
+
+export function fetchBibliography(projectId: string): Promise<BibliographyResponse> {
+  return request(`/projects/${projectId}/bibliography`);
 }

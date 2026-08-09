@@ -1,7 +1,16 @@
-import type { CitationFormat, OaStatus, Project, SourceCandidate } from '@alvus-ai/shared';
-import { useEffect, useState, type FormEvent } from 'react';
+import type { BibliographyEntry, CitationFormat, OaStatus, Project, SourceAnalysis, SourceCandidate } from '@alvus-ai/shared';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ApiError, fetchProject, searchSources } from '../lib/api';
+import {
+  analyzeSource,
+  ApiError,
+  deselectSource,
+  fetchBibliography,
+  fetchProject,
+  rejectSource,
+  searchSources,
+  selectSource,
+} from '../lib/api';
 
 const CITATION_FORMAT_LABELS: Record<CitationFormat, string> = { mla: 'MLA', apa: 'APA', chicago: 'Chicago' };
 
@@ -13,9 +22,72 @@ const OA_STATUS_LABELS: Record<OaStatus, string> = {
   closed: 'Closed access',
 };
 
-function SourceRow({ candidate }: { candidate: SourceCandidate }) {
+function analysisErrorMessage(err: unknown): string {
+  if (!(err instanceof ApiError)) return 'Failed to analyze this source.';
+  if (err.status === 402) {
+    const limit = typeof err.meta?.limit === 'number' ? err.meta.limit : null;
+    return limit !== null
+      ? `You've used all ${limit} source analyses included in your plan this month. Upgrade or wait until it resets.`
+      : "You've reached your plan's monthly limit for source analyses.";
+  }
+  if (err.status === 502) return "We couldn't reach the analysis service right now. Please try again in a bit.";
+  return err.message;
+}
+
+function SourceRow({
+  projectId,
+  candidate,
+  onSelected,
+  onRejected,
+}: {
+  projectId: string;
+  candidate: SourceCandidate;
+  onSelected: () => void;
+  onRejected: () => void;
+}) {
+  const [analysis, setAnalysis] = useState<SourceAnalysis | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [acting, setActing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleAnalyze() {
+    setAnalyzing(true);
+    setError(null);
+    try {
+      setAnalysis(await analyzeSource(projectId, candidate.id));
+    } catch (err) {
+      setError(analysisErrorMessage(err));
+    } finally {
+      setAnalyzing(false);
+    }
+  }
+
+  async function handleSelect() {
+    setActing(true);
+    setError(null);
+    try {
+      await selectSource(projectId, candidate.id);
+      onSelected();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to add this source to the bibliography.');
+      setActing(false);
+    }
+  }
+
+  async function handleReject() {
+    setActing(true);
+    setError(null);
+    try {
+      await rejectSource(projectId, candidate.id);
+      onRejected();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to reject this source.');
+      setActing(false);
+    }
+  }
+
   return (
-    <li data-testid={`source-${candidate.id}`} className="flex flex-col gap-1 rounded border border-slate-200 px-4 py-3">
+    <li data-testid={`source-${candidate.id}`} className="flex flex-col gap-2 rounded border border-slate-200 px-4 py-3">
       <span className="font-medium">{candidate.title}</span>
       <span className="text-sm text-slate-600">
         {candidate.authors.length ? candidate.authors.join(', ') : 'Unknown author'}
@@ -23,6 +95,116 @@ function SourceRow({ candidate }: { candidate: SourceCandidate }) {
         {candidate.venue ? ` · ${candidate.venue}` : ''}
       </span>
       <span className="text-sm text-slate-500">{candidate.oa_status ? OA_STATUS_LABELS[candidate.oa_status] : 'OA status unknown'}</span>
+
+      {analysis && (
+        <div className="flex flex-col gap-2 rounded bg-slate-50 p-3 text-sm">
+          {analysis.full_text_status === 'abstract_only' && (
+            <span data-testid="abstract-only-badge" className="w-fit rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+              Abstract-only analysis
+            </span>
+          )}
+          <p>
+            <strong>Strengths:</strong> {analysis.summary.strengths}
+          </p>
+          <p>
+            <strong>Weaknesses:</strong> {analysis.summary.weaknesses}
+          </p>
+          <p>
+            <strong>Usefulness:</strong> {analysis.usefulness_score.toFixed(1)}/10
+          </p>
+          {analysis.key_quotes.length > 0 && (
+            <div className="flex flex-col gap-1">
+              <strong>Key quotes</strong>
+              <ul className="flex flex-col gap-1">
+                {analysis.key_quotes.map((quote) => (
+                  <li key={quote.quote} className="text-slate-700">
+                    “{quote.quote}” — <span className="italic">{quote.usage_suggestion}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
+
+      <div className="flex gap-2">
+        {!analysis && (
+          <button
+            type="button"
+            onClick={handleAnalyze}
+            disabled={analyzing || acting}
+            className="rounded border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-50"
+          >
+            {analyzing ? 'Analyzing…' : 'Analyze'}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={handleSelect}
+          disabled={acting || analyzing}
+          className="rounded bg-brand px-3 py-1.5 text-sm text-white disabled:opacity-50"
+        >
+          Add to bibliography
+        </button>
+        <button
+          type="button"
+          onClick={handleReject}
+          disabled={acting || analyzing}
+          className="rounded border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-50"
+        >
+          Reject
+        </button>
+      </div>
+    </li>
+  );
+}
+
+function BibliographyEntryRow({
+  projectId,
+  entry,
+  onDeselected,
+}: {
+  projectId: string;
+  entry: BibliographyEntry;
+  onDeselected: () => void;
+}) {
+  const [removing, setRemoving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleDeselect() {
+    setRemoving(true);
+    setError(null);
+    try {
+      await deselectSource(projectId, entry.source_id);
+      onDeselected();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to remove this source.');
+      setRemoving(false);
+    }
+  }
+
+  return (
+    <li data-testid={`bibliography-${entry.source_id}`} className="flex flex-col gap-2 rounded border border-slate-200 px-4 py-3">
+      <span className="text-sm">{entry.citation_text}</span>
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
+      <button
+        type="button"
+        onClick={handleDeselect}
+        disabled={removing}
+        className="w-fit rounded border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-50"
+      >
+        Remove from bibliography
+      </button>
     </li>
   );
 }
@@ -37,6 +219,18 @@ export default function ProjectPage() {
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
 
+  const [bibliography, setBibliography] = useState<BibliographyEntry[]>([]);
+
+  const refreshBibliography = useCallback(async () => {
+    if (!projectId) return;
+    try {
+      const res = await fetchBibliography(projectId);
+      setBibliography(res.entries);
+    } catch {
+      // Non-critical to the rest of the page -- leave the previous list in place.
+    }
+  }, [projectId]);
+
   useEffect(() => {
     if (!projectId) return;
     let cancelled = false;
@@ -47,6 +241,21 @@ export default function ProjectPage() {
       .catch((err) => {
         if (cancelled) return;
         setLoadError(err instanceof ApiError ? err.message : 'Failed to load this project.');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
+  useEffect(() => {
+    if (!projectId) return;
+    let cancelled = false;
+    fetchBibliography(projectId)
+      .then((res) => {
+        if (!cancelled) setBibliography(res.entries);
+      })
+      .catch(() => {
+        // Non-critical to the rest of the page -- leave the previous list in place.
       });
     return () => {
       cancelled = true;
@@ -73,6 +282,15 @@ export default function ProjectPage() {
     } finally {
       setSearching(false);
     }
+  }
+
+  function removeCandidate(id: string) {
+    setCandidates((prev) => (prev ? prev.filter((c) => c.id !== id) : prev));
+  }
+
+  function handleSourceSelected(id: string) {
+    removeCandidate(id);
+    refreshBibliography();
   }
 
   if (loadError) {
@@ -135,13 +353,34 @@ export default function ProjectPage() {
           </div>
         )}
 
-        {candidates !== null && candidates.length > 0 && (
+        {candidates !== null && candidates.length > 0 && projectId && (
           <ul className="flex flex-col gap-3">
             {candidates.map((candidate) => (
-              <SourceRow key={candidate.id} candidate={candidate} />
+              <SourceRow
+                key={candidate.id}
+                projectId={projectId}
+                candidate={candidate}
+                onSelected={() => handleSourceSelected(candidate.id)}
+                onRejected={() => removeCandidate(candidate.id)}
+              />
             ))}
           </ul>
         )}
+
+        <div>
+          <h2 className="text-lg font-medium">Bibliography</h2>
+          {bibliography.length === 0 ? (
+            <p className="text-sm text-slate-600">No sources selected yet.</p>
+          ) : (
+            projectId && (
+              <ul className="mt-3 flex flex-col gap-3">
+                {bibliography.map((entry) => (
+                  <BibliographyEntryRow key={entry.source_id} projectId={projectId} entry={entry} onDeselected={refreshBibliography} />
+                ))}
+              </ul>
+            )
+          )}
+        </div>
       </section>
     </main>
   );
