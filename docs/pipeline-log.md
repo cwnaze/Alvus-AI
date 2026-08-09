@@ -61,3 +61,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-09T16:01:21.993Z | US-013 | done | PR #28 merged after 2 review round(s)
 2026-08-09T16:15:00.000Z | US-014 | in_progress | Branch feature/us-014-create-list-rename-and-delete-a-project created; building projects CRUD (create with title+citation format, list dashboard, rename, delete with confirmation, owner-only access).
 2026-08-09T16:53:00.314Z | US-014 | done | PR #30 merged after 2 review round(s)
+2026-08-09T17:00:00.000Z | US-015 | in_progress | Branch feature/us-015-source-discovery-search created; building source discovery search (Semantic Scholar + CrossRef search with Unpaywall OA resolution, external_works/project_sources schema, candidate results list with empty/error states, owner-only access).
