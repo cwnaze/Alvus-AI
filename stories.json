@@ -371,7 +371,7 @@
       "dependsOn": [
         "US-011"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -385,7 +385,7 @@
         ]
       },
       "demo": "docs/demos/US-012.md",
-      "branch": null,
+      "branch": "feature/us-012-password-reset-flow",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,

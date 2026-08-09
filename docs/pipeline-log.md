@@ -51,3 +51,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-08T21:50:00.000Z | US-011 | pending | Crash resume: the 20:35:00 in_progress marker's story-start run also died before creating the branch or PR on remote (no local/remote branch found); no work exists to resume, so reset to pending for clean re-selection.
 2026-08-08T21:55:00.000Z | US-011 | in_progress | Branch feature/us-011-waitlist-signup-admin-approval-and-login created; building waitlist signup, admin approval, and login (Supabase Auth JWT middleware, /api/auth + /api/admin routes, React auth/admin pages, waitlist status screen).
 2026-08-09T00:18:18.585Z | US-011 | done | PR #24 merged after 2 review round(s)
+2026-08-09T00:26:22.000Z | US-012 | in_progress | Branch feature/us-012-password-reset-flow created; building password reset request/confirm endpoints (Supabase resetPasswordForEmail + verifyOtp recovery token) and frontend forgot/reset password pages.
