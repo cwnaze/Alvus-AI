@@ -154,8 +154,32 @@ export function extractResultText(json) {
 // without embedding JS. `file` is the Claude action's execution_file — parsed
 // as JSON and narrowed to its terminal result message before checking, per
 // extractResultText above, rather than matched against the raw file text.
+//
+// A second mode, `node quota-signal.mjs marker <ISO>`, prints
+// formatQuotaUntilMarker's output for that timestamp. pr-review.yml's bash step
+// calls this instead of hand-building the `<!-- quota-until:... -->` string itself,
+// so there is exactly one place that format is written down — see
+// parseQuotaUntilMarker's counterpart in watchdog.mjs, which the two formats must
+// stay in sync with.
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const [, , file, sinceArg, windowArg] = process.argv;
+  const [, , cmdOrFile, arg2, arg3] = process.argv;
+  if (cmdOrFile === 'marker') {
+    if (!arg2) {
+      console.error('Usage: quota-signal.mjs marker <ISO>');
+      process.exit(2);
+    }
+    const d = new Date(arg2);
+    if (Number.isNaN(d.getTime())) {
+      console.error(`Not a valid date: ${arg2}`);
+      process.exit(2);
+    }
+    console.log(formatQuotaUntilMarker(d));
+    process.exit(0);
+  }
+
+  const file = cmdOrFile;
+  const sinceArg = arg2;
+  const windowArg = arg3;
   if (!file) {
     console.error('Usage: quota-signal.mjs <file> [sinceISO] [windowHours]');
     process.exit(2);

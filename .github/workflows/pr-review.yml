@@ -108,10 +108,14 @@ jobs:
                 gh pr edit "$PR" --add-label quota-blocked || true
                 # Leading HTML-comment marker is machine-readable: recoverQuotaBlockedPrs()
                 # in watchdog.mjs parses it back out (parseQuotaUntilMarker in
-                # quota-signal.mjs, same format as formatQuotaUntilMarker there) to gate
-                # its retry on this exact reset time, instead of the log-scrape
-                # rateLimitedUntil() uses, which can't see this signal at all.
-                comment_body="<!-- quota-until:$until -->"$'\n'"pr-review hit the Claude usage limit mid-run (expected back around $until). No human action needed — pipeline-watchdog will push an empty commit to re-trigger review once the window reopens."
+                # quota-signal.mjs) to gate its retry on this exact reset time, instead
+                # of the log-scrape rateLimitedUntil() uses, which can't see this signal
+                # at all. Built via quota-signal.mjs's own `marker` mode (same
+                # formatQuotaUntilMarker function watchdog.mjs's counterpart matches
+                # against) rather than hand-written here, so there's one place, not two,
+                # that has to agree on the format.
+                marker=$(node .github/scripts/quota-signal.mjs marker "$until")
+                comment_body="$marker"$'\n'"pr-review hit the Claude usage limit mid-run (expected back around $until). No human action needed — pipeline-watchdog will push an empty commit to re-trigger review once the window reopens."
                 gh pr comment "$PR" --body "$comment_body" || true
                 exit 1
               fi
