@@ -1,4 +1,4 @@
-import type { AuthUser, LoginResponse } from '@alvus-ai/shared';
+import type { AuthUser, LoginResponse, RefreshResponse } from '@alvus-ai/shared';
 import { Hono } from 'hono';
 import { createDb } from '../lib/db/client';
 import { createPendingUser, getUserById, type UserRow } from '../lib/db/queries/waitlist';
@@ -81,6 +81,22 @@ auth.post('/login', async (c) => {
     access_token: data.session.access_token,
     refresh_token: data.session.refresh_token,
     user: toAuthUser(userRow),
+  };
+  return c.json(response, 200);
+});
+
+auth.post('/refresh', async (c) => {
+  const body = (await c.req.json().catch(() => null)) as { refresh_token?: unknown } | null;
+  const refreshToken = typeof body?.refresh_token === 'string' ? body.refresh_token : '';
+  if (!refreshToken) throw new AppError(401, 'invalid_refresh_token', 'A refresh token is required');
+
+  const supabase = createSupabaseAdmin(c.env.SUPABASE_URL, c.env.SUPABASE_SECRET_KEY);
+  const { data, error } = await supabase.auth.refreshSession({ refresh_token: refreshToken });
+  if (error || !data.session) throw new AppError(401, 'invalid_refresh_token', 'Invalid or expired refresh token');
+
+  const response: RefreshResponse = {
+    access_token: data.session.access_token,
+    refresh_token: data.session.refresh_token,
   };
   return c.json(response, 200);
 });

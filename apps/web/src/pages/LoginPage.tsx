@@ -18,7 +18,7 @@ export default function LoginPage() {
     setPending(true);
     try {
       const res = await login(email, password);
-      auth.signIn(res.access_token, res.user);
+      auth.signIn(res.access_token, res.refresh_token, res.user);
       navigate('/', { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');

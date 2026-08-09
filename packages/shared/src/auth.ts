@@ -20,6 +20,11 @@ export type LoginResponse = {
   user: AuthUser;
 };
 
+export type RefreshResponse = {
+  access_token: string;
+  refresh_token: string;
+};
+
 export type WaitlistEntry = {
   id: string;
   user_id: string;

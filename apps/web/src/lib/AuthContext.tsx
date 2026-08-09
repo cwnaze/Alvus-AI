@@ -6,7 +6,7 @@ import { clearSession, getAccessToken, getStoredUser, setSession, setStoredUser 
 type AuthContextValue = {
   user: AuthUser | null;
   loading: boolean;
-  signIn: (accessToken: string, user: AuthUser) => void;
+  signIn: (accessToken: string, refreshToken: string, user: AuthUser) => void;
   signOut: () => Promise<void>;
 };
 
@@ -45,8 +45,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signIn = useCallback((accessToken: string, freshUser: AuthUser) => {
-    setSession(accessToken, freshUser);
+  const signIn = useCallback((accessToken: string, refreshToken: string, freshUser: AuthUser) => {
+    setSession(accessToken, refreshToken, freshUser);
     setUser(freshUser);
   }, []);
 

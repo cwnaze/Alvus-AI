@@ -1,5 +1,5 @@
-import type { AuthUser, LoginResponse, WaitlistEntriesResponse } from '@alvus-ai/shared';
-import { clearSession, getAccessToken } from './session';
+import type { AuthUser, LoginResponse, RefreshResponse, WaitlistEntriesResponse } from '@alvus-ai/shared';
+import { clearSession, getAccessToken, getRefreshToken, setTokens } from './session';
 
 type ApiErrorBody = { error: { code: string; message: string; correlationId: string } };
 
@@ -14,7 +14,37 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+// Shared across concurrent 401s so a burst of requests refreshes once, not once
+// per request.
+let inFlightRefresh: Promise<boolean> | null = null;
+
+async function refreshAccessToken(): Promise<boolean> {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) return false;
+
+  if (!inFlightRefresh) {
+    inFlightRefresh = (async () => {
+      try {
+        const res = await fetch('/api/auth/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        });
+        if (!res.ok) return false;
+        const body = (await res.json()) as RefreshResponse;
+        setTokens(body.access_token, body.refresh_token);
+        return true;
+      } catch {
+        return false;
+      } finally {
+        inFlightRefresh = null;
+      }
+    })();
+  }
+  return inFlightRefresh;
+}
+
+async function request<T>(path: string, init: RequestInit = {}, isRetry = false): Promise<T> {
   const headers = new Headers(init.headers);
   headers.set('Content-Type', 'application/json');
   const token = getAccessToken();
@@ -23,9 +53,17 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`/api${path}`, { ...init, headers });
 
   if (!res.ok) {
-    // A 401 means our stored token is dead (expired, or the session was
-    // revoked by /auth/logout elsewhere) -- drop it so the next render treats
-    // the user as signed out instead of retrying with the same bad token.
+    // A 401 on an expired (but not revoked) access token is recoverable via
+    // the refresh token -- retry once with a fresh access token before giving
+    // up and treating the user as signed out. Never retry the refresh call
+    // itself (it doesn't carry an access token, so a 401 there means the
+    // refresh token is dead too).
+    if (res.status === 401 && !isRetry && path !== '/auth/refresh' && (await refreshAccessToken())) {
+      return request<T>(path, init, true);
+    }
+    // A 401 here means there's no usable session (expired refresh token,
+    // revoked by /auth/logout elsewhere, or never signed in) -- drop it so the
+    // next render treats the user as signed out instead of retrying forever.
     if (res.status === 401) clearSession();
     const body = (await res.json().catch(() => null)) as ApiErrorBody | null;
     throw new ApiError(res.status, body?.error.code ?? 'unknown_error', body?.error.message ?? 'Something went wrong');

@@ -6,17 +6,17 @@ import type { AuthBindings, AuthVariables } from '../middleware/auth';
 
 type ErrorEnvelope = { error: { code: string; message: string; correlationId: string } };
 
-const { createUser, deleteUser, signInWithPassword, getUser, signOut, createPendingUser, getUserById } = vi.hoisted(
-  () => ({
+const { createUser, deleteUser, signInWithPassword, getUser, signOut, refreshSession, createPendingUser, getUserById } =
+  vi.hoisted(() => ({
     createUser: vi.fn(),
     deleteUser: vi.fn(),
     signInWithPassword: vi.fn(),
     getUser: vi.fn(),
     signOut: vi.fn(),
+    refreshSession: vi.fn(),
     createPendingUser: vi.fn(),
     getUserById: vi.fn(),
-  }),
-);
+  }));
 
 vi.mock('../lib/supabase/client', () => ({
   createSupabaseAdmin: () => ({
@@ -24,6 +24,7 @@ vi.mock('../lib/supabase/client', () => ({
       admin: { createUser, deleteUser, signOut },
       signInWithPassword,
       getUser,
+      refreshSession,
     },
   }),
 }));
@@ -132,6 +133,34 @@ describe('POST /login', () => {
       refresh_token: 'rt',
       user: { id: 'user-1', email: 'pending@example.test', status: 'pending', role: 'member', created_at: '2026-01-01T00:00:00.000Z' },
     });
+  });
+});
+
+describe('POST /refresh', () => {
+  it('401s without a refresh token', async () => {
+    const res = await jsonRequest('/refresh', {});
+    expect(res.status).toBe(401);
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('invalid_refresh_token');
+  });
+
+  it('401s an invalid or expired refresh token', async () => {
+    refreshSession.mockResolvedValueOnce({ data: { session: null }, error: { message: 'expired' } });
+    const res = await jsonRequest('/refresh', { refresh_token: 'stale-rt' });
+    expect(res.status).toBe(401);
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('invalid_refresh_token');
+  });
+
+  it('returns a rotated access/refresh token pair', async () => {
+    refreshSession.mockResolvedValueOnce({
+      data: { session: { access_token: 'new-at', refresh_token: 'new-rt' } },
+      error: null,
+    });
+
+    const res = await jsonRequest('/refresh', { refresh_token: 'old-rt' });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ access_token: 'new-at', refresh_token: 'new-rt' });
+    expect(refreshSession).toHaveBeenCalledWith({ refresh_token: 'old-rt' });
   });
 });
 

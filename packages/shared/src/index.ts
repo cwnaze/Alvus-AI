@@ -6,6 +6,7 @@ export {
   type UserRole,
   type AuthUser,
   type LoginResponse,
+  type RefreshResponse,
   type WaitlistEntry,
   type WaitlistEntriesResponse,
 } from './auth';
