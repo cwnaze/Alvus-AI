@@ -60,3 +60,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-09T02:45:00.000Z | US-013 | in_progress | Branch feature/us-013-admin-user-directory created; building admin user directory (search/filter by status+tier, view basic info, revoke an approved user's access).
 2026-08-09T16:01:21.993Z | US-013 | done | PR #28 merged after 2 review round(s)
 2026-08-09T16:15:00.000Z | US-014 | in_progress | Branch feature/us-014-create-list-rename-and-delete-a-project created; building projects CRUD (create with title+citation format, list dashboard, rename, delete with confirmation, owner-only access).
+2026-08-09T16:53:00.314Z | US-014 | done | PR #30 merged after 2 review round(s)
