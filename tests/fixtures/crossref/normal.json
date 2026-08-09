@@ -1,0 +1,25 @@
+{
+  "status": "ok",
+  "message": {
+    "total-results": 2,
+    "items": [
+      {
+        "DOI": "10.1234/climate-2020",
+        "title": ["Climate Policy Rhetoric in the 21st Century"],
+        "author": [
+          { "given": "Jane", "family": "Doe" },
+          { "given": "John", "family": "Smith" }
+        ],
+        "published": { "date-parts": [[2020]] },
+        "container-title": ["Journal of Environmental Communication"]
+      },
+      {
+        "DOI": "10.1234/rhetoric-2019",
+        "title": ["Rhetorical Strategies in Environmental Advocacy"],
+        "author": [{ "given": "Priya", "family": "Nair" }],
+        "published": { "date-parts": [[2019]] },
+        "container-title": ["Rhetoric Review"]
+      }
+    ]
+  }
+}

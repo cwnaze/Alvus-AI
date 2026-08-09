@@ -73,7 +73,9 @@ function ProjectRow({ project, onChanged }: { project: Project; onChanged: (upda
           </form>
         ) : (
           <div className="flex flex-col">
-            <span className="font-medium">{project.title}</span>
+            <Link to={`/projects/${project.id}`} className="font-medium text-brand underline">
+              {project.title}
+            </Link>
             <span className="text-sm text-slate-600">
               {CITATION_FORMAT_LABELS[project.citation_format]} · {project.status}
             </span>
