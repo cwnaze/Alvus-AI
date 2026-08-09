@@ -6,6 +6,7 @@ import type {
   Project,
   ProjectsResponse,
   RefreshResponse,
+  SourceSearchResponse,
   WaitlistEntriesResponse,
 } from '@alvus-ai/shared';
 import { clearSession, getAccessToken, getRefreshToken, setTokens } from './session';
@@ -148,4 +149,18 @@ export function renameProject(projectId: string, title: string): Promise<Project
 
 export function deleteProject(projectId: string): Promise<void> {
   return request(`/projects/${projectId}`, { method: 'DELETE' });
+}
+
+export function fetchProject(projectId: string): Promise<Project> {
+  return request(`/projects/${projectId}`);
+}
+
+export function searchSources(
+  projectId: string,
+  params: { query?: string; openAccessOnly?: boolean } = {},
+): Promise<SourceSearchResponse> {
+  return request(`/projects/${projectId}/sources/search`, {
+    method: 'POST',
+    body: JSON.stringify({ query: params.query, open_access_only: params.openAccessOnly }),
+  });
 }

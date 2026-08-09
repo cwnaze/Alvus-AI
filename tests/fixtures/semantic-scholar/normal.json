@@ -1,0 +1,26 @@
+{
+  "total": 2,
+  "offset": 0,
+  "data": [
+    {
+      "paperId": "S2-1",
+      "title": "Climate Policy Rhetoric in the 21st Century",
+      "abstract": "An analysis of persuasive strategies used in climate policy discourse.",
+      "year": 2020,
+      "venue": "Journal of Environmental Communication",
+      "authors": [{ "authorId": "A1", "name": "Jane Doe" }, { "authorId": "A2", "name": "John Smith" }],
+      "externalIds": { "DOI": "10.1234/CLIMATE-2020" },
+      "openAccessPdf": { "url": "https://example.test/climate-2020.pdf", "status": "GOLD" }
+    },
+    {
+      "paperId": "S2-2",
+      "title": "Discourse Analysis Methods in Policy Studies",
+      "abstract": "A survey of discourse analysis methodologies applied to policy studies.",
+      "year": 2018,
+      "venue": "Discourse & Society",
+      "authors": [{ "authorId": "A3", "name": "Amara Chen" }],
+      "externalIds": {},
+      "openAccessPdf": null
+    }
+  ]
+}

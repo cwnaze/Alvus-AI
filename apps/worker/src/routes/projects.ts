@@ -48,7 +48,7 @@ function parseCursor(value: string | null): string | null {
 // Unauthorized project access is 403, not a leaky 404 -- see docs/api.md's
 // cross-cutting rules. A malformed/nonexistent id is still 404: there is no
 // row to be unauthorized *about*.
-async function loadOwnedProject(db: Db, projectId: string, ownerId: string): Promise<ProjectRow> {
+export async function loadOwnedProject(db: Db, projectId: string, ownerId: string): Promise<ProjectRow> {
   if (!UUID_RE.test(projectId)) throw new AppError(404, 'project_not_found', 'No such project');
   const project = await getProjectById(db, projectId);
   if (!project) throw new AppError(404, 'project_not_found', 'No such project');
