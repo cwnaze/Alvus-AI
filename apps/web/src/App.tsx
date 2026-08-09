@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './lib/AuthContext';
+import AdminUsersPage from './pages/AdminUsersPage';
 import AdminWaitlistPage from './pages/AdminWaitlistPage';
 import DashboardPage from './pages/DashboardPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
@@ -49,6 +50,14 @@ export default function App() {
             element={
               <AdminRoute>
                 <AdminWaitlistPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <AdminRoute>
+                <AdminUsersPage />
               </AdminRoute>
             }
           />

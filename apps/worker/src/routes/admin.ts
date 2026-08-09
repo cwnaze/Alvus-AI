@@ -1,5 +1,11 @@
-import type { WaitlistEntriesResponse, WaitlistEntry, WaitlistStatus } from '@alvus-ai/shared';
-import { WAITLIST_STATUSES } from '@alvus-ai/shared';
+import type {
+  AdminUser,
+  AdminUsersResponse,
+  WaitlistEntriesResponse,
+  WaitlistEntry,
+  WaitlistStatus,
+} from '@alvus-ai/shared';
+import { TIERS, WAITLIST_STATUSES } from '@alvus-ai/shared';
 import { Hono, type Context } from 'hono';
 import { createDb } from '../lib/db/client';
 import {
@@ -7,8 +13,10 @@ import {
   getUserById,
   listWaitlistEntries,
   rejectWaitlistUser,
+  type UserRow,
   type WaitlistSignupRow,
 } from '../lib/db/queries/waitlist';
+import { listUsers, revokeUserAccess } from '../lib/db/queries/users';
 import { authenticate, requireAdmin, requireApproved, type AuthBindings, type AuthVariables } from '../middleware/auth';
 import { AppError } from '../middleware/errors';
 
@@ -22,6 +30,20 @@ function toWaitlistEntry(row: WaitlistSignupRow): WaitlistEntry {
     status: row.status,
     requested_at: row.requestedAt ? row.requestedAt.toISOString() : null,
     reviewed_at: row.reviewedAt ? row.reviewedAt.toISOString() : null,
+  };
+}
+
+// There is no `subscriptions` table yet (that's US-023/024's Stripe billing
+// work per docs/data-model.md) -- until then no account can be on a paid
+// plan, so every user is on `free` by definition.
+function toAdminUser(row: UserRow): AdminUser {
+  return {
+    id: row.id,
+    email: row.email,
+    status: row.status,
+    role: row.role,
+    tier: 'free',
+    created_at: row.createdAt.toISOString(),
   };
 }
 
@@ -78,5 +100,48 @@ async function readReason(c: Context<Env>): Promise<string | undefined> {
 
 admin.post('/waitlist/:userId/approve', (c) => review(c, 'approve'));
 admin.post('/waitlist/:userId/reject', (c) => review(c, 'reject'));
+
+admin.get('/users', async (c) => {
+  const status = c.req.query('status');
+  if (status && !WAITLIST_STATUSES.includes(status as WaitlistStatus)) {
+    throw new AppError(400, 'invalid_status', `status must be one of ${WAITLIST_STATUSES.join(', ')}`);
+  }
+  const tier = c.req.query('tier');
+  if (tier && !TIERS.includes(tier as (typeof TIERS)[number])) {
+    throw new AppError(400, 'invalid_tier', `tier must be one of ${TIERS.join(', ')}`);
+  }
+  const q = c.req.query('q') || undefined;
+  const cursor = c.req.query('cursor') ?? null;
+
+  const db = createDb(c.env.DATABASE_URL);
+  // No account can be on a paid tier yet (see toAdminUser) -- a filter for
+  // anything but `free` matches nobody, so skip the query entirely.
+  if (tier && tier !== 'free') {
+    const response: AdminUsersResponse = { users: [], next_cursor: null };
+    return c.json(response, 200);
+  }
+
+  const { users: rows, nextCursor } = await listUsers(db, { q, status: status as WaitlistStatus | undefined, cursor });
+  const response: AdminUsersResponse = { users: rows.map(toAdminUser), next_cursor: nextCursor };
+  return c.json(response, 200);
+});
+
+admin.post('/users/:userId/revoke', async (c) => {
+  const userId = c.req.param('userId');
+  if (!userId || !UUID_RE.test(userId)) throw new AppError(404, 'user_not_found', 'No such user');
+
+  const db = createDb(c.env.DATABASE_URL);
+  const target = await getUserById(db, userId);
+  if (!target) throw new AppError(404, 'user_not_found', 'No such user');
+  if (target.status !== 'approved') {
+    throw new AppError(409, 'not_approved', "Only an approved user's access can be revoked");
+  }
+
+  const reviewer = c.get('authUser');
+  if (!reviewer) throw new AppError(401, 'unauthorized', 'Authentication required');
+
+  const updated = await revokeUserAccess(db, { userId, reviewerId: reviewer.id, reason: await readReason(c) });
+  return c.json({ userId: updated.id, status: updated.status }, 200);
+});
 
 export default admin;

@@ -14,9 +14,14 @@ export default function DashboardPage() {
         <div className="flex items-center gap-4 text-sm text-slate-600">
           <span>{auth.user?.email}</span>
           {auth.user?.role === 'admin' && (
-            <Link to="/admin/waitlist" className="text-brand underline">
-              Waitlist admin
-            </Link>
+            <>
+              <Link to="/admin/waitlist" className="text-brand underline">
+                Waitlist admin
+              </Link>
+              <Link to="/admin/users" className="text-brand underline">
+                User directory
+              </Link>
+            </>
           )}
           <button onClick={() => auth.signOut()} className="rounded border border-slate-300 px-3 py-1">
             Log out

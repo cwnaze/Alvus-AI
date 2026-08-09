@@ -55,7 +55,8 @@ the billing tier — tier lives on `subscriptions`.
 | GET | `/admin/waitlist` | admin | `?status=&cursor=` | `200 { entries[], next_cursor }` | `403` |
 | POST | `/admin/waitlist/:userId/approve` | admin | — | `200 { userId, status: "approved" }` | `404`, `409` |
 | POST | `/admin/waitlist/:userId/reject` | admin | `{ reason? }` | `200 { userId, status: "rejected" }` | `404`, `409` |
-| GET | `/admin/users` | admin | `?q=&tier=&cursor=` | `200 { users[], next_cursor }` | `403` |
+| GET | `/admin/users` | admin | `?q=&status=&tier=&cursor=` | `200 { users[], next_cursor }` | `403` |
+| POST | `/admin/users/:userId/revoke` | admin | `{ reason? }` | `200 { userId, status: "rejected" }` — only an `approved` user | `403`, `404`, `409 not_approved` |
 
 ## Projects
 
