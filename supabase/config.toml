@@ -156,14 +156,24 @@ max_indexes = 5
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-site_url = "http://localhost:8787"
+site_url = "env(PUBLIC_APP_URL)"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
-# A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-# Matches PUBLIC_APP_URL (see .env.example) -- the password-reset email link's
-# redirectTo is checked against this list, or GoTrue rejects resetPasswordForEmail
-# with a 400 before it ever sends the email.
-additional_redirect_urls = ["http://localhost:8787", "http://127.0.0.1:8787"]
+# A list of URLs (wildcards allowed) that auth providers are permitted to redirect to post
+# authentication. The password-reset email link's redirectTo (PUBLIC_APP_URL + /reset-password,
+# see auth.ts) is checked against this list -- and despite GoTrue's own docs describing this
+# list as "exact URLs", an unlisted redirectTo does NOT reject resetPasswordForEmail; it
+# silently falls back to site_url and drops the path, so a broken email link produces no
+# visible error anywhere. The `/**` wildcard is what makes the `/reset-password` path (and
+# any future path under the app's origin) match.
+#
+# Hardcoded to localhost rather than env(PUBLIC_APP_URL) like site_url above: confirmed by
+# testing `supabase config push` against the shared dev project that env() substitution inside
+# an array element is not resolved (it pushes the literal string "env(NAME)/**"), only a
+# field's entire value is. The deployed project's redirect allow-list is instead pushed
+# by .github/scripts/push-supabase-auth-config.mjs, which PATCHes the Management API
+# directly with the real PUBLIC_APP_URL and isn't affected by that limitation.
+additional_redirect_urls = ["http://localhost:8787/**", "http://127.0.0.1:8787/**"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to auth.external_url.

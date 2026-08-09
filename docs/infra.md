@@ -37,6 +37,24 @@ merge gate.
      non-interactive `link` needs a `SUPABASE_DB_PASSWORD` secret this project doesn't
      provision; `--db-url` reaches the same database with the `DATABASE_URL` secret CI
      already has.
+   - `.github/scripts/push-supabase-auth-config.mjs` PATCHes the remote project's
+     `site_url`/redirect allow-list (Management API, `SUPABASE_ACCESS_TOKEN` +
+     `SUPABASE_PROJECT_REF`, no DB connection) to `PUBLIC_APP_URL` /
+     `PUBLIC_APP_URL/**`. `supabase/config.toml`'s `[auth]` section — the same two
+     fields, plus the custom recovery email template — only ever applies to local
+     `supabase start` stacks; without this step the remote project keeps whatever
+     `site_url`/allow-list it last had (or the Supabase-provisioned default:
+     `http://localhost:3000`, an empty allow-list) forever, silently breaking the
+     password-reset email link (GoTrue falls back to `site_url` and drops the path
+     when `redirectTo` isn't on the allow-list — it does not error).
+     Deliberately **not** `supabase config push`: that command pushes the entire
+     `[auth]` diff as one request, including the recovery email template, and the
+     shared project is on the free tier with no custom SMTP configured — Supabase's
+     Management API rejects any email-template change in that state with a 400,
+     failing the whole push, `site_url`/allow-list included. The recovery template
+     itself stays local-stack-only until the project has a paid plan or custom SMTP;
+     that gap is cosmetic (default GoTrue copy instead of the branded one), unlike
+     the `site_url`/allow-list gap this step closes, which was a functional break.
 3. Only after migrations succeed: `wrangler deploy` to production.
 4. Every app-runtime variable (the "App runtime" section of `.env.example`) is bound to
    the Worker via `wrangler secret put`, sourced from the same repo secrets — so a value
