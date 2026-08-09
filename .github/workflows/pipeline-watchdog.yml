@@ -42,9 +42,14 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: write
+  # recoverQuotaBlockedPrs() pushes to a PR branch and posts PR comments/labels, but
+  # every git/gh call in this job authenticates explicitly with PIPELINE_PAT (the
+  # checkout step's `token:` and the script step's `GH_TOKEN`), so the default
+  # GITHUB_TOKEN these permissions would scope is never actually used here. Left at
+  # what the job needs from GITHUB_TOKEN itself (nothing beyond read), not what the
+  # PIPELINE_PAT-driven actions inside it do.
+  contents: read
   issues: write
-  pull-requests: write
 
 jobs:
   watch:
