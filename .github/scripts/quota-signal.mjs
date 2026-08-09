@@ -128,11 +128,21 @@ export function parseQuotaUntilMarker(text) {
  * @anthropic-ai/claude-agent-sdk. Anything else in the stream is the run's
  * *activity*, not its *outcome*.
  *
+ * Even that narrowed text is gated on `is_error`: a normal, successful
+ * completion can still legitimately *describe* the QUOTA_SIGNALS strings
+ * (a review of this very file, summarizing them, for instance) without a
+ * quota hit having happened. Per the module docstring, a real quota death
+ * always ends the run with `is_error:true` — confirmed on PR #34 — so text
+ * from a clean (`is_error:false`) result carries no quota signal worth
+ * checking, and skipping it removes that false-positive path entirely
+ * rather than just narrowing it.
+ *
  * @param {string} json raw contents of the execution file
  * @returns {string} text to run quota checks against; empty string if the
- *   file isn't parseable JSON or holds no result message (treated as "no
- *   signal", not a match — a missed real quota hit falls back to
- *   needs-human, which is the safe direction to fail in)
+ *   file isn't parseable JSON, holds no result message, or that result
+ *   message is not an error (treated as "no signal", not a match — a missed
+ *   real quota hit falls back to needs-human, which is the safe direction
+ *   to fail in)
  */
 export function extractResultText(json) {
   let messages;
@@ -143,7 +153,7 @@ export function extractResultText(json) {
   }
   if (!Array.isArray(messages)) return '';
   const result = [...messages].reverse().find((m) => m && m.type === 'result');
-  if (!result) return '';
+  if (!result || !result.is_error) return '';
   return [result.result, ...(Array.isArray(result.errors) ? result.errors : [])]
     .filter((s) => typeof s === 'string')
     .join('\n');
