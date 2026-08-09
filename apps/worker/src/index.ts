@@ -6,6 +6,7 @@ import type { AuthVariables } from './middleware/auth';
 import { CORRELATION_ID_HEADER, onError, type ErrorVariables } from './middleware/errors';
 import adminRoutes from './routes/admin';
 import authRoutes from './routes/auth';
+import projectsRoutes from './routes/projects';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -21,6 +22,7 @@ app.onError(onError);
 
 app.route('/api/auth', authRoutes);
 app.route('/api/admin', adminRoutes);
+app.route('/api/projects', projectsRoutes);
 
 app.get('/api/health', async (c) => {
   // Deliberately not closed: one connection per request against Supabase's

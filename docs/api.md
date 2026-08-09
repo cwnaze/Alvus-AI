@@ -65,7 +65,7 @@ Citation format is set at creation and immutable thereafter.
 | Method | Path | Auth | Request | Response | Errors |
 |---|---|---|---|---|---|
 | POST | `/projects` | authenticated | `{ title, citation_format: "mla"\|"apa"\|"chicago" }` | `201 <project>` | `400`, `402` project-count limit |
-| GET | `/projects` | authenticated | `?cursor=` | `200 { projects[], next_cursor }` | `401` |
+| GET | `/projects` | authenticated | `?cursor=` | `200 { projects[], next_cursor }` | `400 invalid_cursor`, `401` |
 | GET | `/projects/:projectId` | authenticated | — | `200 <project>` | `403` not owner, `404` |
 | PATCH | `/projects/:projectId` | authenticated | `{ title }` | `200 <project>` | `403`, `404`, `422 citation_format_immutable` |
 | DELETE | `/projects/:projectId` | authenticated | — | `204` (cascades sources, document, feedback, share links) | `403`, `404` |

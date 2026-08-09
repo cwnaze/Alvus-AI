@@ -15,6 +15,7 @@ export default defineConfig({
     './apps/worker/src/lib/db/schema/users.ts',
     './apps/worker/src/lib/db/schema/waitlist-signups.ts',
     './apps/worker/src/lib/db/schema/tier-limits.ts',
+    './apps/worker/src/lib/db/schema/projects.ts',
   ],
   out: './drizzle/migrations',
   dbCredentials: {
