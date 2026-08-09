@@ -134,8 +134,8 @@ export function revokeUserAccess(userId: string, reason?: string): Promise<{ use
   return request(`/admin/users/${userId}/revoke`, { method: 'POST', body: JSON.stringify({ reason }) });
 }
 
-export function fetchProjects(): Promise<ProjectsResponse> {
-  return request('/projects');
+export function fetchProjects(cursor?: string | null): Promise<ProjectsResponse> {
+  return request(`/projects${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ''}`);
 }
 
 export function createProject(title: string, citationFormat: CitationFormat): Promise<Project> {

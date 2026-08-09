@@ -182,6 +182,8 @@ function NewProjectForm({ onCreated, onCancel }: { onCreated: (project: Project)
 export default function DashboardPage() {
   const auth = useAuth();
   const [projects, setProjects] = useState<Project[] | null>(null);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
@@ -190,7 +192,10 @@ export default function DashboardPage() {
     async function load() {
       try {
         const res = await fetchProjects();
-        if (!cancelled) setProjects(res.projects);
+        if (!cancelled) {
+          setProjects(res.projects);
+          setNextCursor(res.next_cursor);
+        }
       } catch (err) {
         if (!cancelled) setError(err instanceof ApiError ? err.message : 'Failed to load projects.');
       }
@@ -200,6 +205,21 @@ export default function DashboardPage() {
       cancelled = true;
     };
   }, []);
+
+  async function handleLoadMore() {
+    if (!nextCursor) return;
+    setLoadingMore(true);
+    setError(null);
+    try {
+      const res = await fetchProjects(nextCursor);
+      setProjects((prev) => [...(prev ?? []), ...res.projects]);
+      setNextCursor(res.next_cursor);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to load more projects.');
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   function handleCreated(project: Project) {
     setProjects((prev) => [...(prev ?? []), project]);
@@ -269,6 +289,16 @@ export default function DashboardPage() {
               <ProjectRow key={project.id} project={project} onChanged={(updated) => handleChanged(project.id, updated)} />
             ))}
           </ul>
+        )}
+
+        {nextCursor && (
+          <button
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            className="self-center rounded border border-slate-300 px-4 py-2 disabled:opacity-50"
+          >
+            {loadingMore ? 'Loading…' : 'Load more'}
+          </button>
         )}
       </section>
     </main>
