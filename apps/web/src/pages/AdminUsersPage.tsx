@@ -8,15 +8,21 @@ export default function AdminUsersPage() {
   const [error, setError] = useState<string | null>(null);
   const [busyUserId, setBusyUserId] = useState<string | null>(null);
   const [q, setQ] = useState('');
+  const [debouncedQ, setDebouncedQ] = useState('');
   const [status, setStatus] = useState('');
   const [tier, setTier] = useState('');
   const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQ(q), 300);
+    return () => clearTimeout(timer);
+  }, [q]);
+
+  useEffect(() => {
     let cancelled = false;
     async function load() {
       try {
-        const res = await fetchAdminUsers({ q: q || undefined, status: status || undefined, tier: tier || undefined });
+        const res = await fetchAdminUsers({ q: debouncedQ || undefined, status: status || undefined, tier: tier || undefined });
         if (!cancelled) setUsers(res.users);
       } catch (err) {
         if (!cancelled) setError(err instanceof ApiError ? err.message : 'Failed to load users.');
@@ -26,7 +32,7 @@ export default function AdminUsersPage() {
     return () => {
       cancelled = true;
     };
-  }, [q, status, tier, reloadToken]);
+  }, [debouncedQ, status, tier, reloadToken]);
 
   async function handleRevoke(userId: string) {
     setError(null);
@@ -58,7 +64,7 @@ export default function AdminUsersPage() {
               type="search"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              className="rounded border border-slate-300 px-3 py-2"
+              className="w-64 rounded border border-slate-300 px-3 py-2"
             />
           </label>
           <label className="flex flex-col gap-1">
