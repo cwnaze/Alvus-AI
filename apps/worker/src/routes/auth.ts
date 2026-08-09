@@ -109,6 +109,51 @@ auth.post('/logout', authenticate, async (c) => {
   return c.body(null, 204);
 });
 
+auth.post('/password-reset/request', async (c) => {
+  const body = (await c.req.json().catch(() => null)) as { email?: unknown } | null;
+  const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
+
+  // Only ever attempt the Supabase call for a well-formed address, but return
+  // the exact same 202 regardless of format, existence, or delivery outcome --
+  // GoTrue itself never reveals whether an email is registered, and neither
+  // should we. A rate limit is the one exception worth surfacing distinctly:
+  // it reveals request frequency, not account existence.
+  if (EMAIL_RE.test(email)) {
+    const supabase = createSupabaseAdmin(c.env.SUPABASE_URL, c.env.SUPABASE_SECRET_KEY);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${c.env.PUBLIC_APP_URL}/reset-password`,
+    });
+    if (error?.status === 429) {
+      throw new AppError(429, 'rate_limited', 'Too many reset requests. Please try again later.');
+    }
+    if (error) console.error('password-reset/request: resetPasswordForEmail failed', error.message);
+  }
+
+  return c.json({}, 202);
+});
+
+auth.post('/password-reset/confirm', async (c) => {
+  const body = (await c.req.json().catch(() => null)) as { token?: unknown; new_password?: unknown } | null;
+  const token = typeof body?.token === 'string' ? body.token : '';
+  const newPassword = typeof body?.new_password === 'string' ? body.new_password : '';
+
+  if (!token) throw new AppError(400, 'invalid_token', 'This reset link is invalid or has expired');
+  if (newPassword.length < MIN_PASSWORD_LENGTH) {
+    throw new AppError(400, 'invalid_password', `Password must be at least ${MIN_PASSWORD_LENGTH} characters`);
+  }
+
+  const supabase = createSupabaseAdmin(c.env.SUPABASE_URL, c.env.SUPABASE_SECRET_KEY);
+  const { data, error } = await supabase.auth.verifyOtp({ token_hash: token, type: 'recovery' });
+  if (error || !data.user) {
+    throw new AppError(400, 'invalid_token', 'This reset link is invalid or has expired');
+  }
+
+  const { error: updateError } = await supabase.auth.admin.updateUserById(data.user.id, { password: newPassword });
+  if (updateError) throw new AppError(400, 'reset_failed', 'Could not reset your password. Please try again.');
+
+  return c.json({}, 200);
+});
+
 auth.get('/me', authenticate, (c) => {
   const authUser = c.get('authUser');
   if (!authUser) throw new AppError(401, 'unauthorized', 'Authentication required');

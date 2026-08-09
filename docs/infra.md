@@ -80,7 +80,7 @@ Two classes: CI/deploy-time (never shipped in the Worker) and app-runtime (bound
 | `SEMANTIC_SCHOLAR_API_KEY` | Optional — raises rate limit; app works without it. |
 | `CROSSREF_CONTACT_EMAIL` | Polite-pool contact per CrossRef policy; not secret. |
 | `UNPAYWALL_CONTACT_EMAIL` | Required query param per Unpaywall policy; not secret. |
-| `PUBLIC_APP_URL` | Base URL for share links and Stripe redirect URLs. |
+| `PUBLIC_APP_URL` | Base URL for share links, Stripe redirect URLs, and the password-reset email link. |
 
 First-draft list — reconcile against data-model/API docs once settled (Stripe
 price/product IDs as config, whether JWT verification needs anything beyond

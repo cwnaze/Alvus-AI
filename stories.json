@@ -389,7 +389,7 @@
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,
-      "notes": ""
+      "notes": "No email-sending infra exists yet, so /auth/password-reset/request relies on Supabase Auth's own mailer (supabase.auth.resetPasswordForEmail), reusing PUBLIC_APP_URL as the redirectTo. A custom recovery email template (supabase/templates/recovery.html + supabase/config.toml's [auth.email.template.recovery]) points the emailed link straight at our own /reset-password?token=<hash> instead of GoTrue's own /verify redirect, so the confirm step stays entirely backend-mediated via POST /auth/password-reset/confirm (verifyOtp + admin.updateUserById), matching every other auth endpoint's frontend-never-talks-to-Supabase-directly convention. That config.toml change only takes effect for `supabase start` local stacks -- there's no `supabase config push` (or dashboard equivalent) step in deploy.yml, so the shared dev/prod Supabase project still serves the default recovery template until one is added; out of scope here. In e2e/us-012.spec.ts, the initial request call is stubbed via page.route rather than hitting Supabase for real: two real resetPasswordForEmail calls during development were enough to 429 the shared dev project's auth-email quota for the rest of the hour, and this spec re-runs on every future PR per docs/testing.md's regression gate. That request/response contract (no-enumeration, 429 handling) is already exhaustively covered by mocked unit tests in apps/worker/src/routes/auth.test.ts; every other step in the e2e spec (token verification, password update, login) is a real call against the shared Supabase project."
     },
     {
       "id": "US-013",

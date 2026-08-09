@@ -6,25 +6,41 @@ import type { AuthBindings, AuthVariables } from '../middleware/auth';
 
 type ErrorEnvelope = { error: { code: string; message: string; correlationId: string } };
 
-const { createUser, deleteUser, signInWithPassword, getUser, signOut, refreshSession, createPendingUser, getUserById } =
-  vi.hoisted(() => ({
-    createUser: vi.fn(),
-    deleteUser: vi.fn(),
-    signInWithPassword: vi.fn(),
-    getUser: vi.fn(),
-    signOut: vi.fn(),
-    refreshSession: vi.fn(),
-    createPendingUser: vi.fn(),
-    getUserById: vi.fn(),
-  }));
+const {
+  createUser,
+  deleteUser,
+  signOut,
+  updateUserById,
+  signInWithPassword,
+  getUser,
+  refreshSession,
+  resetPasswordForEmail,
+  verifyOtp,
+  createPendingUser,
+  getUserById,
+} = vi.hoisted(() => ({
+  createUser: vi.fn(),
+  deleteUser: vi.fn(),
+  signOut: vi.fn(),
+  updateUserById: vi.fn(),
+  signInWithPassword: vi.fn(),
+  getUser: vi.fn(),
+  refreshSession: vi.fn(),
+  resetPasswordForEmail: vi.fn(),
+  verifyOtp: vi.fn(),
+  createPendingUser: vi.fn(),
+  getUserById: vi.fn(),
+}));
 
 vi.mock('../lib/supabase/client', () => ({
   createSupabaseAdmin: () => ({
     auth: {
-      admin: { createUser, deleteUser, signOut },
+      admin: { createUser, deleteUser, signOut, updateUserById },
       signInWithPassword,
       getUser,
       refreshSession,
+      resetPasswordForEmail,
+      verifyOtp,
     },
   }),
 }));
@@ -40,7 +56,12 @@ app.use('*', requestId({ headerName: CORRELATION_ID_HEADER }));
 app.onError(onError);
 app.route('/', authRoutes);
 
-const ENV = { DATABASE_URL: 'unused', SUPABASE_URL: 'http://localhost', SUPABASE_SECRET_KEY: 'secret' };
+const ENV = {
+  DATABASE_URL: 'unused',
+  SUPABASE_URL: 'http://localhost',
+  SUPABASE_SECRET_KEY: 'secret',
+  PUBLIC_APP_URL: 'http://localhost:8787',
+};
 
 function request(path: string, init?: RequestInit) {
   return app.request(path, init, ENV);
@@ -185,6 +206,90 @@ describe('POST /logout', () => {
 
     expect(res.status).toBe(204);
     expect(signOut).toHaveBeenCalledWith('tok', 'global');
+  });
+});
+
+describe('POST /password-reset/request', () => {
+  it('202s and calls resetPasswordForEmail for a well-formed, registered email', async () => {
+    resetPasswordForEmail.mockResolvedValueOnce({ data: {}, error: null });
+
+    const res = await jsonRequest('/password-reset/request', { email: 'known@example.test' });
+
+    expect(res.status).toBe(202);
+    expect(await res.json()).toEqual({});
+    expect(resetPasswordForEmail).toHaveBeenCalledWith('known@example.test', {
+      redirectTo: 'http://localhost:8787/reset-password',
+    });
+  });
+
+  it('202s identically for an email that does not exist, without revealing that', async () => {
+    resetPasswordForEmail.mockResolvedValueOnce({ data: {}, error: { message: 'user not found', status: 400 } });
+
+    const res = await jsonRequest('/password-reset/request', { email: 'unknown@example.test' });
+
+    expect(res.status).toBe(202);
+    expect(await res.json()).toEqual({});
+  });
+
+  it('202s a malformed email without calling Supabase at all', async () => {
+    const res = await jsonRequest('/password-reset/request', { email: 'not-an-email' });
+
+    expect(res.status).toBe(202);
+    expect(resetPasswordForEmail).not.toHaveBeenCalledWith('not-an-email', expect.anything());
+  });
+
+  it('429s when Supabase reports a rate limit', async () => {
+    resetPasswordForEmail.mockResolvedValueOnce({ data: {}, error: { message: 'rate limited', status: 429 } });
+
+    const res = await jsonRequest('/password-reset/request', { email: 'known@example.test' });
+
+    expect(res.status).toBe(429);
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('rate_limited');
+  });
+});
+
+describe('POST /password-reset/confirm', () => {
+  it('400s a missing token', async () => {
+    const res = await jsonRequest('/password-reset/confirm', { new_password: 'longenough1' });
+    expect(res.status).toBe(400);
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('invalid_token');
+  });
+
+  it('400s a too-short new password', async () => {
+    const res = await jsonRequest('/password-reset/confirm', { token: 'tok', new_password: 'short' });
+    expect(res.status).toBe(400);
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('invalid_password');
+  });
+
+  it('400s an invalid or expired token', async () => {
+    verifyOtp.mockResolvedValueOnce({ data: { user: null }, error: { message: 'expired' } });
+
+    const res = await jsonRequest('/password-reset/confirm', { token: 'stale-tok', new_password: 'longenough1' });
+
+    expect(res.status).toBe(400);
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('invalid_token');
+  });
+
+  it('verifies the token, updates the password, and returns 200', async () => {
+    verifyOtp.mockResolvedValueOnce({ data: { user: { id: 'user-1' } }, error: null });
+    updateUserById.mockResolvedValueOnce({ data: {}, error: null });
+
+    const res = await jsonRequest('/password-reset/confirm', { token: 'good-tok', new_password: 'longenough1' });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({});
+    expect(verifyOtp).toHaveBeenCalledWith({ token_hash: 'good-tok', type: 'recovery' });
+    expect(updateUserById).toHaveBeenCalledWith('user-1', { password: 'longenough1' });
+  });
+
+  it('400s if the password update itself fails', async () => {
+    verifyOtp.mockResolvedValueOnce({ data: { user: { id: 'user-1' } }, error: null });
+    updateUserById.mockResolvedValueOnce({ data: {}, error: { message: 'db down' } });
+
+    const res = await jsonRequest('/password-reset/confirm', { token: 'good-tok', new_password: 'longenough1' });
+
+    expect(res.status).toBe(400);
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('reset_failed');
   });
 });
 
