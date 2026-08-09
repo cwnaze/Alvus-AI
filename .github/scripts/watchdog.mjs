@@ -12,10 +12,19 @@
  * dies, no event follows — and the naive response, re-dispatching, spends the quota
  * that is already gone. So every dispatch below is gated on quotaBlocked().
  *
+ * Separately, a PR whose pr-review run died on quota is labeled `quota-blocked` by
+ * pr-review.yml itself (not this script) at the moment it happens, using the Claude
+ * action's own execution log rather than the after-the-fact `gh run view --log`
+ * this script relies on for the general stall case — see quota-signal.mjs for why
+ * that split exists. recoverQuotaBlockedPrs() below watches for the window
+ * reopening and resumes those PRs directly, ahead of and independent of the
+ * stories.json-driven stall detection.
+ *
  * Env: GH_TOKEN (PIPELINE_PAT), REPO, STALL_MINUTES, DRY_RUN
  */
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
+import { checkQuotaText, parseQuotaUntilMarker } from './quota-signal.mjs';
 
 const repo = process.env.REPO;
 if (!repo) throw new Error('REPO is required');
@@ -70,41 +79,16 @@ function rateLimitedUntil() {
     return null;
   }
 
-  // Deaths that are definitively not quota. Checked first because a long log will
-  // otherwise offer some incidental digits to match against.
-  if (/error_max_turns|Reached maximum number of turns/i.test(log)) {
-    console.log(`Run ${last.id} died on turn exhaustion, not quota.`);
-    return null;
-  }
-
-  // Each pattern must be specific enough to survive a 300-line log of timestamps, SHAs
-  // and byte counts. A bare /429/ is not: it matched `12:28:51.5255429Z` on US-004's
-  // max-turns failure and reported a five-hour quota outage that was never happening,
-  // which suppressed every dispatch this script exists to make. Anchor numbers to the
-  // words around them, and prefer the provider's own error identifiers.
-  const quotaSignals = [
-    /usage limit reached/i,
-    /quota exceeded/i,
-    /rate_limit_error/i,
-    /rate limit exceeded/i,
-    /\b429\s+too many requests/i,
-    /\b(?:status|statuscode|http)\b[^\n]{0,16}\b429\b/i,
-  ];
-  const hit = quotaSignals.find((re) => re.test(log));
-  if (!hit) return null;
-  console.log(`Quota signal matched: ${hit}`);
-
-  // Claude reports its own reset time when it knows it ("limit will reset at 3pm",
-  // or an epoch). Prefer that over guessing at the window length.
-  const epoch = log.match(/reset[^\n]*?(\d{10,13})/i);
-  if (epoch) {
-    const ms = Number(epoch[1]);
-    return new Date(ms < 1e12 ? ms * 1000 : ms);
-  }
-  const iso = log.match(/reset[^\n]*?(\d{4}-\d{2}-\d{2}T[\d:]+(?:\.\d+)?Z?)/i);
-  if (iso) return new Date(iso[1]);
-
-  return new Date(new Date(last.updated_at).getTime() + windowHours * 3600_000);
+  // Shared with the pr-review.yml verdict step, which runs the same check against
+  // the Claude action's own execution_file instead of a post-hoc log — see
+  // quota-signal.mjs for why that split exists and what "not quota" excludes
+  // (turn exhaustion, mainly: a bare /429/ once matched `12:28:51.5255429Z` on
+  // US-004's max-turns failure and reported a five-hour quota outage that was
+  // never happening, which suppressed every dispatch this script exists to make).
+  const until = checkQuotaText(log, new Date(last.updated_at), windowHours);
+  if (!until) return null;
+  console.log(`Quota signal matched in run ${last.id}'s log.`);
+  return until;
 }
 
 /** Gate every dispatch: true means "quota is gone, do nothing this tick". */
@@ -122,6 +106,149 @@ function quotaBlocked() {
   );
   return true;
 }
+
+/**
+ * The reset time pr-review.yml computed and stamped into its own PR comment when it
+ * applied the `quota-blocked` label (see quota-signal.mjs's formatQuotaUntilMarker).
+ * This is the anchor recoverQuotaBlockedPrs() below gates its retry on — it is per-PR
+ * data, unlike rateLimitedUntil()'s log scrape, which reads the *last* Claude-backed
+ * run repo-wide and is structurally blind to this signal in the first place (see the
+ * module docstring).
+ *
+ * Only comments from someone with write access, or from the pipeline's own posting
+ * identity, are trusted as the source of this marker — the same trust boundary
+ * CLAUDE.md already draws for steering comments generally. This repo is public, so
+ * without that filter anyone could post a `<!-- quota-until:... -->` comment on a
+ * quota-blocked PR and indefinitely suppress its auto-retry (round 3 of #36 on
+ * PR #35).
+ *
+ * The pipeline's own identity is included explicitly, not folded into the
+ * association check: the comment carrying this marker is posted by pr-review.yml's
+ * "Apply the review verdict" step using `REVIEWER_TOKEN || GITHUB_TOKEN`, and this
+ * repo has no REVIEWER_TOKEN secret configured, so in practice it always posts as
+ * `github-actions[bot]` — whose `author_association` on this repo is CONTRIBUTOR, not
+ * OWNER/MEMBER/COLLABORATOR. Filtering on association alone would trust nobody's
+ * marker at all and silently fall back to the log-based check every time, defeating
+ * the very recovery path this PR exists to fix. That bot login cannot be spoofed by
+ * an outside commenter — GitHub reserves it for the platform's own Actions identity.
+ *
+ * @returns {Date|null} the newest marker found in `prNumber`'s trusted comments, or
+ *   null if it carries none (e.g. labeled before this marker existed, only untrusted
+ *   commenters posted one, or the comment API call failed) — callers fall back to the
+ *   log-based quotaBlocked() in that case.
+ */
+function quotaUntilFromComments(prNumber) {
+  let comments;
+  try {
+    comments = JSON.parse(sh('gh', ['api', `repos/${repo}/issues/${prNumber}/comments`]));
+  } catch (e) {
+    console.error(`Could not read comments for PR #${prNumber} (${e.message}).`);
+    return null;
+  }
+  const trustedAssociations = ['OWNER', 'MEMBER', 'COLLABORATOR'];
+  const isTrusted = (c) =>
+    trustedAssociations.includes(c.author_association) || c.user?.login === 'github-actions[bot]';
+  for (let i = comments.length - 1; i >= 0; i--) {
+    if (!isTrusted(comments[i])) continue;
+    const until = parseQuotaUntilMarker(comments[i].body);
+    if (until) return until;
+  }
+  return null;
+}
+
+/**
+ * PRs pr-review.yml's verdict step labeled `quota-blocked` — a real quota signal
+ * found in the Claude action's own execution_file, not a needs-human crash (see
+ * quota-signal.mjs) — sit outside the story-status-driven logic below entirely.
+ * `stories.json` is only written at in_progress/done, so a PR under review is
+ * invisible to the `active` filter below for as long as review takes, and a
+ * quota-blocked PR needs a time-gated recheck regardless of what stories.json
+ * says. So this runs first and unconditionally, every tick, ahead of anything
+ * that reads stories.json or assumes `main` is checked out.
+ *
+ * Recovery mirrors the exact manual remedy the old plain needs-human comment
+ * used to suggest: push an empty commit to the PR branch to re-trigger the
+ * `synchronize` event pr-review listens for.
+ *
+ * @returns {boolean} true if there was a quota-blocked PR to handle this tick
+ *   (whether or not the window had actually reopened) — the caller should stop
+ *   rather than fall through to the stall logic below, which assumes `main` is
+ *   still checked out and this function may have switched branches to push.
+ */
+function recoverQuotaBlockedPrs() {
+  let prs;
+  try {
+    prs = JSON.parse(
+      sh('gh', ['pr', 'list', '--repo', repo, '--state', 'open', '--label', 'quota-blocked', '--json', 'number,headRefName']),
+    );
+  } catch (e) {
+    console.error(`Could not list quota-blocked PRs (${e.message}).`);
+    return false;
+  }
+  if (!prs.length) return false;
+
+  // Computed at most once, and only if some PR turns out to carry no marker — the
+  // common case (every PR labeled by the current pr-review.yml) never needs it.
+  let logBasedFallback;
+  const stillBlocked = (pr) => {
+    const until = quotaUntilFromComments(pr.number);
+    if (until) {
+      if (until > new Date()) {
+        const mins = Math.round((until - Date.now()) / 60000);
+        console.log(`PR #${pr.number}: quota window not yet open (expected back ~${mins}m, per its own comment).`);
+        return true;
+      }
+      return false;
+    }
+    console.log(`PR #${pr.number}: no quota-until marker on its comments; falling back to the log-based check.`);
+    if (logBasedFallback === undefined) logBasedFallback = quotaBlocked();
+    return logBasedFallback;
+  };
+
+  for (const pr of prs) {
+    if (stillBlocked(pr)) continue;
+
+    // Re-check immediately before acting: a human may already have pushed a real
+    // fix (which re-runs pr-review and clears the label itself) or closed the PR
+    // since the listing above.
+    let fresh;
+    try {
+      fresh = JSON.parse(sh('gh', ['pr', 'view', String(pr.number), '--repo', repo, '--json', 'state,labels']));
+    } catch (e) {
+      console.error(`Could not re-check PR #${pr.number} (${e.message}); skipping.`);
+      continue;
+    }
+    if (fresh.state !== 'OPEN' || !fresh.labels.some((l) => l.name === 'quota-blocked')) {
+      console.log(`PR #${pr.number} is no longer open+quota-blocked; skipping.`);
+      continue;
+    }
+
+    try {
+      sh('git', ['fetch', 'origin', pr.headRefName]);
+      sh('git', ['checkout', '-B', pr.headRefName, `origin/${pr.headRefName}`]);
+      sh('git', ['config', 'user.name', 'pipeline-watchdog']);
+      sh('git', ['config', 'user.email', 'actions@users.noreply.github.com']);
+      sh('git', ['commit', '--allow-empty', '-m', 'chore: retry pr-review (Claude quota window reopened)']);
+      // Must push with a token that fires `synchronize` for other workflows to react
+      // to — the checkout step's token, which pipeline-watchdog.yml sets to
+      // PIPELINE_PAT for exactly this reason. Pushing with the default GITHUB_TOKEN
+      // would succeed silently and trigger nothing, the same trap the steering-issue
+      // and needs-human-issue creation calls elsewhere in this pipeline already avoid.
+      sh('git', ['push', 'origin', `HEAD:${pr.headRefName}`]);
+      // Remove the label only after the push that actually resumes review succeeds,
+      // so a push failure leaves the label (and the retry) for the next tick.
+      sh('gh', ['api', `repos/${repo}/issues/${pr.number}/labels/quota-blocked`, '-X', 'DELETE']);
+      sh('gh', ['pr', 'comment', String(pr.number), '--repo', repo, '--body',
+        'Pipeline watchdog: the Claude quota window has reopened. Pushed an empty commit to re-trigger `pr-review`.']);
+      console.log(`Recovered PR #${pr.number}: quota window reopened, pr-review re-triggered.`);
+    } catch (e) {
+      console.error(`Could not recover PR #${pr.number}: ${e.message}`);
+    }
+  }
+  return true;
+}
+
+if (recoverQuotaBlockedPrs()) process.exit(0);
 
 const db = JSON.parse(fs.readFileSync('stories.json', 'utf8'));
 const active = db.stories.filter((s) => ['in_progress', 'in_review', 'fixing'].includes(s.status));
