@@ -440,7 +440,7 @@
       "dependsOn": [
         "US-011"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -454,7 +454,7 @@
         ]
       },
       "demo": "docs/demos/US-014.md",
-      "branch": null,
+      "branch": "feature/us-014-create-list-rename-and-delete-a-project",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,
