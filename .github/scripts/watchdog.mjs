@@ -115,21 +115,41 @@ function quotaBlocked() {
  * run repo-wide and is structurally blind to this signal in the first place (see the
  * module docstring).
  *
- * @returns {Date|null} the newest marker found in `prNumber`'s comments, or null if
- *   it carries none (e.g. labeled before this marker existed, or the comment API
- *   call failed) — callers fall back to the log-based quotaBlocked() in that case.
+ * Only comments from someone with write access, or from the pipeline's own posting
+ * identity, are trusted as the source of this marker — the same trust boundary
+ * CLAUDE.md already draws for steering comments generally. This repo is public, so
+ * without that filter anyone could post a `<!-- quota-until:... -->` comment on a
+ * quota-blocked PR and indefinitely suppress its auto-retry (round 3 of #36 on
+ * PR #35).
+ *
+ * The pipeline's own identity is included explicitly, not folded into the
+ * association check: the comment carrying this marker is posted by pr-review.yml's
+ * "Apply the review verdict" step using `REVIEWER_TOKEN || GITHUB_TOKEN`, and this
+ * repo has no REVIEWER_TOKEN secret configured, so in practice it always posts as
+ * `github-actions[bot]` — whose `author_association` on this repo is CONTRIBUTOR, not
+ * OWNER/MEMBER/COLLABORATOR. Filtering on association alone would trust nobody's
+ * marker at all and silently fall back to the log-based check every time, defeating
+ * the very recovery path this PR exists to fix. That bot login cannot be spoofed by
+ * an outside commenter — GitHub reserves it for the platform's own Actions identity.
+ *
+ * @returns {Date|null} the newest marker found in `prNumber`'s trusted comments, or
+ *   null if it carries none (e.g. labeled before this marker existed, only untrusted
+ *   commenters posted one, or the comment API call failed) — callers fall back to the
+ *   log-based quotaBlocked() in that case.
  */
 function quotaUntilFromComments(prNumber) {
   let comments;
   try {
-    comments = JSON.parse(
-      sh('gh', ['pr', 'view', String(prNumber), '--repo', repo, '--json', 'comments']),
-    ).comments;
+    comments = JSON.parse(sh('gh', ['api', `repos/${repo}/issues/${prNumber}/comments`]));
   } catch (e) {
     console.error(`Could not read comments for PR #${prNumber} (${e.message}).`);
     return null;
   }
+  const trustedAssociations = ['OWNER', 'MEMBER', 'COLLABORATOR'];
+  const isTrusted = (c) =>
+    trustedAssociations.includes(c.author_association) || c.user?.login === 'github-actions[bot]';
   for (let i = comments.length - 1; i >= 0; i--) {
+    if (!isTrusted(comments[i])) continue;
     const until = parseQuotaUntilMarker(comments[i].body);
     if (until) return until;
   }
