@@ -4,6 +4,9 @@ export type WaitlistStatus = (typeof WAITLIST_STATUSES)[number];
 export const USER_ROLES = ['member', 'admin'] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
+export const TIERS = ['free', 'plus', 'pro'] as const;
+export type Tier = (typeof TIERS)[number];
+
 // Mirrors the JSON wire contract in docs/api.md exactly (snake_case) so the
 // frontend never has to translate between a domain shape and the response body.
 export type AuthUser = {
@@ -36,5 +39,19 @@ export type WaitlistEntry = {
 
 export type WaitlistEntriesResponse = {
   entries: WaitlistEntry[];
+  next_cursor: string | null;
+};
+
+export type AdminUser = {
+  id: string;
+  email: string;
+  status: WaitlistStatus;
+  role: UserRole;
+  tier: Tier;
+  created_at: string;
+};
+
+export type AdminUsersResponse = {
+  users: AdminUser[];
   next_cursor: string | null;
 };

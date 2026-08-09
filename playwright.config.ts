@@ -13,6 +13,12 @@ const baseURL = process.env.BASE_URL ?? serve.url ?? 'http://localhost:5173';
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,          // demos share seeded fixture state
+  // fullyParallel only serializes tests *within* a file -- separate spec
+  // files still ran concurrently by default (half the CPU count), racing on
+  // the same shared admin@example.test fixture session across files. Pin to
+  // one worker so "demos share seeded fixture state" (above) actually holds
+  // across the whole suite, not just within one file.
+  workers: 1,
   forbidOnly: !!process.env.CI,
   retries: 0,                    // a retry that passes is still a bug worth seeing
   reporter: [['list'], ['html', { open: 'never' }]],
