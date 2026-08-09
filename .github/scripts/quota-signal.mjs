@@ -16,10 +16,11 @@
  * in the visible log — confirmed on PR #34 (2026-08-09): the log held exactly
  * `{type,subtype,is_error,duration_ms,num_turns,total_cost_usd,
  * permission_denials_count}` and nothing else between system-init and result.
- * The execution file holds the raw, unsanitized SDK message stream (including
- * the result message's own `result`/`errors` text) and is the only place the
- * real reason survives. Same regexes, so a match means the same thing either
- * way; only the text they run against differs.
+ * The execution file holds the raw, unsanitized SDK message stream, and the
+ * result message's own `result`/`errors` text within it is the only place
+ * the real reason survives — see extractResultText below for why the file's
+ * CLI mode narrows to just that message rather than matching the whole
+ * stream. Same regexes either way; only the text they run against differs.
  */
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -83,27 +84,69 @@ export function checkQuotaText(text, since, windowHours) {
   return extractResetTime(text, since, windowHours);
 }
 
+/**
+ * Narrow a raw execution_file down to the only text in it that's safe to run
+ * a quota check against.
+ *
+ * The execution file is `JSON.stringify(messages, null, 2)` of the *entire*
+ * unsanitized SDK message stream — every tool_use/tool_result verbatim,
+ * including full file reads and `gh pr diff` output. Running findQuotaSignal
+ * over that whole blob means the run's own tool calls can plant a false
+ * match: this very script's QUOTA_SIGNALS regex literals are themselves
+ * quota-shaped text, so a run that reads this file (any review of a PR that
+ * touches it, this PR's own review included) embeds those exact strings into
+ * the execution file regardless of what actually happened. Same for a
+ * `gh pr diff` of a PR whose diff quotes them.
+ *
+ * The only structurally trustworthy text is the terminal `result`-type
+ * message's own `result` (success) / `errors` (error) fields — that's the
+ * SDK's own account of why the run ended, per SDKResultMessage in
+ * @anthropic-ai/claude-agent-sdk. Anything else in the stream is the run's
+ * *activity*, not its *outcome*.
+ *
+ * @param {string} json raw contents of the execution file
+ * @returns {string} text to run quota checks against; empty string if the
+ *   file isn't parseable JSON or holds no result message (treated as "no
+ *   signal", not a match — a missed real quota hit falls back to
+ *   needs-human, which is the safe direction to fail in)
+ */
+export function extractResultText(json) {
+  let messages;
+  try {
+    messages = JSON.parse(json);
+  } catch {
+    return '';
+  }
+  if (!Array.isArray(messages)) return '';
+  const result = [...messages].reverse().find((m) => m && m.type === 'result');
+  if (!result) return '';
+  return [result.result, ...(Array.isArray(result.errors) ? result.errors : [])]
+    .filter((s) => typeof s === 'string')
+    .join('\n');
+}
+
 // CLI mode: `node quota-signal.mjs <file> [sinceISO] [windowHours]`.
 // Prints `blocked <ISO>` or `clear` on stdout so a bash step can branch on it
-// without embedding JS. Reads the whole file as text — the execution file is
-// JSON, but a quota signal is a text match regardless of structure, and
-// reading it as text avoids caring whether it parses.
+// without embedding JS. `file` is the Claude action's execution_file — parsed
+// as JSON and narrowed to its terminal result message before checking, per
+// extractResultText above, rather than matched against the raw file text.
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const [, , file, sinceArg, windowArg] = process.argv;
   if (!file) {
     console.error('Usage: quota-signal.mjs <file> [sinceISO] [windowHours]');
     process.exit(2);
   }
-  let text;
+  let raw;
   try {
-    text = fs.readFileSync(file, 'utf8');
+    raw = fs.readFileSync(file, 'utf8');
   } catch (e) {
     console.error(`Could not read ${file}: ${e.message}`);
     console.log('clear');
     process.exit(0);
   }
+  const text = extractResultText(raw);
   const since = sinceArg ? new Date(sinceArg) : new Date();
   const windowHours = windowArg ? Number(windowArg) : 5;
-  const until = checkQuotaText(text, since, windowHours);
+  const until = text ? checkQuotaText(text, since, windowHours) : null;
   console.log(until ? `blocked ${until.toISOString()}` : 'clear');
 }
