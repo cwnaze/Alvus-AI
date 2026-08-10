@@ -576,7 +576,7 @@
         "US-014",
         "US-016"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -590,7 +590,7 @@
         ]
       },
       "demo": "docs/demos/US-018.md",
-      "branch": null,
+      "branch": "feature/us-018-editor-load-edit-and-autosave-a-document-in-tiptap",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,
