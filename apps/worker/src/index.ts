@@ -18,6 +18,10 @@ type Bindings = {
   SEMANTIC_SCHOLAR_API_KEY?: string;
   CROSSREF_CONTACT_EMAIL?: string;
   UNPAYWALL_CONTACT_EMAIL?: string;
+  AI_PROVIDER_MODE?: string;
+  LITELLM_BASE_URL?: string;
+  LITELLM_API_KEY?: string;
+  LITELLM_MODEL?: string;
 };
 
 const app = new Hono<{ Bindings: Bindings; Variables: ErrorVariables & AuthVariables }>();

@@ -6,8 +6,8 @@ import type { AuthBindings, AuthVariables } from '../middleware/auth';
 
 type ErrorEnvelope = { error: { code: string; message: string; correlationId: string } };
 
-const { getUser, getUserById, createProject, listProjects, getProjectById, renameProject, deleteProject } = vi.hoisted(
-  () => ({
+const { getUser, getUserById, createProject, listProjects, getProjectById, renameProject, deleteProject, listProjectSources } =
+  vi.hoisted(() => ({
     getUser: vi.fn(),
     getUserById: vi.fn(),
     createProject: vi.fn(),
@@ -15,8 +15,8 @@ const { getUser, getUserById, createProject, listProjects, getProjectById, renam
     getProjectById: vi.fn(),
     renameProject: vi.fn(),
     deleteProject: vi.fn(),
-  }),
-);
+    listProjectSources: vi.fn(),
+  }));
 
 vi.mock('../lib/supabase/client', () => ({
   createSupabaseAdmin: () => ({ auth: { getUser } }),
@@ -30,6 +30,7 @@ vi.mock('../lib/db/queries/projects', () => ({
   renameProject,
   deleteProject,
 }));
+vi.mock('../lib/db/queries/sources', () => ({ listProjectSources }));
 
 const { default: projectsRoutes } = await import('./projects');
 
@@ -255,6 +256,40 @@ describe('PATCH /:projectId', () => {
       body: JSON.stringify({}),
     });
     expect(res.status).toBe(400);
+  });
+});
+
+describe('GET /:projectId/bibliography', () => {
+  it('returns citation entries for selected sources only', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow({ citationFormat: 'apa' }));
+    listProjectSources.mockResolvedValueOnce([
+      { id: 'src-1', citationString: 'Doe, J. (2020). Title. Venue.' },
+      { id: 'src-2', citationString: null },
+    ]);
+
+    const res = await request(`/${PROJECT_ID}/bibliography`);
+
+    expect(res.status).toBe(200);
+    expect(listProjectSources).toHaveBeenCalledWith(expect.anything(), { projectId: PROJECT_ID, state: 'selected' });
+    expect(await res.json()).toEqual({
+      citation_format: 'apa',
+      entries: [{ source_id: 'src-1', citation_text: 'Doe, J. (2020). Title. Venue.' }],
+    });
+  });
+
+  it('403s a non-owner', async () => {
+    asCaller({ id: OTHER_USER_ID });
+    getProjectById.mockResolvedValueOnce(projectRow({ ownerId: OWNER_ID }));
+    const res = await request(`/${PROJECT_ID}/bibliography`);
+    expect(res.status).toBe(403);
+  });
+
+  it('404s a nonexistent project', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(undefined);
+    const res = await request(`/${PROJECT_ID}/bibliography`);
+    expect(res.status).toBe(404);
   });
 });
 

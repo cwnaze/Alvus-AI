@@ -1,7 +1,9 @@
 import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
+import { and, eq } from 'drizzle-orm';
 import { createDb } from '../apps/worker/src/lib/db/client';
-import { tierLimits, users, waitlistSignups } from '../apps/worker/src/lib/db/schema';
+import { tierLimits, usageEvents, users, waitlistSignups } from '../apps/worker/src/lib/db/schema';
+import { currentBillingPeriod } from '../apps/worker/src/lib/metering';
 import { findAuthUserIdByEmail } from './lib/find-auth-user-id';
 
 // Never run against a production database by accident. This is the only environment
@@ -49,7 +51,14 @@ const FIXTURE_USERS: Array<{
   { key: 'waitlist-pending', email: 'waitlist-pending@example.test', status: 'pending', role: 'member' },
   { key: 'waitlist-approved', email: 'waitlist-approved@example.test', status: 'approved', role: 'member' },
   { key: 'admin', email: 'admin@example.test', status: 'approved', role: 'admin' },
+  // Every account is on the `free` tier by definition until billing (US-023/024)
+  // lands (see lib/metering's resolveTier) -- this one exists purely so the
+  // "hit a usage limit" demo doesn't have to burn 5 real analyses through the
+  // UI to get there (docs/testing.md).
+  { key: 'free-tier-at-limit', email: 'free-tier-at-limit@example.test', status: 'approved', role: 'member' },
 ];
+
+const FREE_TIER_SOURCE_ANALYSIS_LIMIT = 5;
 
 const supabaseAdmin = createClient(supabaseUrl, supabaseSecretKey, {
   auth: { autoRefreshToken: false, persistSession: false },
@@ -114,9 +123,30 @@ async function seedFixtureUsers() {
   }
 }
 
+async function seedUsageAtLimit() {
+  const authUserId = await ensureAuthUser('free-tier-at-limit@example.test');
+  const billingPeriod = currentBillingPeriod(new Date());
+
+  // Delete-then-reinsert for idempotency (usage_events is append-only and has
+  // no natural key to upsert against) -- always leaves exactly the cap's worth
+  // of usage for the current billing period, however many times seed re-runs.
+  await db
+    .delete(usageEvents)
+    .where(and(eq(usageEvents.userId, authUserId), eq(usageEvents.actionType, 'source_analysis'), eq(usageEvents.billingPeriod, billingPeriod)));
+  await db.insert(usageEvents).values({
+    userId: authUserId,
+    actionType: 'source_analysis',
+    quantity: FREE_TIER_SOURCE_ANALYSIS_LIMIT,
+    billingPeriod,
+  });
+
+  console.log(`Seeded usage_events for "free-tier-at-limit" at the free tier's ${FREE_TIER_SOURCE_ANALYSIS_LIMIT}/mo source_analysis cap.`);
+}
+
 async function main() {
   await seedTierLimits();
   await seedFixtureUsers();
+  await seedUsageAtLimit();
 }
 
 main()

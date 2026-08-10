@@ -3,6 +3,8 @@ import { sql } from 'drizzle-orm';
 import { projects } from './projects';
 import { externalWorks } from './external-works';
 
+export type KeyQuoteJson = { quote: string; location: string; usage_suggestion: string };
+
 // See docs/data-model.md. `uploadedFileId` (set iff `origin = 'uploaded'`) is
 // deliberately omitted for now -- nothing produces an `uploaded` row yet, and
 // the `uploaded_files` table it would reference doesn't exist until upload
@@ -23,7 +25,7 @@ export const projectSources = pgTable(
     strengthsSummary: text('strengths_summary'),
     weaknessesSummary: text('weaknesses_summary'),
     usefulnessScore: numeric('usefulness_score', { precision: 4, scale: 2 }),
-    keyQuotes: jsonb('key_quotes').notNull().default([]),
+    keyQuotes: jsonb('key_quotes').notNull().default([]).$type<KeyQuoteJson[]>(),
     fullTextAvailable: boolean('full_text_available').notNull().default(false),
     fullTextSource: text('full_text_source', { enum: ['open_access', 'uploaded', 'abstract_only'] }),
     analyzedAt: timestamp('analyzed_at', { withTimezone: true }),

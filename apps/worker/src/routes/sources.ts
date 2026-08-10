@@ -1,7 +1,30 @@
-import type { SourceCandidate, SourceSearchResponse } from '@alvus-ai/shared';
+import type {
+  KeyQuote,
+  ProjectSource,
+  ProjectSourcesResponse,
+  SourceAnalysis,
+  SourceCandidate,
+  SourceSearchResponse,
+  SourceStateResponse,
+} from '@alvus-ai/shared';
 import { Hono } from 'hono';
+import { AiProviderError, AiUnreadableSourceError, requestSourceAnalysis, type AiEnv } from '../lib/ai';
+import { formatCitation } from '../lib/citation';
 import { createDb } from '../lib/db/client';
-import { findOrCreateProjectSource, upsertExternalWork, type ExternalWorkRow } from '../lib/db/queries/sources';
+import {
+  deleteProjectSource,
+  findOrCreateProjectSource,
+  getProjectSourceById,
+  listProjectSources,
+  saveProjectSourceAnalysis,
+  updateProjectSourceState,
+  upsertExternalWork,
+  type ExternalWorkRow,
+  type ProjectSourceRow,
+  type ProjectSourceState,
+  type ProjectSourceWithWork,
+} from '../lib/db/queries/sources';
+import { assertWithinUsageLimit, recordUsage } from '../lib/metering';
 import { searchSources } from '../lib/sources';
 import { authenticate, requireApproved, type AuthBindings, type AuthVariables } from '../middleware/auth';
 import { AppError } from '../middleware/errors';
@@ -11,13 +34,15 @@ const MAX_LIMIT = 50;
 const DEFAULT_LIMIT = 20;
 const MIN_YEAR = 1000;
 const MAX_YEAR = 3000;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-type SourcesBindings = AuthBindings & {
-  SOURCES_PROVIDER_MODE?: string;
-  SEMANTIC_SCHOLAR_API_KEY?: string;
-  CROSSREF_CONTACT_EMAIL?: string;
-  UNPAYWALL_CONTACT_EMAIL?: string;
-};
+export type SourcesBindings = AuthBindings &
+  AiEnv & {
+    SOURCES_PROVIDER_MODE?: string;
+    SEMANTIC_SCHOLAR_API_KEY?: string;
+    CROSSREF_CONTACT_EMAIL?: string;
+    UNPAYWALL_CONTACT_EMAIL?: string;
+  };
 
 type SearchBody = {
   query?: unknown;
@@ -65,10 +90,57 @@ function toSourceCandidate(sourceId: string, work: ExternalWorkRow): SourceCandi
   };
 }
 
+function toNumber(value: string | null): number {
+  return value === null ? 0 : Number(value);
+}
+
+function toKeyQuotes(row: ProjectSourceRow): KeyQuote[] {
+  return row.keyQuotes.map((q) => ({ quote: q.quote, location: q.location, usage_suggestion: q.usage_suggestion }));
+}
+
+// `null` unless analysis has actually completed (`analyzedAt` set) -- absence
+// distinguishes "not yet analyzed" from an analysis that happened to produce
+// empty text.
+function toSourceAnalysisResponse(row: ProjectSourceRow): SourceAnalysis | null {
+  if (!row.analyzedAt || row.citationString === null) return null;
+  return {
+    citation: row.citationString,
+    summary: { strengths: row.strengthsSummary ?? '', weaknesses: row.weaknessesSummary ?? '' },
+    usefulness_score: toNumber(row.usefulnessScore),
+    key_quotes: toKeyQuotes(row),
+    full_text_status: row.fullTextSource === 'open_access' ? 'open_access' : 'abstract_only',
+    analyzed_at: row.analyzedAt.toISOString(),
+  };
+}
+
+function toProjectSource(row: ProjectSourceWithWork): ProjectSource {
+  return {
+    id: row.id,
+    title: row.work?.title ?? '(untitled)',
+    authors: row.work?.authors ?? [],
+    year: row.work?.publicationYear ?? null,
+    venue: row.work?.venue ?? null,
+    oa_status: row.work?.oaStatus ?? null,
+    state: row.state,
+    analysis: toSourceAnalysisResponse(row),
+  };
+}
+
 type Env = { Bindings: SourcesBindings; Variables: AuthVariables };
 
 const sources = new Hono<Env>();
 sources.use('*', authenticate, requireApproved);
+
+async function loadProjectSource(
+  db: ReturnType<typeof createDb>,
+  projectId: string,
+  sourceId: string | undefined,
+): Promise<ProjectSourceWithWork> {
+  if (!sourceId || !UUID_RE.test(sourceId)) throw new AppError(404, 'source_not_found', 'No such source');
+  const source = await getProjectSourceById(db, { id: sourceId, projectId });
+  if (!source) throw new AppError(404, 'source_not_found', 'No such source');
+  return source;
+}
 
 sources.post('/search', async (c) => {
   const authUser = c.get('authUser');
@@ -111,11 +183,225 @@ sources.post('/search', async (c) => {
       oaUrl: candidate.oaUrl,
     });
     const projectSource = await findOrCreateProjectSource(db, { projectId: project.id, externalWorkId: work.id });
+    // A previously rejected candidate stays dismissed across re-searches
+    // (docs/api.md: "not re-suggested on later search") -- findOrCreateProjectSource
+    // returns the existing row as-is, so this is the one place that has to
+    // filter it. A `selected` source is already in the bibliography, shown
+    // below with its own "Remove from bibliography" action, so it's excluded
+    // here for the same reason -- it's already decided, not a fresh candidate.
+    if (projectSource.state === 'rejected' || projectSource.state === 'selected') continue;
     candidates.push(toSourceCandidate(projectSource.id, work));
   }
 
   const response: SourceSearchResponse = { candidates, count: candidates.length };
   return c.json(response, 200);
+});
+
+sources.get('/', async (c) => {
+  const authUser = c.get('authUser');
+  if (!authUser) throw new AppError(401, 'unauthorized', 'Authentication required');
+
+  const db = createDb(c.env.DATABASE_URL);
+  const project = await loadOwnedProject(db, c.req.param('projectId') ?? '', authUser.id);
+
+  const status = c.req.query('status');
+  if (status !== undefined && status !== 'candidate' && status !== 'selected') {
+    throw new AppError(400, 'invalid_status', 'status must be "candidate" or "selected"');
+  }
+
+  const rows = await listProjectSources(db, { projectId: project.id, state: status as ProjectSourceState | undefined });
+  const response: ProjectSourcesResponse = { sources: rows.map(toProjectSource) };
+  return c.json(response, 200);
+});
+
+sources.get('/:sourceId', async (c) => {
+  const authUser = c.get('authUser');
+  if (!authUser) throw new AppError(401, 'unauthorized', 'Authentication required');
+
+  const db = createDb(c.env.DATABASE_URL);
+  const project = await loadOwnedProject(db, c.req.param('projectId') ?? '', authUser.id);
+  const source = await loadProjectSource(db, project.id, c.req.param('sourceId'));
+  return c.json(toProjectSource(source), 200);
+});
+
+sources.get('/:sourceId/analysis', async (c) => {
+  const authUser = c.get('authUser');
+  if (!authUser) throw new AppError(401, 'unauthorized', 'Authentication required');
+
+  const db = createDb(c.env.DATABASE_URL);
+  const project = await loadOwnedProject(db, c.req.param('projectId') ?? '', authUser.id);
+  const source = await loadProjectSource(db, project.id, c.req.param('sourceId'));
+
+  const analysis = toSourceAnalysisResponse(source);
+  if (!analysis) throw new AppError(404, 'not_yet_analyzed', 'This source has not been analyzed yet');
+  return c.json(analysis, 200);
+});
+
+sources.post('/:sourceId/analyze', async (c) => {
+  const authUser = c.get('authUser');
+  if (!authUser) throw new AppError(401, 'unauthorized', 'Authentication required');
+
+  const db = createDb(c.env.DATABASE_URL);
+  const project = await loadOwnedProject(db, c.req.param('projectId') ?? '', authUser.id);
+  const source = await loadProjectSource(db, project.id, c.req.param('sourceId'));
+
+  const body = (await c.req.json().catch(() => ({}))) as { force_refresh?: unknown };
+  const forceRefresh = body.force_refresh === true;
+
+  if (!forceRefresh) {
+    const cached = toSourceAnalysisResponse(source);
+    if (cached) return c.json(cached, 200);
+  }
+
+  // Every project_source produced today is `origin: 'discovered'`, which the
+  // DB check constraint guarantees has an external_work_id -- `work` should
+  // never be null here. Guard anyway rather than assume, since a future
+  // `uploaded` origin (US-017) would hit this same path without one.
+  if (!source.work) throw new AppError(422, 'unreadable_source', 'This source has no analyzable content');
+  const work = source.work;
+
+  const now = new Date();
+  await assertWithinUsageLimit(db, { userId: authUser.id, actionType: 'source_analysis', now });
+
+  let result;
+  try {
+    result = await requestSourceAnalysis(
+      { title: work.title, authors: work.authors, abstract: work.abstract },
+      {
+        AI_PROVIDER_MODE: c.env.AI_PROVIDER_MODE,
+        LITELLM_BASE_URL: c.env.LITELLM_BASE_URL,
+        LITELLM_API_KEY: c.env.LITELLM_API_KEY,
+        LITELLM_MODEL: c.env.LITELLM_MODEL,
+      },
+    );
+  } catch (err) {
+    if (err instanceof AiUnreadableSourceError) throw new AppError(422, 'unreadable_source', err.message);
+    if (err instanceof AiProviderError) {
+      throw new AppError(502, 'ai_provider_unreachable', 'The analysis service is currently unreachable. Please try again later.');
+    }
+    throw err;
+  }
+
+  // No full-text fetch/extraction pipeline exists yet (nothing populates
+  // `external_works.full_text_storage_path` -- see that schema file's
+  // comment); "fetching full text where legally available" for a discovered
+  // source is therefore approximated by whether Unpaywall resolved an OA
+  // link, and the model is given the abstract either way. Real content
+  // extraction lands with US-017's upload story, which needs a PDF parser
+  // regardless.
+  const fullTextSource: 'open_access' | 'abstract_only' = work.oaUrl ? 'open_access' : 'abstract_only';
+
+  const citation = formatCitation(project.citationFormat, {
+    authors: work.authors,
+    title: work.title,
+    year: work.publicationYear,
+    venue: work.venue,
+  });
+
+  const updated = await saveProjectSourceAnalysis(db, {
+    id: source.id,
+    citationString: citation,
+    strengthsSummary: result.analysis.strengths,
+    weaknessesSummary: result.analysis.weaknesses,
+    usefulnessScore: result.analysis.usefulnessScore,
+    keyQuotes: result.analysis.keyQuotes.map((q) => ({ quote: q.quote, location: q.location, usage_suggestion: q.usageSuggestion })),
+    fullTextAvailable: fullTextSource === 'open_access',
+    fullTextSource,
+    analyzedAt: now,
+  });
+
+  // Recorded only after a successful analysis (docs/tdd.md Flow 1 step 6c) --
+  // a failed AI call above never reaches here, so it never counts against quota.
+  await recordUsage(db, {
+    userId: authUser.id,
+    projectId: project.id,
+    actionType: 'source_analysis',
+    now,
+    tokenCostInput: result.tokenUsage.inputTokens,
+    tokenCostOutput: result.tokenUsage.outputTokens,
+  });
+
+  const response = toSourceAnalysisResponse(updated);
+  if (!response) throw new Error('analyze: saved analysis did not round-trip into a response');
+  return c.json(response, 200);
+});
+
+sources.post('/:sourceId/select', async (c) => {
+  const authUser = c.get('authUser');
+  if (!authUser) throw new AppError(401, 'unauthorized', 'Authentication required');
+
+  const db = createDb(c.env.DATABASE_URL);
+  const project = await loadOwnedProject(db, c.req.param('projectId') ?? '', authUser.id);
+  const source = await loadProjectSource(db, project.id, c.req.param('sourceId'));
+
+  // Bibliography membership must not silently depend on a prior /analyze call
+  // (docs/tdd.md Flow 1 step 7 treats it as a derived view over `selected`
+  // sources with no separate authoring step). Citation fields for a
+  // discovered source already come from external_works metadata rather than
+  // the LLM, so compute the citation here too instead of leaving
+  // `citationString` null -- and therefore invisible from the bibliography --
+  // until analysis happens to have run first.
+  const citationString =
+    source.citationString ??
+    (source.work
+      ? formatCitation(project.citationFormat, {
+          authors: source.work.authors,
+          title: source.work.title,
+          year: source.work.publicationYear,
+          venue: source.work.venue,
+        })
+      : undefined);
+
+  const updated = await updateProjectSourceState(db, { id: source.id, state: 'selected', selectedAt: new Date(), citationString });
+  const response: SourceStateResponse = { state: updated.state };
+  return c.json(response, 200);
+});
+
+sources.post('/:sourceId/deselect', async (c) => {
+  const authUser = c.get('authUser');
+  if (!authUser) throw new AppError(401, 'unauthorized', 'Authentication required');
+
+  const db = createDb(c.env.DATABASE_URL);
+  const project = await loadOwnedProject(db, c.req.param('projectId') ?? '', authUser.id);
+  const source = await loadProjectSource(db, project.id, c.req.param('sourceId'));
+
+  if (source.state !== 'selected') {
+    throw new AppError(409, 'not_selected', 'This source is not currently selected');
+  }
+  const updated = await updateProjectSourceState(db, { id: source.id, state: 'candidate', selectedAt: null });
+  const response: SourceStateResponse = { state: updated.state };
+  return c.json(response, 200);
+});
+
+sources.post('/:sourceId/reject', async (c) => {
+  const authUser = c.get('authUser');
+  if (!authUser) throw new AppError(401, 'unauthorized', 'Authentication required');
+
+  const db = createDb(c.env.DATABASE_URL);
+  const project = await loadOwnedProject(db, c.req.param('projectId') ?? '', authUser.id);
+  const source = await loadProjectSource(db, project.id, c.req.param('sourceId'));
+
+  if (source.state === 'selected') {
+    throw new AppError(409, 'already_selected', 'Deselect this source before rejecting it');
+  }
+  const updated = await updateProjectSourceState(db, { id: source.id, state: 'rejected', selectedAt: source.selectedAt });
+  const response: SourceStateResponse = { state: updated.state };
+  return c.json(response, 200);
+});
+
+sources.delete('/:sourceId', async (c) => {
+  const authUser = c.get('authUser');
+  if (!authUser) throw new AppError(401, 'unauthorized', 'Authentication required');
+
+  const db = createDb(c.env.DATABASE_URL);
+  const project = await loadOwnedProject(db, c.req.param('projectId') ?? '', authUser.id);
+  const source = await loadProjectSource(db, project.id, c.req.param('sourceId'));
+
+  if (source.state !== 'selected') {
+    throw new AppError(409, 'delete_requires_selected', 'Reject a candidate instead of deleting it');
+  }
+  await deleteProjectSource(db, { id: source.id });
+  return c.body(null, 204);
 });
 
 export default sources;

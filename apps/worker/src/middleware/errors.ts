@@ -9,11 +9,14 @@ export type ErrorVariables = RequestIdVariables & { userId?: string };
 // Typed 4xx (or other non-500) error a route can throw to get the standard
 // envelope back with its own status/code/message instead of falling through to
 // onError's generic 500 -- see docs/api.md's error envelope + status code table.
+// `meta` is optional, additional structured detail -- e.g. `usage_limit_exceeded`'s
+// `{ limit, used, resets_at }` (docs/api.md's cross-cutting rules).
 export class AppError extends Error {
   constructor(
     public status: ContentfulStatusCode,
     public code: string,
     message: string,
+    public meta?: Record<string, unknown>,
   ) {
     super(message);
     this.name = 'AppError';
@@ -36,6 +39,7 @@ export const onError = <E extends { Variables: ErrorVariables }>(err: Error, c: 
           code: err.code,
           message: err.message,
           correlationId,
+          ...(err.meta ? { meta: err.meta } : {}),
         },
       },
       err.status,

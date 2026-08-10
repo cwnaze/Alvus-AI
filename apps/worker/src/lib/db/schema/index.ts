@@ -5,3 +5,4 @@ export * from './tier-limits';
 export * from './projects';
 export * from './external-works';
 export * from './project-sources';
+export * from './usage-events';

@@ -1,9 +1,11 @@
 import { and, eq } from 'drizzle-orm';
 import type { Db } from '../client';
-import { externalWorks, projectSources } from '../schema';
+import { externalWorks, projectSources, type KeyQuoteJson } from '../schema';
 
 export type ExternalWorkRow = typeof externalWorks.$inferSelect;
 export type ProjectSourceRow = typeof projectSources.$inferSelect;
+export type ProjectSourceState = ProjectSourceRow['state'];
+export type ProjectSourceWithWork = ProjectSourceRow & { work: ExternalWorkRow | null };
 
 export type ExternalWorkIdentity = {
   doi: string | null;
@@ -73,4 +75,90 @@ export async function findOrCreateProjectSource(
     .returning();
   if (!created) throw new Error('findOrCreateProjectSource: insert returned no row');
   return created;
+}
+
+function withWork(row: { project_sources: ProjectSourceRow; external_works: ExternalWorkRow | null }): ProjectSourceWithWork {
+  return { ...row.project_sources, work: row.external_works };
+}
+
+export async function listProjectSources(
+  db: Db,
+  params: { projectId: string; state?: ProjectSourceState },
+): Promise<ProjectSourceWithWork[]> {
+  const conditions = [eq(projectSources.projectId, params.projectId)];
+  if (params.state) conditions.push(eq(projectSources.state, params.state));
+
+  const rows = await db
+    .select()
+    .from(projectSources)
+    .leftJoin(externalWorks, eq(projectSources.externalWorkId, externalWorks.id))
+    .where(and(...conditions));
+  return rows.map(withWork);
+}
+
+export async function getProjectSourceById(
+  db: Db,
+  params: { id: string; projectId: string },
+): Promise<ProjectSourceWithWork | undefined> {
+  const [row] = await db
+    .select()
+    .from(projectSources)
+    .leftJoin(externalWorks, eq(projectSources.externalWorkId, externalWorks.id))
+    .where(and(eq(projectSources.id, params.id), eq(projectSources.projectId, params.projectId)));
+  return row ? withWork(row) : undefined;
+}
+
+export async function updateProjectSourceState(
+  db: Db,
+  params: { id: string; state: ProjectSourceState; selectedAt: Date | null; citationString?: string },
+): Promise<ProjectSourceRow> {
+  const [updated] = await db
+    .update(projectSources)
+    .set({
+      state: params.state,
+      selectedAt: params.selectedAt,
+      ...(params.citationString !== undefined ? { citationString: params.citationString } : {}),
+      updatedAt: new Date(),
+    })
+    .where(eq(projectSources.id, params.id))
+    .returning();
+  if (!updated) throw new Error(`updateProjectSourceState: project_source ${params.id} vanished mid-update`);
+  return updated;
+}
+
+export async function saveProjectSourceAnalysis(
+  db: Db,
+  params: {
+    id: string;
+    citationString: string;
+    strengthsSummary: string;
+    weaknessesSummary: string;
+    usefulnessScore: number;
+    keyQuotes: KeyQuoteJson[];
+    fullTextAvailable: boolean;
+    fullTextSource: 'open_access' | 'abstract_only';
+    analyzedAt: Date;
+  },
+): Promise<ProjectSourceRow> {
+  const [updated] = await db
+    .update(projectSources)
+    .set({
+      citationString: params.citationString,
+      strengthsSummary: params.strengthsSummary,
+      weaknessesSummary: params.weaknessesSummary,
+      usefulnessScore: params.usefulnessScore.toString(),
+      keyQuotes: params.keyQuotes,
+      fullTextAvailable: params.fullTextAvailable,
+      fullTextSource: params.fullTextSource,
+      analyzedAt: params.analyzedAt,
+      updatedAt: new Date(),
+    })
+    .where(eq(projectSources.id, params.id))
+    .returning();
+  if (!updated) throw new Error(`saveProjectSourceAnalysis: project_source ${params.id} vanished mid-update`);
+  return updated;
+}
+
+export async function deleteProjectSource(db: Db, params: { id: string }): Promise<void> {
+  await db.delete(projectSources).where(eq(projectSources.id, params.id));
 }
