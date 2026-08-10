@@ -65,3 +65,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-09T17:31:38.793Z | US-015 | done | PR #32 merged after 1 review round(s)
 2026-08-09T17:38:25.000Z | US-016 | in_progress | Branch feature/us-016-analyze-a-candidate-source-and-select-or-reject-it created; building AI source analysis (LiteLLM-backed citation/strengths-weaknesses/usefulness-score/key-quotes), select/deselect/reject state transitions, abstract-only flagging, bibliography view, and source-analysis tier metering.
 2026-08-10T22:57:12.758Z | US-016 | done | PR #34 merged after 1 review round(s)
+2026-08-10T23:01:10.000Z | US-017 | in_progress | Branch feature/us-017-upload-your-own-pdf-txt-source created; building PDF/TXT upload (type/size validation, text extraction, corrupt-file and scanned-image-only-PDF handling, reuse of US-016 analysis pipeline to populate bibliography).

@@ -544,7 +544,7 @@
       "dependsOn": [
         "US-016"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -558,7 +558,7 @@
         ]
       },
       "demo": "docs/demos/US-017.md",
-      "branch": null,
+      "branch": "feature/us-017-upload-your-own-pdf-txt-source",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,
