@@ -2,13 +2,11 @@ import { boolean, check, index, jsonb, numeric, pgTable, text, timestamp, uuid }
 import { sql } from 'drizzle-orm';
 import { projects } from './projects';
 import { externalWorks } from './external-works';
+import { uploadedFiles } from './uploaded-files';
 
 export type KeyQuoteJson = { quote: string; location: string; usage_suggestion: string };
 
-// See docs/data-model.md. `uploadedFileId` (set iff `origin = 'uploaded'`) is
-// deliberately omitted for now -- nothing produces an `uploaded` row yet, and
-// the `uploaded_files` table it would reference doesn't exist until upload
-// (a separate story) lands; that story adds both via a follow-up migration.
+// See docs/data-model.md.
 export const projectSources = pgTable(
   'project_sources',
   {
@@ -18,6 +16,7 @@ export const projectSources = pgTable(
       .references(() => projects.id, { onDelete: 'cascade' }),
     origin: text('origin', { enum: ['discovered', 'uploaded'] }).notNull(),
     externalWorkId: uuid('external_work_id').references(() => externalWorks.id),
+    uploadedFileId: uuid('uploaded_file_id').references(() => uploadedFiles.id),
     state: text('state', { enum: ['candidate', 'selected', 'rejected'] })
       .notNull()
       .default('candidate'),
@@ -37,6 +36,8 @@ export const projectSources = pgTable(
     index('project_sources_project_id_idx').on(table.projectId),
     index('project_sources_project_id_state_idx').on(table.projectId, table.state),
     index('project_sources_external_work_id_idx').on(table.externalWorkId),
+    index('project_sources_uploaded_file_id_idx').on(table.uploadedFileId),
     check('project_sources_origin_external_work_id_check', sql`origin != 'discovered' or external_work_id is not null`),
+    check('project_sources_origin_uploaded_file_id_check', sql`origin != 'uploaded' or uploaded_file_id is not null`),
   ],
 );

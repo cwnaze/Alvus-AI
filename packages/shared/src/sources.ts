@@ -21,7 +21,7 @@ export type SourceSearchResponse = {
 export const SOURCE_STATES = ['candidate', 'selected', 'rejected'] as const;
 export type SourceState = (typeof SOURCE_STATES)[number];
 
-export const FULL_TEXT_STATUSES = ['open_access', 'abstract_only'] as const;
+export const FULL_TEXT_STATUSES = ['open_access', 'uploaded', 'abstract_only'] as const;
 export type FullTextStatus = (typeof FULL_TEXT_STATUSES)[number];
 
 export type KeyQuote = {

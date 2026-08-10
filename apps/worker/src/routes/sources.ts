@@ -12,6 +12,7 @@ import { AiProviderError, AiUnreadableSourceError, requestSourceAnalysis, type A
 import { formatCitation } from '../lib/citation';
 import { createDb } from '../lib/db/client';
 import {
+  createUploadedProjectSource,
   deleteProjectSource,
   findOrCreateProjectSource,
   getProjectSourceById,
@@ -24,8 +25,11 @@ import {
   type ProjectSourceState,
   type ProjectSourceWithWork,
 } from '../lib/db/queries/sources';
+import { EmptyExtractionError, extractTextFromFile, UnparseableFileError, type UploadMimeType } from '../lib/files';
 import { assertWithinUsageLimit, recordUsage } from '../lib/metering';
 import { searchSources } from '../lib/sources';
+import { StorageError, uploadSourceFile } from '../lib/storage';
+import { createSupabaseAdmin } from '../lib/supabase/client';
 import { authenticate, requireApproved, type AuthBindings, type AuthVariables } from '../middleware/auth';
 import { AppError } from '../middleware/errors';
 import { loadOwnedProject } from './projects';
@@ -35,6 +39,11 @@ const DEFAULT_LIMIT = 20;
 const MIN_YEAR = 1000;
 const MAX_YEAR = 3000;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// docs/api.md: "multipart/form-data: file (PDF/TXT ≤20MB), title?"
+const MAX_UPLOAD_BYTES = 20_000_000;
+const MAX_UPLOAD_TITLE_LENGTH = 200;
+const MIME_BY_EXTENSION: Record<string, UploadMimeType> = { '.pdf': 'application/pdf', '.txt': 'text/plain' };
 
 export type SourcesBindings = AuthBindings &
   AiEnv & {
@@ -103,20 +112,31 @@ function toKeyQuotes(row: ProjectSourceRow): KeyQuote[] {
 // empty text.
 function toSourceAnalysisResponse(row: ProjectSourceRow): SourceAnalysis | null {
   if (!row.analyzedAt || row.citationString === null) return null;
+  const fullTextStatus = row.fullTextSource === 'open_access' || row.fullTextSource === 'uploaded' ? row.fullTextSource : 'abstract_only';
   return {
     citation: row.citationString,
     summary: { strengths: row.strengthsSummary ?? '', weaknesses: row.weaknessesSummary ?? '' },
     usefulness_score: toNumber(row.usefulnessScore),
     key_quotes: toKeyQuotes(row),
-    full_text_status: row.fullTextSource === 'open_access' ? 'open_access' : 'abstract_only',
+    full_text_status: fullTextStatus,
     analyzed_at: row.analyzedAt.toISOString(),
   };
+}
+
+// An uploaded file has no user-editable title field to speak of beyond what
+// was given at upload time (docs/api.md's `title?` upload field) -- fall back
+// to the original filename, stripped of its extension, rather than the
+// generic "(untitled)" reserved for a row with neither.
+function titleForUploadedFile(file: { title: string | null; originalFilename: string }): string {
+  if (file.title) return file.title;
+  const dot = file.originalFilename.lastIndexOf('.');
+  return dot > 0 ? file.originalFilename.slice(0, dot) : file.originalFilename;
 }
 
 function toProjectSource(row: ProjectSourceWithWork): ProjectSource {
   return {
     id: row.id,
-    title: row.work?.title ?? '(untitled)',
+    title: row.work?.title ?? (row.uploadedFile ? titleForUploadedFile(row.uploadedFile) : '(untitled)'),
     authors: row.work?.authors ?? [],
     year: row.work?.publicationYear ?? null,
     venue: row.work?.venue ?? null,
@@ -195,6 +215,147 @@ sources.post('/search', async (c) => {
 
   const response: SourceSearchResponse = { candidates, count: candidates.length };
   return c.json(response, 200);
+});
+
+function extensionOf(filename: string): string {
+  const dot = filename.lastIndexOf('.');
+  return dot === -1 ? '' : filename.slice(dot).toLowerCase();
+}
+
+async function sha256Hex(bytes: Uint8Array): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+// Unlike discovery (candidate -> explicit analyze -> explicit select, three
+// separate calls), an upload is one request: parse -> analyze -> store ->
+// select (docs/api.md: "select/upload promotes to selected", "analysis runs
+// synchronously"). Validation cheapest-first: request shape, then file
+// type/size (free), then text extraction (local compute), then the metered
+// AI call, then Storage -- so a bad upload never burns quota or a Storage
+// write.
+sources.post('/upload', async (c) => {
+  const authUser = c.get('authUser');
+  if (!authUser) throw new AppError(401, 'unauthorized', 'Authentication required');
+
+  const db = createDb(c.env.DATABASE_URL);
+  const project = await loadOwnedProject(db, c.req.param('projectId') ?? '', authUser.id);
+
+  const contentType = c.req.header('content-type') ?? '';
+  if (!contentType.toLowerCase().includes('multipart/form-data')) {
+    throw new AppError(400, 'invalid_upload', 'Expected a multipart/form-data request with a file field');
+  }
+
+  let form: Awaited<ReturnType<typeof c.req.parseBody>>;
+  try {
+    form = await c.req.parseBody();
+  } catch {
+    throw new AppError(400, 'invalid_upload', 'Could not parse the upload request');
+  }
+
+  const file = form.file;
+  if (!(file instanceof File) || !file.name) {
+    throw new AppError(400, 'missing_file', 'A file is required');
+  }
+  if (file.size === 0) {
+    throw new AppError(400, 'empty_file', 'The uploaded file is empty');
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    throw new AppError(413, 'file_too_large', 'Files must be 20MB or smaller');
+  }
+
+  const requestedTitle = typeof form.title === 'string' && form.title.trim() ? form.title.trim().slice(0, MAX_UPLOAD_TITLE_LENGTH) : null;
+
+  // Check MIME **and** extension, not either alone (docs/security.md).
+  const mimeType = MIME_BY_EXTENSION[extensionOf(file.name)];
+  if (!mimeType || file.type !== mimeType) {
+    throw new AppError(415, 'unsupported_file_type', 'Only PDF and TXT files are supported');
+  }
+
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (bytes.byteLength > MAX_UPLOAD_BYTES) {
+    throw new AppError(413, 'file_too_large', 'Files must be 20MB or smaller');
+  }
+
+  let extractedText: string;
+  try {
+    extractedText = await extractTextFromFile(bytes, mimeType);
+  } catch (err) {
+    if (err instanceof EmptyExtractionError || err instanceof UnparseableFileError) {
+      throw new AppError(422, 'unreadable_upload', err.message);
+    }
+    throw err;
+  }
+
+  const now = new Date();
+  await assertWithinUsageLimit(db, { userId: authUser.id, actionType: 'source_analysis', now });
+
+  const effectiveTitle = requestedTitle ?? titleForUploadedFile({ title: null, originalFilename: file.name });
+
+  let result;
+  try {
+    result = await requestSourceAnalysis(
+      { title: effectiveTitle, authors: [], abstract: extractedText },
+      {
+        AI_PROVIDER_MODE: c.env.AI_PROVIDER_MODE,
+        LITELLM_BASE_URL: c.env.LITELLM_BASE_URL,
+        LITELLM_API_KEY: c.env.LITELLM_API_KEY,
+        LITELLM_MODEL: c.env.LITELLM_MODEL,
+      },
+    );
+  } catch (err) {
+    if (err instanceof AiUnreadableSourceError) throw new AppError(422, 'unreadable_upload', err.message);
+    if (err instanceof AiProviderError) {
+      throw new AppError(502, 'ai_provider_unreachable', 'The analysis service is currently unreachable. Please try again later.');
+    }
+    throw err;
+  }
+
+  const citation = formatCitation(project.citationFormat, { authors: [], title: effectiveTitle, year: null, venue: null });
+  const checksum = await sha256Hex(bytes);
+  const storagePath = `${authUser.id}/${project.id}/${crypto.randomUUID()}${extensionOf(file.name)}`;
+
+  const supabase = createSupabaseAdmin(c.env.SUPABASE_URL, c.env.SUPABASE_SECRET_KEY);
+  try {
+    await uploadSourceFile(supabase, { path: storagePath, data: bytes, contentType: mimeType });
+  } catch (err) {
+    if (err instanceof StorageError) {
+      throw new AppError(502, 'storage_unreachable', 'Could not store the uploaded file. Please try again.');
+    }
+    throw err;
+  }
+
+  const created = await createUploadedProjectSource(db, {
+    projectId: project.id,
+    ownerId: authUser.id,
+    title: requestedTitle,
+    storagePath,
+    originalFilename: file.name,
+    mimeType,
+    fileSizeBytes: bytes.byteLength,
+    checksumSha256: checksum,
+    citationString: citation,
+    strengthsSummary: result.analysis.strengths,
+    weaknessesSummary: result.analysis.weaknesses,
+    usefulnessScore: result.analysis.usefulnessScore,
+    keyQuotes: result.analysis.keyQuotes.map((q) => ({ quote: q.quote, location: q.location, usage_suggestion: q.usageSuggestion })),
+    now,
+  });
+
+  // Recorded only after a successful analysis, same as /analyze -- see that
+  // route's comment.
+  await recordUsage(db, {
+    userId: authUser.id,
+    projectId: project.id,
+    actionType: 'source_analysis',
+    now,
+    tokenCostInput: result.tokenUsage.inputTokens,
+    tokenCostOutput: result.tokenUsage.outputTokens,
+  });
+
+  return c.json(toProjectSource(created), 201);
 });
 
 sources.get('/', async (c) => {
