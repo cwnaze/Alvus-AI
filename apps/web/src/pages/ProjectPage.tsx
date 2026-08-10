@@ -1,5 +1,5 @@
 import type { BibliographyEntry, CitationFormat, OaStatus, Project, SourceAnalysis, SourceCandidate } from '@alvus-ai/shared';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   analyzeSource,
@@ -10,6 +10,7 @@ import {
   rejectSource,
   searchSources,
   selectSource,
+  uploadSource,
 } from '../lib/api';
 
 const CITATION_FORMAT_LABELS: Record<CitationFormat, string> = { mla: 'MLA', apa: 'APA', chicago: 'Chicago' };
@@ -32,6 +33,80 @@ function analysisErrorMessage(err: unknown): string {
   }
   if (err.status === 502) return "We couldn't reach the analysis service right now. Please try again in a bit.";
   return err.message;
+}
+
+function uploadErrorMessage(err: unknown): string {
+  if (!(err instanceof ApiError)) return 'Failed to upload this source.';
+  if (err.status === 402) {
+    const limit = typeof err.meta?.limit === 'number' ? err.meta.limit : null;
+    return limit !== null
+      ? `You've used all ${limit} source analyses included in your plan this month. Upgrade or wait until it resets.`
+      : "You've reached your plan's monthly limit for source analyses.";
+  }
+  if (err.status === 413) return 'That file is too large. Files must be 20MB or smaller.';
+  if (err.status === 415) return 'Only PDF and TXT files are supported.';
+  if (err.status === 502) return "We couldn't reach the analysis service right now. Please try again in a bit.";
+  return err.message;
+}
+
+function UploadSourceForm({ projectId, onUploaded }: { projectId: string; onUploaded: () => void }) {
+  const [file, setFile] = useState<File | null>(null);
+  const [title, setTitle] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!file) return;
+    setUploading(true);
+    setError(null);
+    try {
+      await uploadSource(projectId, file, title.trim() || undefined);
+      setFile(null);
+      setTitle('');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      onUploaded();
+    } catch (err) {
+      setError(uploadErrorMessage(err));
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3 rounded border border-slate-200 p-4">
+      <h2 className="text-sm font-medium text-slate-700">Upload your own PDF or TXT</h2>
+      <label className="flex flex-col gap-1">
+        <span className="text-sm text-slate-700">Source file</span>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.txt,application/pdf,text/plain"
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          className="rounded border border-slate-300 px-3 py-2"
+        />
+      </label>
+      <label className="flex flex-col gap-1">
+        <span className="text-sm text-slate-700">Title (optional)</span>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Defaults to the file name"
+          className="rounded border border-slate-300 px-3 py-2"
+        />
+      </label>
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
+      <button type="submit" disabled={!file || uploading} className="self-start rounded bg-brand px-4 py-2 text-white disabled:opacity-50">
+        {uploading ? 'Uploading…' : 'Upload source'}
+      </button>
+    </form>
+  );
 }
 
 function SourceRow({
@@ -343,13 +418,12 @@ export default function ProjectPage() {
           </p>
         )}
 
+        {projectId && <UploadSourceForm projectId={projectId} onUploaded={refreshBibliography} />}
+
         {candidates !== null && candidates.length === 0 && (
           <div className="flex flex-col items-center gap-3 py-16 text-center">
             <h3 className="text-lg font-medium">No matching sources found</h3>
             <p className="text-slate-600">Try a different search, or add your own source instead.</p>
-            <button type="button" disabled title="Coming soon" className="rounded border border-slate-300 px-4 py-2 opacity-50">
-              Upload your own PDF or TXT
-            </button>
           </div>
         )}
 

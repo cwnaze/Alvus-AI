@@ -1,11 +1,12 @@
 import { and, eq } from 'drizzle-orm';
 import type { Db } from '../client';
-import { externalWorks, projectSources, type KeyQuoteJson } from '../schema';
+import { externalWorks, projectSources, uploadedFiles, type KeyQuoteJson } from '../schema';
 
 export type ExternalWorkRow = typeof externalWorks.$inferSelect;
+export type UploadedFileRow = typeof uploadedFiles.$inferSelect;
 export type ProjectSourceRow = typeof projectSources.$inferSelect;
 export type ProjectSourceState = ProjectSourceRow['state'];
-export type ProjectSourceWithWork = ProjectSourceRow & { work: ExternalWorkRow | null };
+export type ProjectSourceWithWork = ProjectSourceRow & { work: ExternalWorkRow | null; uploadedFile: UploadedFileRow | null };
 
 export type ExternalWorkIdentity = {
   doi: string | null;
@@ -77,8 +78,12 @@ export async function findOrCreateProjectSource(
   return created;
 }
 
-function withWork(row: { project_sources: ProjectSourceRow; external_works: ExternalWorkRow | null }): ProjectSourceWithWork {
-  return { ...row.project_sources, work: row.external_works };
+function withWork(row: {
+  project_sources: ProjectSourceRow;
+  external_works: ExternalWorkRow | null;
+  uploaded_files: UploadedFileRow | null;
+}): ProjectSourceWithWork {
+  return { ...row.project_sources, work: row.external_works, uploadedFile: row.uploaded_files };
 }
 
 export async function listProjectSources(
@@ -92,6 +97,7 @@ export async function listProjectSources(
     .select()
     .from(projectSources)
     .leftJoin(externalWorks, eq(projectSources.externalWorkId, externalWorks.id))
+    .leftJoin(uploadedFiles, eq(projectSources.uploadedFileId, uploadedFiles.id))
     .where(and(...conditions));
   return rows.map(withWork);
 }
@@ -104,6 +110,7 @@ export async function getProjectSourceById(
     .select()
     .from(projectSources)
     .leftJoin(externalWorks, eq(projectSources.externalWorkId, externalWorks.id))
+    .leftJoin(uploadedFiles, eq(projectSources.uploadedFileId, uploadedFiles.id))
     .where(and(eq(projectSources.id, params.id), eq(projectSources.projectId, params.projectId)));
   return row ? withWork(row) : undefined;
 }
@@ -161,4 +168,72 @@ export async function saveProjectSourceAnalysis(
 
 export async function deleteProjectSource(db: Db, params: { id: string }): Promise<void> {
   await db.delete(projectSources).where(eq(projectSources.id, params.id));
+}
+
+// Unlike a `discovered` source (candidate -> explicit analyze -> explicit
+// select, three separate calls), an upload goes straight from bytes to a
+// `selected` bibliography entry in one request (docs/api.md: "select/upload
+// promotes to selected") -- analysis already ran synchronously by the time
+// this is called, so there is no intermediate `candidate` state to pass
+// through. One transaction: the `uploaded_files` row must exist before
+// `project_sources` can reference it, and a failure partway through must not
+// leave an orphaned file row with no source.
+export async function createUploadedProjectSource(
+  db: Db,
+  params: {
+    projectId: string;
+    ownerId: string;
+    title: string | null;
+    storagePath: string;
+    originalFilename: string;
+    mimeType: 'application/pdf' | 'text/plain';
+    fileSizeBytes: number;
+    checksumSha256: string | null;
+    citationString: string;
+    strengthsSummary: string;
+    weaknessesSummary: string;
+    usefulnessScore: number;
+    keyQuotes: KeyQuoteJson[];
+    now: Date;
+  },
+): Promise<ProjectSourceWithWork> {
+  return db.transaction(async (tx) => {
+    const [file] = await tx
+      .insert(uploadedFiles)
+      .values({
+        projectId: params.projectId,
+        ownerId: params.ownerId,
+        title: params.title,
+        storagePath: params.storagePath,
+        originalFilename: params.originalFilename,
+        mimeType: params.mimeType,
+        fileSizeBytes: params.fileSizeBytes,
+        checksumSha256: params.checksumSha256,
+        uploadStatus: 'processed',
+      })
+      .returning();
+    if (!file) throw new Error('createUploadedProjectSource: uploaded_files insert returned no row');
+
+    const [source] = await tx
+      .insert(projectSources)
+      .values({
+        projectId: params.projectId,
+        origin: 'uploaded',
+        uploadedFileId: file.id,
+        state: 'selected',
+        citationString: params.citationString,
+        strengthsSummary: params.strengthsSummary,
+        weaknessesSummary: params.weaknessesSummary,
+        usefulnessScore: params.usefulnessScore.toString(),
+        keyQuotes: params.keyQuotes,
+        fullTextAvailable: true,
+        fullTextSource: 'uploaded',
+        analyzedAt: params.now,
+        selectedAt: params.now,
+      })
+      .returning();
+    if (!source) throw new Error('createUploadedProjectSource: project_sources insert returned no row');
+
+    return { ...source, work: null, uploadedFile: file };
+  });
 }

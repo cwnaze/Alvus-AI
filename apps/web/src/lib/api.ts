@@ -5,6 +5,7 @@ import type {
   CitationFormat,
   LoginResponse,
   Project,
+  ProjectSource,
   ProjectSourcesResponse,
   ProjectsResponse,
   RefreshResponse,
@@ -61,7 +62,10 @@ async function refreshAccessToken(): Promise<boolean> {
 
 async function request<T>(path: string, init: RequestInit = {}, isRetry = false): Promise<T> {
   const headers = new Headers(init.headers);
-  headers.set('Content-Type', 'application/json');
+  // A FormData body (source upload) must keep the browser-generated
+  // multipart boundary in its own Content-Type -- setting it here would
+  // overwrite that boundary and break parsing server-side.
+  if (!(init.body instanceof FormData)) headers.set('Content-Type', 'application/json');
   const token = getAccessToken();
   if (token) headers.set('Authorization', `Bearer ${token}`);
 
@@ -172,6 +176,13 @@ export function searchSources(
 
 export function fetchSources(projectId: string, status?: 'candidate' | 'selected'): Promise<ProjectSourcesResponse> {
   return request(`/projects/${projectId}/sources${status ? `?status=${status}` : ''}`);
+}
+
+export function uploadSource(projectId: string, file: File, title?: string): Promise<ProjectSource> {
+  const form = new FormData();
+  form.set('file', file);
+  if (title) form.set('title', title);
+  return request(`/projects/${projectId}/sources/upload`, { method: 'POST', body: form });
 }
 
 export function analyzeSource(projectId: string, sourceId: string, forceRefresh = false): Promise<SourceAnalysis> {

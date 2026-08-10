@@ -2,6 +2,8 @@ import { Hono } from 'hono';
 import { requestId } from 'hono/request-id';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AiProviderError, AiUnreadableSourceError } from '../lib/ai/types';
+import { EmptyExtractionError, UnparseableFileError } from '../lib/files/extract-text';
+import { StorageError } from '../lib/storage/client';
 import { AppError, CORRELATION_ID_HEADER, onError } from '../middleware/errors';
 import type { AuthBindings, AuthVariables } from '../middleware/auth';
 
@@ -18,10 +20,13 @@ const {
   saveProjectSourceAnalysis,
   updateProjectSourceState,
   deleteProjectSource,
+  createUploadedProjectSource,
   searchSources,
   requestSourceAnalysis,
   assertWithinUsageLimit,
   recordUsage,
+  extractTextFromFile,
+  uploadSourceFile,
 } = vi.hoisted(() => ({
   getUser: vi.fn(),
   getUserById: vi.fn(),
@@ -33,10 +38,13 @@ const {
   saveProjectSourceAnalysis: vi.fn(),
   updateProjectSourceState: vi.fn(),
   deleteProjectSource: vi.fn(),
+  createUploadedProjectSource: vi.fn(),
   searchSources: vi.fn(),
   requestSourceAnalysis: vi.fn(),
   assertWithinUsageLimit: vi.fn(),
   recordUsage: vi.fn(),
+  extractTextFromFile: vi.fn(),
+  uploadSourceFile: vi.fn(),
 }));
 
 vi.mock('../lib/supabase/client', () => ({
@@ -53,6 +61,7 @@ vi.mock('../lib/db/queries/sources', () => ({
   saveProjectSourceAnalysis,
   updateProjectSourceState,
   deleteProjectSource,
+  createUploadedProjectSource,
 }));
 vi.mock('../lib/sources', () => ({ searchSources }));
 vi.mock('../lib/ai', async (importOriginal) => {
@@ -60,6 +69,14 @@ vi.mock('../lib/ai', async (importOriginal) => {
   return { ...actual, requestSourceAnalysis };
 });
 vi.mock('../lib/metering', () => ({ assertWithinUsageLimit, recordUsage }));
+vi.mock('../lib/files', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../lib/files')>();
+  return { ...actual, extractTextFromFile };
+});
+vi.mock('../lib/storage', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../lib/storage')>();
+  return { ...actual, uploadSourceFile };
+});
 
 const { default: sourcesRoutes } = await import('./sources');
 
@@ -158,6 +175,61 @@ function projectSourceRow(overrides: Partial<Record<string, unknown>> = {}) {
     work: externalWorkRow(),
     ...overrides,
   };
+}
+
+function uploadedFileRow(overrides: Partial<Record<string, unknown>> = {}) {
+  return {
+    id: 'uploaded-file-1',
+    projectId: PROJECT_ID,
+    ownerId: OWNER_ID,
+    title: null,
+    storageBucket: 'source-uploads',
+    storagePath: `${OWNER_ID}/${PROJECT_ID}/file.pdf`,
+    originalFilename: 'paper.pdf',
+    mimeType: 'application/pdf',
+    fileSizeBytes: 1234,
+    checksumSha256: 'checksum',
+    uploadStatus: 'processed',
+    createdAt: new Date('2026-02-01T00:00:00Z'),
+    ...overrides,
+  };
+}
+
+function uploadedProjectSourceRow(overrides: Partial<Record<string, unknown>> = {}) {
+  return {
+    id: 'uploaded-source-1',
+    projectId: PROJECT_ID,
+    origin: 'uploaded',
+    externalWorkId: null,
+    uploadedFileId: 'uploaded-file-1',
+    state: 'selected',
+    citationString: '"Paper."',
+    strengthsSummary: 'S',
+    weaknessesSummary: 'W',
+    usefulnessScore: '8.00',
+    keyQuotes: [],
+    fullTextAvailable: true,
+    fullTextSource: 'uploaded',
+    analyzedAt: new Date('2026-02-01T00:00:00Z'),
+    selectedAt: new Date('2026-02-01T00:00:00Z'),
+    createdAt: new Date('2026-02-01T00:00:00Z'),
+    updatedAt: new Date('2026-02-01T00:00:00Z'),
+    work: null,
+    uploadedFile: uploadedFileRow(),
+    ...overrides,
+  };
+}
+
+function pdfFile(name = 'paper.pdf', content = 'irrelevant, extraction is mocked'): File {
+  return new File([content], name, { type: 'application/pdf' });
+}
+
+function txtFile(name = 'notes.txt', content = 'irrelevant, extraction is mocked'): File {
+  return new File([content], name, { type: 'text/plain' });
+}
+
+function uploadRequest(projectId: string, form: FormData) {
+  return request(`/${projectId}/upload`, { method: 'POST', body: form });
 }
 
 describe('POST /search', () => {
@@ -715,5 +787,256 @@ describe('DELETE /:sourceId', () => {
 
     expect(res.status).toBe(409);
     expect(deleteProjectSource).not.toHaveBeenCalled();
+  });
+});
+
+describe('POST /upload', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('uploads a PDF, analyzes it synchronously, and adds it directly to the bibliography', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow({ citationFormat: 'mla' }));
+    extractTextFromFile.mockResolvedValueOnce('Extracted full text of the paper.');
+    assertWithinUsageLimit.mockResolvedValueOnce(undefined);
+    requestSourceAnalysis.mockResolvedValueOnce({
+      analysis: { strengths: 'S', weaknesses: 'W', usefulnessScore: 8, keyQuotes: [] },
+      tokenUsage: { inputTokens: 20, outputTokens: 10 },
+    });
+    uploadSourceFile.mockResolvedValueOnce(undefined);
+    createUploadedProjectSource.mockResolvedValueOnce(uploadedProjectSourceRow());
+
+    const form = new FormData();
+    form.set('file', pdfFile('My Paper.pdf'));
+    form.set('title', 'My Custom Title');
+
+    const res = await uploadRequest(PROJECT_ID, form);
+
+    expect(res.status).toBe(201);
+    expect(extractTextFromFile).toHaveBeenCalledWith(expect.any(Uint8Array), 'application/pdf');
+    expect(assertWithinUsageLimit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ actionType: 'source_analysis' }));
+    expect(requestSourceAnalysis).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'My Custom Title', authors: [], abstract: 'Extracted full text of the paper.' }),
+      expect.anything(),
+    );
+    expect(uploadSourceFile).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ contentType: 'application/pdf' }));
+    expect(createUploadedProjectSource).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        projectId: PROJECT_ID,
+        ownerId: OWNER_ID,
+        title: 'My Custom Title',
+        originalFilename: 'My Paper.pdf',
+        mimeType: 'application/pdf',
+      }),
+    );
+    expect(recordUsage).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ actionType: 'source_analysis', tokenCostInput: 20, tokenCostOutput: 10 }),
+    );
+    const body = (await res.json()) as Record<string, unknown>;
+    expect(body.state).toBe('selected');
+  });
+
+  it('accepts a TXT upload too', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+    extractTextFromFile.mockResolvedValueOnce('Plain text content.');
+    assertWithinUsageLimit.mockResolvedValueOnce(undefined);
+    requestSourceAnalysis.mockResolvedValueOnce({
+      analysis: { strengths: 'S', weaknesses: 'W', usefulnessScore: 5, keyQuotes: [] },
+      tokenUsage: { inputTokens: null, outputTokens: null },
+    });
+    uploadSourceFile.mockResolvedValueOnce(undefined);
+    createUploadedProjectSource.mockResolvedValueOnce(
+      uploadedProjectSourceRow({ uploadedFile: uploadedFileRow({ mimeType: 'text/plain', originalFilename: 'notes.txt' }) }),
+    );
+
+    const form = new FormData();
+    form.set('file', txtFile('notes.txt'));
+    const res = await uploadRequest(PROJECT_ID, form);
+
+    expect(res.status).toBe(201);
+    expect(extractTextFromFile).toHaveBeenCalledWith(expect.any(Uint8Array), 'text/plain');
+  });
+
+  it('falls back to the filename (extension stripped) when no title is given', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+    extractTextFromFile.mockResolvedValueOnce('Extracted text.');
+    assertWithinUsageLimit.mockResolvedValueOnce(undefined);
+    requestSourceAnalysis.mockResolvedValueOnce({
+      analysis: { strengths: 'S', weaknesses: 'W', usefulnessScore: 5, keyQuotes: [] },
+      tokenUsage: { inputTokens: null, outputTokens: null },
+    });
+    uploadSourceFile.mockResolvedValueOnce(undefined);
+    createUploadedProjectSource.mockResolvedValueOnce(uploadedProjectSourceRow());
+
+    const form = new FormData();
+    form.set('file', pdfFile('Climate Notes.pdf'));
+    await uploadRequest(PROJECT_ID, form);
+
+    expect(requestSourceAnalysis).toHaveBeenCalledWith(expect.objectContaining({ title: 'Climate Notes' }), expect.anything());
+    expect(createUploadedProjectSource).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ title: null }));
+  });
+
+  it('400s when no file is included', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+
+    const form = new FormData();
+    form.set('title', 'No file here');
+    const res = await uploadRequest(PROJECT_ID, form);
+
+    expect(res.status).toBe(400);
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('missing_file');
+    expect(extractTextFromFile).not.toHaveBeenCalled();
+  });
+
+  it('415s an unsupported file type', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+
+    const form = new FormData();
+    form.set(
+      'file',
+      new File(['content'], 'notes.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }),
+    );
+    const res = await uploadRequest(PROJECT_ID, form);
+
+    expect(res.status).toBe(415);
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('unsupported_file_type');
+    expect(extractTextFromFile).not.toHaveBeenCalled();
+  });
+
+  it('415s a mismatched extension/MIME pair (checked together, not either alone)', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+
+    const form = new FormData();
+    form.set('file', new File(['content'], 'paper.pdf', { type: 'text/plain' }));
+    const res = await uploadRequest(PROJECT_ID, form);
+
+    expect(res.status).toBe(415);
+    expect(extractTextFromFile).not.toHaveBeenCalled();
+  });
+
+  it('413s an oversized file', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+
+    const oversized = new File([new Uint8Array(20_000_001)], 'big.pdf', { type: 'application/pdf' });
+    const form = new FormData();
+    form.set('file', oversized);
+    const res = await uploadRequest(PROJECT_ID, form);
+
+    expect(res.status).toBe(413);
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('file_too_large');
+    expect(extractTextFromFile).not.toHaveBeenCalled();
+  });
+
+  it('422s a corrupted file without calling the AI or recording usage', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+    extractTextFromFile.mockRejectedValueOnce(new UnparseableFileError('This PDF could not be parsed'));
+
+    const form = new FormData();
+    form.set('file', pdfFile());
+    const res = await uploadRequest(PROJECT_ID, form);
+
+    expect(res.status).toBe(422);
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('unreadable_upload');
+    expect(assertWithinUsageLimit).not.toHaveBeenCalled();
+    expect(requestSourceAnalysis).not.toHaveBeenCalled();
+  });
+
+  it('422s a scanned-image-only PDF with a distinct message, not an empty-content AI call', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+    extractTextFromFile.mockRejectedValueOnce(new EmptyExtractionError('This PDF has no extractable text'));
+
+    const form = new FormData();
+    form.set('file', pdfFile());
+    const res = await uploadRequest(PROJECT_ID, form);
+
+    expect(res.status).toBe(422);
+    const body = (await res.json()) as ErrorEnvelope;
+    expect(body.error.code).toBe('unreadable_upload');
+    expect(body.error.message).toContain('no extractable text');
+    expect(requestSourceAnalysis).not.toHaveBeenCalled();
+  });
+
+  it('402s once the usage limit is exhausted, without calling the AI', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+    extractTextFromFile.mockResolvedValueOnce('Extracted text.');
+    assertWithinUsageLimit.mockRejectedValueOnce(
+      new AppError(402, 'usage_limit_exceeded', 'limit reached', { limit: 5, used: 5, resets_at: '2026-03-01T00:00:00.000Z' }),
+    );
+
+    const form = new FormData();
+    form.set('file', pdfFile());
+    const res = await uploadRequest(PROJECT_ID, form);
+
+    expect(res.status).toBe(402);
+    expect(requestSourceAnalysis).not.toHaveBeenCalled();
+  });
+
+  it('502s when the AI provider is unreachable', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+    extractTextFromFile.mockResolvedValueOnce('Extracted text.');
+    assertWithinUsageLimit.mockResolvedValueOnce(undefined);
+    requestSourceAnalysis.mockRejectedValueOnce(new AiProviderError('unreachable'));
+
+    const form = new FormData();
+    form.set('file', pdfFile());
+    const res = await uploadRequest(PROJECT_ID, form);
+
+    expect(res.status).toBe(502);
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('ai_provider_unreachable');
+    expect(uploadSourceFile).not.toHaveBeenCalled();
+  });
+
+  it('502s when the file cannot be stored, after a successful analysis', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+    extractTextFromFile.mockResolvedValueOnce('Extracted text.');
+    assertWithinUsageLimit.mockResolvedValueOnce(undefined);
+    requestSourceAnalysis.mockResolvedValueOnce({
+      analysis: { strengths: 'S', weaknesses: 'W', usefulnessScore: 5, keyQuotes: [] },
+      tokenUsage: { inputTokens: null, outputTokens: null },
+    });
+    uploadSourceFile.mockRejectedValueOnce(new StorageError('bucket unreachable'));
+
+    const form = new FormData();
+    form.set('file', pdfFile());
+    const res = await uploadRequest(PROJECT_ID, form);
+
+    expect(res.status).toBe(502);
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('storage_unreachable');
+    expect(createUploadedProjectSource).not.toHaveBeenCalled();
+  });
+
+  it('403s a non-owner', async () => {
+    asCaller({ id: OTHER_USER_ID });
+    getProjectById.mockResolvedValueOnce(projectRow({ ownerId: OWNER_ID }));
+
+    const form = new FormData();
+    form.set('file', pdfFile());
+    const res = await uploadRequest(PROJECT_ID, form);
+
+    expect(res.status).toBe(403);
+    expect(extractTextFromFile).not.toHaveBeenCalled();
+  });
+
+  it('404s a nonexistent project', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(undefined);
+
+    const form = new FormData();
+    form.set('file', pdfFile());
+    const res = await uploadRequest(PROJECT_ID, form);
+
+    expect(res.status).toBe(404);
   });
 });

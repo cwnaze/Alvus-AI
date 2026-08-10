@@ -95,7 +95,9 @@ test('US-015: source discovery search', async ({ page, demo }) => {
   await page.getByLabel('Search query').fill('zzz-empty query');
   await page.getByRole('button', { name: 'Search for sources' }).click();
   await expect(page.getByText('No matching sources found')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Upload your own PDF or TXT' })).toBeVisible();
+  // The manual-upload path (US-017) is always available, not just here -- the
+  // empty state's copy points at it rather than duplicating a second control.
+  await expect(page.getByRole('heading', { name: 'Upload your own PDF or TXT' })).toBeVisible();
   await demo.step('An empty result set shows a clear empty state offering the manual-upload path');
 
   // 6. An upstream provider outage shows a clear error state, not a blank

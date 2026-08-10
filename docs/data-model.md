@@ -165,6 +165,7 @@ metadata, writes restricted to service role only.
 | `id` | uuid PK | |
 | `project_id` | uuid, FK → `projects.id` ON DELETE CASCADE | |
 | `owner_id` | uuid, FK → `users.id` | denormalized for direct RLS checks |
+| `title` | text, nullable | user-supplied display title (docs/api.md upload's `title?`); null means derive from `original_filename` at read time -- added during US-017 implementation, `project_sources`/`external_works` have nowhere else to hold a title for an `origin='uploaded'` row |
 | `storage_bucket` | text, default `source-uploads` | |
 | `storage_path` | text, unique, not null | |
 | `original_filename` | text, not null | |
