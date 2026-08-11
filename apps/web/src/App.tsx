@@ -10,6 +10,7 @@ import ProjectPage from './pages/ProjectPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import SignupPage from './pages/SignupPage';
 import StatusScreen from './pages/StatusScreen';
+import WritingPage from './pages/WritingPage';
 
 function LoadingScreen() {
   return (
@@ -74,6 +75,14 @@ export default function App() {
             element={
               <ProjectRoute>
                 <ProjectPage />
+              </ProjectRoute>
+            }
+          />
+          <Route
+            path="/projects/:projectId/write"
+            element={
+              <ProjectRoute>
+                <WritingPage />
               </ProjectRoute>
             }
           />

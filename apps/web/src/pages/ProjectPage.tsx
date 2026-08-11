@@ -384,6 +384,11 @@ export default function ProjectPage() {
         <Link to="/" className="text-xl font-semibold text-brand">
           Alvus AI
         </Link>
+        {projectId && (
+          <Link to={`/projects/${projectId}/write`} className="rounded bg-brand px-4 py-2 text-sm text-white">
+            Start writing
+          </Link>
+        )}
       </header>
 
       <section className="mx-auto flex max-w-2xl flex-col gap-6 px-6 py-8">
