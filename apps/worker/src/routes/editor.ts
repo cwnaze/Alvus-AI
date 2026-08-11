@@ -40,9 +40,8 @@ editor.put('/', async (c) => {
   if (!authUser) throw new AppError(401, 'unauthorized', 'Authentication required');
 
   const db = createDb(c.env.DATABASE_URL);
-  const project = await loadOwnedProject(db, c.req.param('projectId') ?? '', authUser.id);
-
   const body = (await c.req.json().catch(() => null)) as { content?: unknown } | null;
+  const project = await loadOwnedProject(db, c.req.param('projectId') ?? '', authUser.id);
   const content = parseContent(body?.content);
 
   const saved = await saveDocumentContent(db, { projectId: project.id, content });
