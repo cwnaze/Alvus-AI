@@ -63,6 +63,7 @@ export type SourceStateResponse = {
 export type BibliographyEntry = {
   source_id: string;
   citation_text: string;
+  in_text_citation: string;
 };
 
 export type BibliographyResponse = {

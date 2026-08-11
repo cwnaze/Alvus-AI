@@ -95,7 +95,7 @@ Search/upload results start as `candidate`; select/upload promotes to `selected`
 | POST | `/projects/:projectId/sources/:sourceId/reject` | authenticated | — | `200 { state: "rejected" }` — soft dismissal, not re-suggested on later search | `403`, `404`, `409` already selected |
 | DELETE | `/projects/:projectId/sources/:sourceId` | authenticated | — | `204` (hard delete — `selected` source or upload only; reject a `candidate` instead) | `403`, `404` |
 | POST | `/projects/:projectId/sources/upload` | authenticated, **metered** | `multipart/form-data`: `file` (PDF/TXT ≤20MB), `title?` | `201 <source, status: "selected">` (analysis runs synchronously) | `400`, `403`, `404`, `413`, `415`, `422 unreadable_upload`, `402` |
-| GET | `/projects/:projectId/bibliography` | authenticated | — | `200 { citation_format, entries: [{source_id, citation_text}] }` | `403`, `404` |
+| GET | `/projects/:projectId/bibliography` | authenticated | — | `200 { citation_format, entries: [{source_id, citation_text, in_text_citation}] }` | `403`, `404` |
 
 ## Editor
 

@@ -1,17 +1,18 @@
 import { Hono } from 'hono';
 import { requestId } from 'hono/request-id';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CORRELATION_ID_HEADER, onError } from '../middleware/errors';
 import type { AuthBindings, AuthVariables } from '../middleware/auth';
 
 type ErrorEnvelope = { error: { code: string; message: string; correlationId: string } };
 
-const { getUser, getUserById, getProjectById, getOrCreateDocument, saveDocumentContent } = vi.hoisted(() => ({
+const { getUser, getUserById, getProjectById, getOrCreateDocument, saveDocumentContent, listProjectSources } = vi.hoisted(() => ({
   getUser: vi.fn(),
   getUserById: vi.fn(),
   getProjectById: vi.fn(),
   getOrCreateDocument: vi.fn(),
   saveDocumentContent: vi.fn(),
+  listProjectSources: vi.fn(),
 }));
 
 vi.mock('../lib/supabase/client', () => ({
@@ -21,6 +22,7 @@ vi.mock('../lib/db/client', () => ({ createDb: () => ({}) }));
 vi.mock('../lib/db/queries/waitlist', () => ({ getUserById }));
 vi.mock('../lib/db/queries/projects', () => ({ getProjectById }));
 vi.mock('../lib/db/queries/documents', () => ({ getOrCreateDocument, saveDocumentContent }));
+vi.mock('../lib/db/queries/sources', () => ({ listProjectSources }));
 
 const { default: editorRoutes } = await import('./editor');
 
@@ -177,5 +179,89 @@ describe('PUT /', () => {
     expect(res.status).toBe(200);
     expect(saveDocumentContent).toHaveBeenCalledWith(expect.anything(), { projectId: PROJECT_ID, content });
     expect(await res.json()).toEqual({ updated_at: '2026-01-04T00:00:00.000Z' });
+  });
+});
+
+describe('POST /format', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  function request(path: string) {
+    return app.request(
+      `${path}/format`,
+      { method: 'POST', headers: { Authorization: 'Bearer tok', 'Content-Type': 'application/json' }, body: JSON.stringify({}) },
+      ENV,
+    );
+  }
+
+  it('403s a non-owner', async () => {
+    asCaller({ id: OTHER_USER_ID });
+    getProjectById.mockResolvedValueOnce(projectRow({ ownerId: OWNER_ID }));
+    const res = await request(`/${PROJECT_ID}`);
+    expect(res.status).toBe(403);
+  });
+
+  it('404s a nonexistent project', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(undefined);
+    const res = await request(`/${PROJECT_ID}`);
+    expect(res.status).toBe(404);
+  });
+
+  it('422s an empty document', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+    getOrCreateDocument.mockResolvedValueOnce(documentRow({ content: { type: 'doc', content: [{ type: 'paragraph' }] } }));
+    const res = await request(`/${PROJECT_ID}`);
+    expect(res.status).toBe(422);
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('empty_document');
+    expect(saveDocumentContent).not.toHaveBeenCalled();
+  });
+
+  it('refreshes a citation whose source is still selected and reports no dangling citations', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+    const content = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'A claim ' },
+            { type: 'citation', attrs: { sourceId: 'src-1', text: '(Stale)', dangling: false } },
+          ],
+        },
+      ],
+    };
+    getOrCreateDocument.mockResolvedValueOnce(documentRow({ content }));
+    listProjectSources.mockResolvedValueOnce([{ id: 'src-1', work: { authors: ['Jane Doe'], publicationYear: 2020 } }]);
+    saveDocumentContent.mockImplementationOnce((_db, params) =>
+      Promise.resolve(documentRow({ content: params.content, updatedAt: new Date('2026-01-05T00:00:00Z') })),
+    );
+
+    const res = await request(`/${PROJECT_ID}`);
+
+    expect(res.status).toBe(200);
+    expect(listProjectSources).toHaveBeenCalledWith(expect.anything(), { projectId: PROJECT_ID, state: 'selected' });
+    const body = (await res.json()) as { content: { content: [{ content: unknown[] }] }; dangling_citations: unknown[] };
+    expect(body.dangling_citations).toEqual([]);
+    expect(body.content.content[0].content[1]).toEqual({ type: 'citation', attrs: { sourceId: 'src-1', text: '(Doe)', dangling: false } });
+  });
+
+  it('flags a citation whose source is no longer selected as dangling', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+    const content = {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'citation', attrs: { sourceId: 'gone', text: '(Doe)', dangling: false } }] }],
+    };
+    getOrCreateDocument.mockResolvedValueOnce(documentRow({ content }));
+    listProjectSources.mockResolvedValueOnce([]);
+    saveDocumentContent.mockImplementationOnce((_db, params) => Promise.resolve(documentRow({ content: params.content })));
+
+    const res = await request(`/${PROJECT_ID}`);
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { dangling_citations: Array<{ source_id: string }> };
+    expect(body.dangling_citations).toEqual([{ source_id: 'gone' }]);
   });
 });

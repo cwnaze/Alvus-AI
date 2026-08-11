@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatCitation, type CitationFields } from './index';
+import { formatCitation, formatInTextCitation, type CitationFields, type InTextCitationFields } from './index';
 
 function fields(overrides: Partial<CitationFields> = {}): CitationFields {
   return {
@@ -9,6 +9,10 @@ function fields(overrides: Partial<CitationFields> = {}): CitationFields {
     venue: 'Journal of Environmental Communication',
     ...overrides,
   };
+}
+
+function inTextFields(overrides: Partial<InTextCitationFields> = {}): InTextCitationFields {
+  return { authors: ['Jane Doe'], year: 2020, ...overrides };
 }
 
 describe('formatCitation', () => {
@@ -76,5 +80,64 @@ describe('formatCitation', () => {
     it('uses "et al." for three or more authors', () => {
       expect(formatCitation('chicago', fields({ authors: ['Jane Doe', 'John Smith', 'Amara Chen'] }))).toContain('Doe, Jane et al.');
     });
+  });
+});
+
+describe('formatInTextCitation', () => {
+  describe('mla', () => {
+    it('formats a single author with no page number', () => {
+      expect(formatInTextCitation('mla', inTextFields())).toBe('(Doe)');
+    });
+
+    it('joins two authors with "and"', () => {
+      expect(formatInTextCitation('mla', inTextFields({ authors: ['Jane Doe', 'John Smith'] }))).toBe('(Doe and Smith)');
+    });
+
+    it('uses "et al." for three or more authors', () => {
+      expect(formatInTextCitation('mla', inTextFields({ authors: ['Jane Doe', 'John Smith', 'Amara Chen'] }))).toBe('(Doe et al.)');
+    });
+
+    it('falls back to "n.d." when there are no authors', () => {
+      expect(formatInTextCitation('mla', inTextFields({ authors: [] }))).toBe('(n.d.)');
+    });
+  });
+
+  describe('apa', () => {
+    it('formats a single author with the year', () => {
+      expect(formatInTextCitation('apa', inTextFields())).toBe('(Doe, 2020)');
+    });
+
+    it('joins two authors with "&"', () => {
+      expect(formatInTextCitation('apa', inTextFields({ authors: ['Jane Doe', 'John Smith'] }))).toBe('(Doe & Smith, 2020)');
+    });
+
+    it('uses "et al." for three or more authors', () => {
+      expect(formatInTextCitation('apa', inTextFields({ authors: ['Jane Doe', 'John Smith', 'Amara Chen'] }))).toBe('(Doe et al., 2020)');
+    });
+
+    it('falls back to "n.d." when there is no year', () => {
+      expect(formatInTextCitation('apa', inTextFields({ year: null }))).toBe('(Doe, n.d.)');
+    });
+
+    it('omits the author segment when there are no authors', () => {
+      expect(formatInTextCitation('apa', inTextFields({ authors: [] }))).toBe('(2020)');
+    });
+  });
+
+  describe('chicago', () => {
+    it('formats a single author with the year, no comma', () => {
+      expect(formatInTextCitation('chicago', inTextFields())).toBe('(Doe 2020)');
+    });
+
+    it('uses "et al." for three or more authors', () => {
+      expect(formatInTextCitation('chicago', inTextFields({ authors: ['Jane Doe', 'John Smith', 'Amara Chen'] }))).toBe(
+        '(Doe et al. 2020)',
+      );
+    });
+  });
+
+  it('is visually distinct per format for the same source', () => {
+    const result = { mla: formatInTextCitation('mla', inTextFields()), apa: formatInTextCitation('apa', inTextFields()), chicago: formatInTextCitation('chicago', inTextFields()) };
+    expect(new Set(Object.values(result)).size).toBe(3);
   });
 });

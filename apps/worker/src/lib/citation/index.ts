@@ -96,3 +96,70 @@ export function formatCitation(format: CitationFormat, fields: CitationFields): 
       return formatChicago(fields);
   }
 }
+
+// The parenthetical in-text form, distinct from `formatCitation`'s bibliography
+// entry (docs/tdd.md Flow 2: "using the same rules as lib/citation ... always
+// match" -- both draw on the same author-name helpers above). No page number:
+// this app has no stable per-source pagination to draw one from (search
+// results and uploads alike are analyzed from unpaginated text/abstracts), so
+// MLA in-text citations omit it -- the same convention MLA itself uses for
+// sources without fixed page numbers.
+export type InTextCitationFields = {
+  authors: string[];
+  year: number | null;
+};
+
+function inTextAuthorsMla(authors: string[]): string {
+  if (authors.length === 0) return '';
+  const last = (name: string) => splitName(name).last;
+  if (authors.length === 1) return last(authors[0]!);
+  if (authors.length === 2) return `${last(authors[0]!)} and ${last(authors[1]!)}`;
+  return `${last(authors[0]!)} et al.`;
+}
+
+function inTextAuthorsApa(authors: string[]): string {
+  if (authors.length === 0) return '';
+  const last = (name: string) => splitName(name).last;
+  if (authors.length === 1) return last(authors[0]!);
+  if (authors.length === 2) return `${last(authors[0]!)} & ${last(authors[1]!)}`;
+  return `${last(authors[0]!)} et al.`;
+}
+
+function inTextAuthorsChicago(authors: string[]): string {
+  if (authors.length === 0) return '';
+  const last = (name: string) => splitName(name).last;
+  if (authors.length === 1) return last(authors[0]!);
+  if (authors.length === 2) return `${last(authors[0]!)} and ${last(authors[1]!)}`;
+  return `${last(authors[0]!)} et al.`;
+}
+
+function formatInTextMla(fields: InTextCitationFields): string {
+  const authors = inTextAuthorsMla(fields.authors);
+  return `(${authors || UNDATED.mla})`;
+}
+
+function formatInTextApa(fields: InTextCitationFields): string {
+  const authors = inTextAuthorsApa(fields.authors);
+  const year = fields.year ?? UNDATED.apa;
+  return authors ? `(${authors}, ${year})` : `(${year})`;
+}
+
+function formatInTextChicago(fields: InTextCitationFields): string {
+  const authors = inTextAuthorsChicago(fields.authors);
+  const year = fields.year ?? UNDATED.chicago;
+  return authors ? `(${authors} ${year})` : `(${year})`;
+}
+
+// Chicago here is the author-date variant ("(Doe 2020)"), not
+// notes-bibliography footnotes -- the editor has no footnote/endnote support,
+// and author-date is a standard, citable Chicago style in its own right.
+export function formatInTextCitation(format: CitationFormat, fields: InTextCitationFields): string {
+  switch (format) {
+    case 'mla':
+      return formatInTextMla(fields);
+    case 'apa':
+      return formatInTextApa(fields);
+    case 'chicago':
+      return formatInTextChicago(fields);
+  }
+}
