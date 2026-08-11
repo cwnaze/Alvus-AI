@@ -6,4 +6,5 @@ export * from './projects';
 export * from './external-works';
 export * from './uploaded-files';
 export * from './project-sources';
+export * from './project-documents';
 export * from './usage-events';

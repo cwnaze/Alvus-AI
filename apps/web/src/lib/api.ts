@@ -3,12 +3,15 @@ import type {
   AuthUser,
   BibliographyResponse,
   CitationFormat,
+  DocumentContent,
   LoginResponse,
   Project,
+  ProjectDocumentResponse,
   ProjectSource,
   ProjectSourcesResponse,
   ProjectsResponse,
   RefreshResponse,
+  SaveDocumentResponse,
   SourceAnalysis,
   SourceSearchResponse,
   SourceStateResponse,
@@ -206,4 +209,12 @@ export function rejectSource(projectId: string, sourceId: string): Promise<Sourc
 
 export function fetchBibliography(projectId: string): Promise<BibliographyResponse> {
   return request(`/projects/${projectId}/bibliography`);
+}
+
+export function fetchDocument(projectId: string): Promise<ProjectDocumentResponse> {
+  return request(`/projects/${projectId}/document`);
+}
+
+export function saveDocument(projectId: string, content: DocumentContent): Promise<SaveDocumentResponse> {
+  return request(`/projects/${projectId}/document`, { method: 'PUT', body: JSON.stringify({ content }) });
 }

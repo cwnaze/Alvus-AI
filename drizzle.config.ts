@@ -19,6 +19,7 @@ export default defineConfig({
     './apps/worker/src/lib/db/schema/external-works.ts',
     './apps/worker/src/lib/db/schema/uploaded-files.ts',
     './apps/worker/src/lib/db/schema/project-sources.ts',
+    './apps/worker/src/lib/db/schema/project-documents.ts',
     './apps/worker/src/lib/db/schema/usage-events.ts',
   ],
   out: './drizzle/migrations',

@@ -17,6 +17,7 @@ export {
   type BibliographyEntry,
   type BibliographyResponse,
 } from './sources';
+export { type DocumentContent, type ProjectDocumentResponse, type SaveDocumentResponse } from './document';
 export {
   WAITLIST_STATUSES,
   type WaitlistStatus,

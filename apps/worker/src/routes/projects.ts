@@ -107,9 +107,8 @@ projects.patch('/:projectId', async (c) => {
   if (!authUser) throw new AppError(401, 'unauthorized', 'Authentication required');
 
   const db = createDb(c.env.DATABASE_URL);
-  const project = await loadOwnedProject(db, c.req.param('projectId'), authUser.id);
-
   const body = (await c.req.json().catch(() => null)) as { title?: unknown; citation_format?: unknown } | null;
+  const project = await loadOwnedProject(db, c.req.param('projectId'), authUser.id);
   if (body?.citation_format !== undefined && body.citation_format !== project.citationFormat) {
     throw new AppError(422, 'citation_format_immutable', 'Citation format cannot be changed after creation');
   }
