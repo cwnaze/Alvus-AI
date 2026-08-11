@@ -611,7 +611,7 @@
         "US-018",
         "US-016"
       ],
-      "status": "in_progress",
+      "status": "pending",
       "demoKind": "browser",
       "verification": {
         "commands": [
