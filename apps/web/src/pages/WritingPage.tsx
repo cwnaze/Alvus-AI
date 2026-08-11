@@ -50,9 +50,13 @@ export default function WritingPage() {
 
   useEffect(() => {
     return () => {
-      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      if (!saveTimeoutRef.current) return;
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+      const pending = latestContentRef.current;
+      if (pending && projectId) void saveDocument(projectId, pending);
     };
-  }, []);
+  }, [projectId]);
 
   function scheduleSave(content: DocumentContent) {
     if (!projectId) return;
@@ -108,7 +112,7 @@ export default function WritingPage() {
               <h1 className="text-lg font-medium">{project.title}</h1>
               <p className="text-sm text-slate-600">{CITATION_FORMAT_LABELS[project.citation_format]}</p>
             </div>
-            <DocumentEditor initialContent={docContent} onChange={scheduleSave} />
+            <DocumentEditor key={projectId} initialContent={docContent} onChange={scheduleSave} />
           </>
         )}
       </section>

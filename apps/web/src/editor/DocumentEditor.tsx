@@ -39,9 +39,10 @@ function Toolbar({ editor }: { editor: Editor }) {
   );
 }
 
-// Mounted only once the project's document has loaded (see WritingPage), so
-// `initialContent` seeds the editor once and is never fed back in -- TipTap
-// owns the document after that; edits flow out via `onChange`, never back in.
+// Mounted only once the project's document has loaded (see WritingPage, which
+// keys this by projectId to force a remount on project change), so
+// `initialContent` seeds the editor once per instance and is never fed back in
+// -- TipTap owns the document after that; edits flow out via `onChange`, never back in.
 export default function DocumentEditor({ initialContent, onChange }: DocumentEditorProps) {
   const editor = useEditor({
     extensions: [StarterKit],

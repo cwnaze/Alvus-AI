@@ -120,7 +120,25 @@ test('US-018: load, edit, and autosave a document in the editor', async ({ page,
   await expect(saveStatus).toHaveText('Saved');
   await demo.step('Formatting text as bold through the toolbar autosaves the change');
 
-  // 6. The autosaved content round-trips through the API exactly.
+  // 6. Navigating away immediately after an edit -- before the 800ms debounce
+  // fires -- must still flush the pending save. Otherwise the edit is silently
+  // discarded, directly contradicting "so I never lose work" (this story's own
+  // premise). No waitForAutosave() here: the point is that no debounce timer
+  // ever fires on its own, so the assertion instead waits on the flush PUT that
+  // navigating away must trigger directly.
+  const flushSave = waitForAutosave();
+  await page.keyboard.press('Control+Home');
+  await page.keyboard.type('Navigating away should not lose this.');
+  await page.keyboard.press('Enter');
+  await page.getByRole('link', { name: 'Sources & bibliography' }).click();
+  await flushSave;
+  await expect(page).toHaveURL(`/projects/${projectId}`);
+  await page.getByRole('link', { name: 'Start writing' }).click();
+  await expect(page).toHaveURL(`/projects/${projectId}/write`);
+  await expect(page.getByTestId('document-editor')).toContainText('Navigating away should not lose this.');
+  await demo.step('Navigating away right after an edit still flushes the pending autosave');
+
+  // 7. The autosaved content round-trips through the API exactly.
   const docRes = await page.request.get(`/api/projects/${projectId}/document`, {
     headers: { Authorization: `Bearer ${demoToken}` },
   });
@@ -128,15 +146,16 @@ test('US-018: load, edit, and autosave a document in the editor', async ({ page,
   const savedDoc = (await docRes.json()) as { content: unknown; updated_at: string };
   expect(JSON.stringify(savedDoc.content)).toContain('Climate policy rhetoric has shifted markedly over the last decade.');
   expect(JSON.stringify(savedDoc.content)).toContain('This sentence will be bold.');
+  expect(JSON.stringify(savedDoc.content)).toContain('Navigating away should not lose this.');
 
-  // 7. Reloading the page loads the persisted document back into the editor
+  // 8. Reloading the page loads the persisted document back into the editor
   // -- the edits actually survived, not just an in-memory autosave flag.
   await page.reload();
   await expect(page.getByTestId('document-editor')).toContainText('Climate policy rhetoric has shifted markedly over the last decade.');
   await expect(page.getByTestId('document-editor').locator('strong')).toHaveText('This sentence will be bold.');
   await demo.step('Reloading the page loads the autosaved document back into the editor');
 
-  // 8. A different approved user cannot read or write this project's document.
+  // 9. A different approved user cannot read or write this project's document.
   const otherLogin = await page.request.post('/api/auth/login', { data: { email: OTHER_USER_EMAIL, password: FIXTURE_PASSWORD } });
   const { access_token: otherToken } = (await otherLogin.json()) as { access_token: string };
   const forbiddenGet = await page.request.get(`/api/projects/${projectId}/document`, { headers: { Authorization: `Bearer ${otherToken}` } });
