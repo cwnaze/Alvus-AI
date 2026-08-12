@@ -113,11 +113,30 @@ export default function WritingPage() {
     editorRef.current?.chain().focus().insertCitation({ sourceId: entry.source_id, text: entry.in_text_citation }).run();
   }
 
+  // Cancels a pending debounced autosave and awaits it immediately, so callers that
+  // need the server's persisted content to match what's in the editor (e.g. a
+  // full-document render) can't race the 800ms debounce window.
+  async function flushPendingSave() {
+    if (!saveTimeoutRef.current || !projectId) return;
+    clearTimeout(saveTimeoutRef.current);
+    saveTimeoutRef.current = null;
+    const pending = latestContentRef.current;
+    if (!pending) return;
+    setSaveStatus('saving');
+    try {
+      await saveDocument(projectId, pending);
+      setSaveStatus('saved');
+    } catch {
+      setSaveStatus('error');
+    }
+  }
+
   async function handleRenderFullDocument() {
     if (!projectId) return;
     setRendering(true);
     setRenderError(null);
     try {
+      await flushPendingSave();
       const result = await formatDocument(projectId);
       setDocContent(result.content);
       setPreviewContent(result.content);
