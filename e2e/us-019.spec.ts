@@ -139,6 +139,7 @@ test('US-019: citation-format rendering: in-text citations, full-document re-ren
   await expect(page.getByTestId('bibliography-page-heading')).toHaveText('References');
   await expect(preview.getByTestId(`preview-bibliography-${climateEntry.source_id}`)).toContainText('Doe');
   await expect(page.getByTestId('dangling-citations-warning')).toHaveCount(0);
+  await preview.scrollIntoViewIfNeeded();
   await demo.step('Triggering a full re-render assembles the complete formatted paper with headers, margins, and a bibliography page');
 
   // 7. Removing the cited source from the bibliography and re-rendering
