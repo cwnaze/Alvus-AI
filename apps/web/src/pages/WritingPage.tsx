@@ -172,7 +172,7 @@ export default function WritingPage() {
           <button
             type="button"
             onClick={handleRenderFullDocument}
-            disabled={rendering}
+            disabled={rendering || docContent === null}
             className="rounded border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-50"
           >
             {rendering ? 'Rendering…' : 'Render full document'}
