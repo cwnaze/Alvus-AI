@@ -679,7 +679,7 @@
       "dependsOn": [
         "US-018"
       ],
-      "status": "in_progress",
+      "status": "done",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -694,9 +694,9 @@
       },
       "demo": "docs/demos/US-021.md",
       "branch": "feature/us-021-post-writing-feedback-pass",
-      "prNumber": null,
-      "issueNumber": null,
-      "reviewRounds": 0,
+      "prNumber": 50,
+      "issueNumber": 51,
+      "reviewRounds": 1,
       "notes": ""
     },
     {
