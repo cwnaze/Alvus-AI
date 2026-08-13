@@ -2,6 +2,7 @@ import type {
   AdminUsersResponse,
   AuthUser,
   BibliographyResponse,
+  BillingStatusResponse,
   CitationFormat,
   DocumentContent,
   DocumentFormatResponse,
@@ -149,6 +150,10 @@ export function fetchAdminUsers(params: { q?: string; status?: string; tier?: st
 
 export function revokeUserAccess(userId: string, reason?: string): Promise<{ userId: string; status: string }> {
   return request(`/admin/users/${userId}/revoke`, { method: 'POST', body: JSON.stringify({ reason }) });
+}
+
+export function fetchBillingStatus(): Promise<BillingStatusResponse> {
+  return request('/billing/status');
 }
 
 export function fetchProjects(cursor?: string | null): Promise<ProjectsResponse> {
