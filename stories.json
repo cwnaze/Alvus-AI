@@ -714,7 +714,7 @@
         "US-016",
         "US-021"
       ],
-      "status": "in_progress",
+      "status": "done",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -729,9 +729,9 @@
       },
       "demo": "docs/demos/US-022.md",
       "branch": "feature/us-022-usage-dashboard-and-limit-exceeded-ux",
-      "prNumber": null,
-      "issueNumber": null,
-      "reviewRounds": 0,
+      "prNumber": 52,
+      "issueNumber": 53,
+      "reviewRounds": 1,
       "notes": ""
     },
     {
