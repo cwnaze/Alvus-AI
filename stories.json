@@ -644,7 +644,7 @@
       "dependsOn": [
         "US-018"
       ],
-      "status": "in_progress",
+      "status": "done",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -659,9 +659,9 @@
       },
       "demo": "docs/demos/US-020.md",
       "branch": "feature/us-020-paragraph-and-structure-suggestions-in-the-editor",
-      "prNumber": null,
-      "issueNumber": null,
-      "reviewRounds": 0,
+      "prNumber": 48,
+      "issueNumber": 49,
+      "reviewRounds": 1,
       "notes": ""
     },
     {

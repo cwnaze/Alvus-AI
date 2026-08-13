@@ -76,3 +76,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-11T18:00:30.000Z | US-019 | in_progress | Branch feature/us-019-citation-format-rendering created; building in-text citation insertion from the bibliography, full-document re-render (headers/margins/bibliography page per citation style), and dangling-citation detection.
 2026-08-13T00:10:21.506Z | US-019 | done | PR #44 merged after 3 review round(s)
 2026-08-13T00:15:00.000Z | US-020 | in_progress | Branch feature/us-020-paragraph-and-structure-suggestions-in-the-editor created; building the rate-limited (not metered) paragraph/structure suggestion endpoint on routes/editor.ts and inline hint UI in the writing view.
+2026-08-13T00:51:47.558Z | US-020 | done | PR #48 merged after 1 review round(s)
