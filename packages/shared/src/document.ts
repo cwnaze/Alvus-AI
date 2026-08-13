@@ -25,3 +25,38 @@ export type DocumentFormatResponse = {
 export type SuggestionsResponse = {
   suggestions: string[];
 };
+
+export const FEEDBACK_CATEGORIES = ['wording', 'phrasing', 'grammar', 'content'] as const;
+export type FeedbackCategory = (typeof FEEDBACK_CATEGORIES)[number];
+
+// `from`/`to` are raw ProseMirror positions computed at pass-time -- not
+// re-validated against later edits (docs/data-model.md's acceptable v1
+// limitation for `feedback_passes.comments`).
+export type FeedbackAnchor = {
+  from: number;
+  to: number;
+};
+
+export type FeedbackComment = {
+  id: string;
+  anchor: FeedbackAnchor;
+  category: FeedbackCategory;
+  text: string;
+};
+
+export type FeedbackPassResponse = {
+  pass_id: string;
+  created_at: string;
+  comments: FeedbackComment[];
+};
+
+export type FeedbackPassSummary = {
+  pass_id: string;
+  created_at: string;
+  comment_count: number;
+};
+
+export type FeedbackPassesResponse = {
+  passes: FeedbackPassSummary[];
+  next_cursor: string | null;
+};

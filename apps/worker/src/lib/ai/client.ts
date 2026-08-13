@@ -1,11 +1,15 @@
+import type { FeedbackCategory } from '@alvus-ai/shared';
+import { FEEDBACK_CATEGORIES } from '@alvus-ai/shared';
 import OpenAI from 'openai';
-import { analysisFixture, fixtureKindForSource, fixtureKindForSuggestion, isLiveMode, suggestionsFixture } from './fixtures';
-import { buildAnalysisPrompt, buildSuggestionPrompt } from './prompts';
+import { analysisFixture, feedbackFixture, fixtureKindForFeedback, fixtureKindForSource, fixtureKindForSuggestion, isLiveMode, suggestionsFixture } from './fixtures';
+import { buildAnalysisPrompt, buildFeedbackPrompt, buildSuggestionPrompt } from './prompts';
 import {
   AiProviderError,
   AiUnreadableSourceError,
   type AiEnv,
   type AnalysisInput,
+  type FeedbackCommentDraft,
+  type FeedbackInput,
   type SourceAnalysis,
   type SuggestionInput,
   type TokenUsage,
@@ -138,6 +142,73 @@ export async function requestParagraphSuggestions(input: SuggestionInput, env: A
     }
 
     return { suggestions: normalizeSuggestions(parsed) };
+  } catch (err) {
+    if (err instanceof AiProviderError) throw err;
+    throw new AiProviderError(err instanceof Error ? err.message : 'LiteLLM request failed');
+  }
+}
+
+const CATEGORY_SET: ReadonlySet<string> = new Set(FEEDBACK_CATEGORIES);
+
+// Structural validation only -- category/text/quote well-formed -- not
+// whether `quote` actually appears in the document. That's the route's job
+// (lib/document/feedback-anchors.ts), since only the route has the document.
+function normalizeFeedback(raw: unknown): FeedbackCommentDraft[] {
+  if (!raw || typeof raw !== 'object') throw new AiProviderError('Feedback response was not valid JSON');
+  const r = raw as Record<string, unknown>;
+  const rawComments = Array.isArray(r.comments) ? r.comments : [];
+  const comments = rawComments
+    .filter((c): c is Record<string, unknown> => !!c && typeof c === 'object')
+    .map((c) => ({
+      category: typeof c.category === 'string' && CATEGORY_SET.has(c.category) ? (c.category as FeedbackCategory) : null,
+      text: typeof c.text === 'string' ? c.text.trim() : '',
+      quote: typeof c.quote === 'string' ? c.quote.trim() : '',
+    }))
+    .filter((c): c is FeedbackCommentDraft => c.category !== null && c.text.length > 0 && c.quote.length > 0);
+  if (comments.length === 0) throw new AiProviderError('Feedback response contained no usable comments');
+  return comments;
+}
+
+// docs/api.md's feedback endpoint has no distinct 422 for a malformed/empty
+// model response -- like suggestions, that's a 502, not a semantic-failure
+// code (empty_document, the one 422 this endpoint does have, is checked by
+// the route before this is ever called).
+export async function requestFeedbackPass(input: FeedbackInput, env: AiEnv): Promise<{ comments: FeedbackCommentDraft[]; tokenUsage: TokenUsage }> {
+  if (!isLiveMode(env)) {
+    const kind = fixtureKindForFeedback(input.documentText);
+    if (kind === 'error') throw new AiProviderError('LiteLLM proxy is unreachable');
+    return { comments: normalizeFeedback(feedbackFixture()), tokenUsage: { inputTokens: null, outputTokens: null } };
+  }
+
+  if (!env.LITELLM_BASE_URL || !env.LITELLM_API_KEY || !env.LITELLM_MODEL) {
+    throw new AiProviderError('LiteLLM proxy is not configured');
+  }
+
+  const client = new OpenAI({ baseURL: env.LITELLM_BASE_URL, apiKey: env.LITELLM_API_KEY });
+
+  try {
+    const completion = await client.chat.completions.create({
+      model: env.LITELLM_MODEL,
+      messages: buildFeedbackPrompt(input),
+      response_format: { type: 'json_object' },
+    });
+    const content = completion.choices[0]?.message.content;
+    if (!content) throw new AiProviderError('The feedback model returned an empty response');
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      throw new AiProviderError('The feedback model returned malformed JSON');
+    }
+
+    return {
+      comments: normalizeFeedback(parsed),
+      tokenUsage: {
+        inputTokens: completion.usage?.prompt_tokens ?? null,
+        outputTokens: completion.usage?.completion_tokens ?? null,
+      },
+    };
   } catch (err) {
     if (err instanceof AiProviderError) throw err;
     throw new AiProviderError(err instanceof Error ? err.message : 'LiteLLM request failed');

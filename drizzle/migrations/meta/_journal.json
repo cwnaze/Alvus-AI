@@ -50,6 +50,13 @@
       "when": 1786580544471,
       "tag": "0006_puzzling_toxin",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1786595553625,
+      "tag": "0007_jazzy_reavers",
+      "breakpoints": true
     }
   ]
 }

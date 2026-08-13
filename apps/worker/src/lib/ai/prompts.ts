@@ -1,4 +1,4 @@
-import type { AnalysisInput, SuggestionInput } from './types';
+import type { AnalysisInput, FeedbackInput, SuggestionInput } from './types';
 
 // Commentary only, never prose generation (see CLAUDE.md: "never generating
 // prose itself"), and strict-JSON so the response can be parsed without a
@@ -31,5 +31,24 @@ export function buildSuggestionPrompt(input: SuggestionInput): Array<{ role: 'sy
   return [
     { role: 'system', content: SUGGESTION_SYSTEM_PROMPT },
     { role: 'user', content: `Text immediately before the cursor:\n${context}` },
+  ];
+}
+
+// Commentary only, same "never write or suggest prose" boundary as the other
+// two prompts (CLAUDE.md) -- this is feedback on writing already done, not
+// generation. "quote" must be copied verbatim so the route can locate it in
+// the document and turn it into a position-anchored comment
+// (lib/document/feedback-anchors.ts); a quote the route can't find is simply
+// dropped, so the prompt asks for short, exact excerpts to maximize the odds
+// of a match.
+const FEEDBACK_SYSTEM_PROMPT = `You are a writing tutor giving a student comment-style feedback on a draft of their academic paper, after they have finished writing it. Respond with strict JSON only, matching exactly this shape:
+{"comments": [{"category": "wording"|"phrasing"|"grammar"|"content", "text": string, "quote": string}]}
+"category" is one of: "wording" (word choice), "phrasing" (sentence construction/flow), "grammar" (mechanical errors), or "content" (argument/evidence issues). "text" is the comment itself, explaining the issue and what to consider -- never a rewritten replacement sentence. "quote" is a short (a few words to one sentence) excerpt copied EXACTLY, character-for-character, from the draft below, identifying what the comment refers to. Provide 2-6 comments covering a mix of categories where the draft has issues to raise. Never write or suggest replacement prose for the student's paper -- only commentary on what is already there.`;
+
+export function buildFeedbackPrompt(input: FeedbackInput): Array<{ role: 'system' | 'user'; content: string }> {
+  const documentText = input.documentText.trim() || '(the document is currently empty)';
+  return [
+    { role: 'system', content: FEEDBACK_SYSTEM_PROMPT },
+    { role: 'user', content: `Draft:\n${documentText}` },
   ];
 }
