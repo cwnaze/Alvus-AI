@@ -23,6 +23,7 @@ export {
   type SaveDocumentResponse,
   type DanglingCitation,
   type DocumentFormatResponse,
+  type SuggestionsResponse,
 } from './document';
 export {
   WAITLIST_STATUSES,

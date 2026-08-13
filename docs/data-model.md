@@ -12,6 +12,7 @@ erDiagram
   waitlist_signups ||--|| users : "audits"
   users ||--o| subscriptions : "has"
   users ||--o{ usage_events : "generates"
+  users ||--o{ suggestion_requests : "generates"
   users ||--o{ projects : "owns"
   projects ||--|| project_documents : "has content"
   projects ||--o{ uploaded_files : "receives"
@@ -111,6 +112,20 @@ over a billing period at read time, not a mutable counter.
 
 Indexes: composite `(user_id, billing_period, action_type)` for the limit-check query;
 index `created_at` for retention. Sensitive: billing-relevant, self + admin/service role.
+
+## `suggestion_requests`
+Append-only log backing the editor's paragraph/structure-suggestion rate limit (`POST
+/projects/:projectId/document/suggestions`). Not a `usage_events` action — this call is
+rate-limited, not metered against tier limits, so it has no `action_type`/billing-period
+concept; the limit is a fixed-window count over `created_at` at read time.
+| Field | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `user_id` | uuid, FK → `users.id` ON DELETE CASCADE | |
+| `created_at` | timestamptz | |
+
+Indexes: composite `(user_id, created_at)` for the window-count query. Sensitive: no
+content stored, just a request timestamp -- not billing-relevant.
 
 ## `projects`
 | Field | Type | Notes |

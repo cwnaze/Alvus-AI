@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { requestId } from 'hono/request-id';
 import { describe, expect, it, vi } from 'vitest';
-import { CORRELATION_ID_HEADER, onError, type ErrorVariables } from './errors';
+import { AppError, CORRELATION_ID_HEADER, onError, type ErrorVariables } from './errors';
 
 type ErrorEnvelope = { error: { code: string; message: string; correlationId: string } };
 
@@ -18,6 +18,9 @@ function buildApp() {
   });
   app.get('/boom/:id', () => {
     throw new Error('kaboom');
+  });
+  app.get('/rate-limited', () => {
+    throw new AppError(429, 'rate_limited', 'Too many requests', { retry_after: 60 }, { 'Retry-After': '60' });
   });
   return app;
 }
@@ -77,6 +80,17 @@ describe('global error handler', () => {
     const logged = JSON.parse(call[0] as string);
     expect(logged.route).toBe('/boom/:id');
     consoleError.mockRestore();
+  });
+
+  it('applies an AppError’s custom headers (e.g. Retry-After) to the response', async () => {
+    const app = buildApp();
+    const res = await app.request('/rate-limited');
+
+    expect(res.status).toBe(429);
+    expect(res.headers.get('Retry-After')).toBe('60');
+    const body = (await res.json()) as { error: { code: string; meta?: Record<string, unknown> } };
+    expect(body.error.code).toBe('rate_limited');
+    expect(body.error.meta).toEqual({ retry_after: 60 });
   });
 
   it('logs userId as null when the request is unauthenticated', async () => {
