@@ -1,7 +1,15 @@
 import OpenAI from 'openai';
-import { analysisFixture, fixtureKindForSource, isLiveMode } from './fixtures';
-import { buildAnalysisPrompt } from './prompts';
-import { AiProviderError, AiUnreadableSourceError, type AiEnv, type AnalysisInput, type SourceAnalysis, type TokenUsage } from './types';
+import { analysisFixture, fixtureKindForSource, fixtureKindForSuggestion, isLiveMode, suggestionsFixture } from './fixtures';
+import { buildAnalysisPrompt, buildSuggestionPrompt } from './prompts';
+import {
+  AiProviderError,
+  AiUnreadableSourceError,
+  type AiEnv,
+  type AnalysisInput,
+  type SourceAnalysis,
+  type SuggestionInput,
+  type TokenUsage,
+} from './types';
 
 const MAX_SCORE = 10;
 const MIN_SCORE = 0;
@@ -79,6 +87,59 @@ export async function requestSourceAnalysis(
     };
   } catch (err) {
     if (err instanceof AiUnreadableSourceError) throw err;
+    throw new AiProviderError(err instanceof Error ? err.message : 'LiteLLM request failed');
+  }
+}
+
+const MAX_SUGGESTIONS = 4;
+
+function normalizeSuggestions(raw: unknown): string[] {
+  if (!raw || typeof raw !== 'object') throw new AiProviderError('Suggestion response was not valid JSON');
+  const r = raw as Record<string, unknown>;
+  const rawSuggestions = Array.isArray(r.suggestions) ? r.suggestions : [];
+  const suggestions = rawSuggestions
+    .filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
+    .map((s) => s.trim())
+    .slice(0, MAX_SUGGESTIONS);
+  if (suggestions.length === 0) throw new AiProviderError('Suggestion response contained no usable suggestions');
+  return suggestions;
+}
+
+// docs/api.md's suggestions endpoint has no 422 -- unlike source analysis, a
+// malformed/empty model response here is treated the same as a provider
+// outage (502), not a distinct semantic-failure code.
+export async function requestParagraphSuggestions(input: SuggestionInput, env: AiEnv): Promise<{ suggestions: string[] }> {
+  if (!isLiveMode(env)) {
+    const kind = fixtureKindForSuggestion(input.cursorContext);
+    if (kind === 'error') throw new AiProviderError('LiteLLM proxy is unreachable');
+    return { suggestions: normalizeSuggestions(suggestionsFixture()) };
+  }
+
+  if (!env.LITELLM_BASE_URL || !env.LITELLM_API_KEY || !env.LITELLM_MODEL) {
+    throw new AiProviderError('LiteLLM proxy is not configured');
+  }
+
+  const client = new OpenAI({ baseURL: env.LITELLM_BASE_URL, apiKey: env.LITELLM_API_KEY });
+
+  try {
+    const completion = await client.chat.completions.create({
+      model: env.LITELLM_MODEL,
+      messages: buildSuggestionPrompt(input),
+      response_format: { type: 'json_object' },
+    });
+    const content = completion.choices[0]?.message.content;
+    if (!content) throw new AiProviderError('The suggestion model returned an empty response');
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      throw new AiProviderError('The suggestion model returned malformed JSON');
+    }
+
+    return { suggestions: normalizeSuggestions(parsed) };
+  } catch (err) {
+    if (err instanceof AiProviderError) throw err;
     throw new AiProviderError(err instanceof Error ? err.message : 'LiteLLM request failed');
   }
 }

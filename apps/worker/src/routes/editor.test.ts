@@ -6,13 +6,24 @@ import type { AuthBindings, AuthVariables } from '../middleware/auth';
 
 type ErrorEnvelope = { error: { code: string; message: string; correlationId: string } };
 
-const { getUser, getUserById, getProjectById, getOrCreateDocument, saveDocumentContent, listProjectSources } = vi.hoisted(() => ({
+const {
+  getUser,
+  getUserById,
+  getProjectById,
+  getOrCreateDocument,
+  saveDocumentContent,
+  listProjectSources,
+  countSuggestionRequestsSince,
+  recordSuggestionRequest,
+} = vi.hoisted(() => ({
   getUser: vi.fn(),
   getUserById: vi.fn(),
   getProjectById: vi.fn(),
   getOrCreateDocument: vi.fn(),
   saveDocumentContent: vi.fn(),
   listProjectSources: vi.fn(),
+  countSuggestionRequestsSince: vi.fn(),
+  recordSuggestionRequest: vi.fn(),
 }));
 
 vi.mock('../lib/supabase/client', () => ({
@@ -23,6 +34,7 @@ vi.mock('../lib/db/queries/waitlist', () => ({ getUserById }));
 vi.mock('../lib/db/queries/projects', () => ({ getProjectById }));
 vi.mock('../lib/db/queries/documents', () => ({ getOrCreateDocument, saveDocumentContent }));
 vi.mock('../lib/db/queries/sources', () => ({ listProjectSources }));
+vi.mock('../lib/db/queries/suggestion-requests', () => ({ countSuggestionRequestsSince, recordSuggestionRequest }));
 
 const { default: editorRoutes } = await import('./editor');
 
@@ -263,5 +275,80 @@ describe('POST /format', () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as { dangling_citations: Array<{ source_id: string }> };
     expect(body.dangling_citations).toEqual([{ source_id: 'gone' }]);
+  });
+});
+
+describe('POST /suggestions', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    countSuggestionRequestsSince.mockResolvedValue(0);
+    recordSuggestionRequest.mockResolvedValue(undefined);
+  });
+
+  function request(projectPath: string, body: unknown = { cursor_context: 'Recent scholarship shows' }) {
+    return app.request(
+      `${projectPath}/suggestions`,
+      { method: 'POST', headers: { Authorization: 'Bearer tok', 'Content-Type': 'application/json' }, body: JSON.stringify(body) },
+      ENV,
+    );
+  }
+
+  it('403s a non-owner', async () => {
+    asCaller({ id: OTHER_USER_ID });
+    getProjectById.mockResolvedValueOnce(projectRow({ ownerId: OWNER_ID }));
+    const res = await request(`/${PROJECT_ID}`);
+    expect(res.status).toBe(403);
+  });
+
+  it('404s a nonexistent project', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(undefined);
+    const res = await request(`/${PROJECT_ID}`);
+    expect(res.status).toBe(404);
+  });
+
+  it('400s a non-string cursor_context', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+    const res = await request(`/${PROJECT_ID}`, { cursor_context: 42 });
+    expect(res.status).toBe(400);
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('invalid_cursor_context');
+    expect(countSuggestionRequestsSince).not.toHaveBeenCalled();
+  });
+
+  it('returns suggestions and records the request, without touching usage metering', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+
+    const res = await request(`/${PROJECT_ID}`);
+
+    expect(res.status).toBe(200);
+    expect(recordSuggestionRequest).toHaveBeenCalledWith(expect.anything(), { userId: OWNER_ID });
+    const body = (await res.json()) as { suggestions: string[] };
+    expect(body.suggestions.length).toBeGreaterThan(0);
+  });
+
+  it('429s with a Retry-After header once the caller is at the rate-limit ceiling', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+    countSuggestionRequestsSince.mockResolvedValueOnce(10);
+
+    const res = await request(`/${PROJECT_ID}`);
+
+    expect(res.status).toBe(429);
+    expect(res.headers.get('Retry-After')).toBeTruthy();
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('rate_limited');
+    expect(recordSuggestionRequest).not.toHaveBeenCalled();
+  });
+
+  it('502s when the AI provider is unreachable, still counting the attempt against the rate limit', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+
+    const res = await request(`/${PROJECT_ID}`, { cursor_context: 'zzz-ai-error trigger' });
+
+    expect(res.status).toBe(502);
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('ai_provider_unreachable');
+    expect(recordSuggestionRequest).toHaveBeenCalledWith(expect.anything(), { userId: OWNER_ID });
   });
 });

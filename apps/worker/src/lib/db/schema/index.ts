@@ -8,3 +8,4 @@ export * from './uploaded-files';
 export * from './project-sources';
 export * from './project-documents';
 export * from './usage-events';
+export * from './suggestion-requests';

@@ -21,3 +21,7 @@ export type DocumentFormatResponse = {
   content: DocumentContent;
   dangling_citations: DanglingCitation[];
 };
+
+export type SuggestionsResponse = {
+  suggestions: string[];
+};

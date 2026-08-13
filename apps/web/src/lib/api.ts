@@ -16,6 +16,7 @@ import type {
   SourceAnalysis,
   SourceSearchResponse,
   SourceStateResponse,
+  SuggestionsResponse,
   WaitlistEntriesResponse,
 } from '@alvus-ai/shared';
 import { clearSession, getAccessToken, getRefreshToken, setTokens } from './session';
@@ -222,4 +223,11 @@ export function saveDocument(projectId: string, content: DocumentContent): Promi
 
 export function formatDocument(projectId: string): Promise<DocumentFormatResponse> {
   return request(`/projects/${projectId}/document/format`, { method: 'POST', body: JSON.stringify({}) });
+}
+
+export function fetchSuggestions(projectId: string, cursorContext: string): Promise<SuggestionsResponse> {
+  return request(`/projects/${projectId}/document/suggestions`, {
+    method: 'POST',
+    body: JSON.stringify({ cursor_context: cursorContext }),
+  });
 }

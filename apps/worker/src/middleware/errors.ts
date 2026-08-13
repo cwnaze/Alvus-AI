@@ -10,13 +10,16 @@ export type ErrorVariables = RequestIdVariables & { userId?: string };
 // envelope back with its own status/code/message instead of falling through to
 // onError's generic 500 -- see docs/api.md's error envelope + status code table.
 // `meta` is optional, additional structured detail -- e.g. `usage_limit_exceeded`'s
-// `{ limit, used, resets_at }` (docs/api.md's cross-cutting rules).
+// `{ limit, used, resets_at }` (docs/api.md's cross-cutting rules). `headers` is
+// optional response headers -- e.g. a 429's `Retry-After` (docs/api.md: "Rate-limited
+// -> always 429 with Retry-After").
 export class AppError extends Error {
   constructor(
     public status: ContentfulStatusCode,
     public code: string,
     message: string,
     public meta?: Record<string, unknown>,
+    public headers?: Record<string, string>,
   ) {
     super(message);
     this.name = 'AppError';
@@ -43,6 +46,7 @@ export const onError = <E extends { Variables: ErrorVariables }>(err: Error, c: 
         },
       },
       err.status,
+      err.headers,
     );
   }
 

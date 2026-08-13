@@ -29,6 +29,10 @@ export type AnalysisInput = {
   abstract: string | null;
 };
 
+export type SuggestionInput = {
+  cursorContext: string;
+};
+
 // Thrown when the LiteLLM proxy itself is unreachable/erroring -- maps to the
 // route's 502 (docs/api.md: "Upstream provider down -> always 502").
 export class AiProviderError extends Error {

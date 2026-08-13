@@ -1,4 +1,5 @@
 import normalAnalysis from '../../../../../tests/fixtures/litellm/normal.json';
+import normalSuggestions from '../../../../../tests/fixtures/litellm/suggestions.json';
 import type { AiEnv } from './types';
 
 // Same determinism boundary as lib/sources/fixtures.ts: nothing in the
@@ -23,4 +24,16 @@ export function fixtureKindForSource(text: string): FixtureKind {
 
 export function analysisFixture(): unknown {
   return normalAnalysis;
+}
+
+// Suggestions have no "unreadable" state (docs/api.md lists only 429/502 for
+// this endpoint, no 422) -- just normal vs. a provider outage.
+export type SuggestionFixtureKind = 'normal' | 'error';
+
+export function fixtureKindForSuggestion(text: string): SuggestionFixtureKind {
+  return text.toLowerCase().includes('zzz-ai-error') ? 'error' : 'normal';
+}
+
+export function suggestionsFixture(): unknown {
+  return normalSuggestions;
 }

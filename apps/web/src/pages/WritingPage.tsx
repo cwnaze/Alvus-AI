@@ -4,9 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import DocumentEditor from '../editor/DocumentEditor';
 import DocumentPreview from '../editor/DocumentPreview';
-import { ApiError, fetchBibliography, fetchDocument, fetchProject, formatDocument, saveDocument } from '../lib/api';
+import { ApiError, fetchBibliography, fetchDocument, fetchProject, fetchSuggestions, formatDocument, saveDocument } from '../lib/api';
 
 const CITATION_FORMAT_LABELS: Record<CitationFormat, string> = { mla: 'MLA', apa: 'APA', chicago: 'Chicago' };
+
+// How much text immediately before the cursor to send as context -- enough for a
+// useful suggestion without shipping the whole document on every request.
+const CURSOR_CONTEXT_CHARS = 1000;
 
 // Debounce autosave rather than saving on every keystroke -- formatting is
 // deterministic client-side, so there's no AI call to justify per-keystroke
@@ -58,6 +62,10 @@ export default function WritingPage() {
   const [renderError, setRenderError] = useState<string | null>(null);
   const [danglingSourceIds, setDanglingSourceIds] = useState<string[]>([]);
   const [previewContent, setPreviewContent] = useState<DocumentContent | null>(null);
+
+  const [suggestions, setSuggestions] = useState<string[] | null>(null);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [suggestionsError, setSuggestionsError] = useState<string | null>(null);
 
   const editorRef = useRef<Editor | null>(null);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -149,6 +157,30 @@ export default function WritingPage() {
     }
   }
 
+  // A hint, never inserted text -- CLAUDE.md: "never generating prose itself". This
+  // reads the current cursor position directly off the live editor instance rather
+  // than the (possibly stale, debounce-delayed) `docContent` state.
+  async function handleRequestSuggestions() {
+    if (!projectId || !editorRef.current) return;
+    setSuggestionsLoading(true);
+    setSuggestionsError(null);
+    try {
+      const { from } = editorRef.current.state.selection;
+      const cursorContext = editorRef.current.state.doc.textBetween(Math.max(0, from - CURSOR_CONTEXT_CHARS), from, '\n', '\n');
+      const result = await fetchSuggestions(projectId, cursorContext);
+      setSuggestions(result.suggestions);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 429) {
+        setSuggestionsError("You're requesting suggestions too quickly. Please wait a moment and try again.");
+      } else {
+        setSuggestionsError(err instanceof ApiError ? err.message : 'Failed to get suggestions.');
+      }
+      setSuggestions(null);
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  }
+
   if (loadError) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-white text-slate-900">
@@ -169,6 +201,15 @@ export default function WritingPage() {
           <span role="status" data-testid="save-status">
             {SAVE_STATUS_LABEL[saveStatus]}
           </span>
+          <button
+            type="button"
+            onClick={handleRequestSuggestions}
+            disabled={suggestionsLoading || docContent === null}
+            data-testid="request-suggestions"
+            className="rounded border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-50"
+          >
+            {suggestionsLoading ? 'Getting suggestions…' : 'Suggest a starting point'}
+          </button>
           <button
             type="button"
             onClick={handleRenderFullDocument}
@@ -218,6 +259,24 @@ export default function WritingPage() {
                     editorRef.current = editor;
                   }}
                 />
+
+                {suggestionsError && (
+                  <p role="alert" data-testid="suggestions-error" className="mt-3 text-sm text-red-600">
+                    {suggestionsError}
+                  </p>
+                )}
+                {suggestions && suggestions.length > 0 && (
+                  <div data-testid="suggestion-hints" className="mt-3 flex flex-col gap-2 rounded border border-slate-200 bg-slate-50 px-4 py-3">
+                    <h2 className="text-sm font-semibold text-slate-700">Suggestions -- starting points, not text to insert</h2>
+                    <ul className="flex flex-col gap-2">
+                      {suggestions.map((suggestion, i) => (
+                        <li key={i} data-testid={`suggestion-hint-${i}`} className="text-sm text-slate-700">
+                          {suggestion}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
               <aside className="w-64 shrink-0">
                 <h2 className="mb-3 text-sm font-semibold text-slate-700">Bibliography</h2>

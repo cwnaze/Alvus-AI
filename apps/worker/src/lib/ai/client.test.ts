@@ -8,7 +8,7 @@ vi.mock('openai', () => ({
   },
 }));
 
-const { requestSourceAnalysis } = await import('./client');
+const { requestParagraphSuggestions, requestSourceAnalysis } = await import('./client');
 const { AiProviderError, AiUnreadableSourceError } = await import('./types');
 
 const INPUT = { title: 'Climate Policy Rhetoric in the 21st Century', authors: ['Jane Doe'], abstract: 'An abstract.' };
@@ -97,5 +97,62 @@ describe('requestSourceAnalysis (live mode)', () => {
   it('throws AiProviderError when the LiteLLM call itself fails', async () => {
     create.mockRejectedValueOnce(new Error('network error'));
     await expect(requestSourceAnalysis(INPUT, LIVE_ENV)).rejects.toBeInstanceOf(AiProviderError);
+  });
+});
+
+const SUGGESTION_INPUT = { cursorContext: 'Recent scholarship shows a shift in rhetorical strategy.' };
+
+describe('requestParagraphSuggestions (fixture mode)', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('returns the normalized normal fixture', async () => {
+    const result = await requestParagraphSuggestions(SUGGESTION_INPUT, {});
+    expect(result.suggestions.length).toBeGreaterThan(0);
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('throws AiProviderError for cursor_context matching the zzz-ai-error marker', async () => {
+    await expect(requestParagraphSuggestions({ cursorContext: 'zzz-ai-error trigger' }, {})).rejects.toBeInstanceOf(AiProviderError);
+  });
+});
+
+describe('requestParagraphSuggestions (live mode)', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('throws AiProviderError when the proxy is not configured', async () => {
+    await expect(requestParagraphSuggestions(SUGGESTION_INPUT, { AI_PROVIDER_MODE: 'live' })).rejects.toBeInstanceOf(AiProviderError);
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('parses a valid JSON response', async () => {
+    create.mockResolvedValueOnce(chatResponse(JSON.stringify({ suggestions: ['Open with a definition.', 'Contrast with the prior source.'] })));
+    const result = await requestParagraphSuggestions(SUGGESTION_INPUT, LIVE_ENV);
+    expect(result.suggestions).toEqual(['Open with a definition.', 'Contrast with the prior source.']);
+  });
+
+  it('caps suggestions at 4 and drops blank/non-string entries', async () => {
+    create.mockResolvedValueOnce(chatResponse(JSON.stringify({ suggestions: ['a', '', 'b', 42, 'c', 'd', 'e'] })));
+    const result = await requestParagraphSuggestions(SUGGESTION_INPUT, LIVE_ENV);
+    expect(result.suggestions).toEqual(['a', 'b', 'c', 'd']);
+  });
+
+  it('throws AiProviderError on malformed JSON', async () => {
+    create.mockResolvedValueOnce(chatResponse('not json'));
+    await expect(requestParagraphSuggestions(SUGGESTION_INPUT, LIVE_ENV)).rejects.toBeInstanceOf(AiProviderError);
+  });
+
+  it('throws AiProviderError on an empty response', async () => {
+    create.mockResolvedValueOnce({ choices: [{ message: { content: null } }] });
+    await expect(requestParagraphSuggestions(SUGGESTION_INPUT, LIVE_ENV)).rejects.toBeInstanceOf(AiProviderError);
+  });
+
+  it('throws AiProviderError when the response has no usable suggestions', async () => {
+    create.mockResolvedValueOnce(chatResponse(JSON.stringify({ suggestions: [] })));
+    await expect(requestParagraphSuggestions(SUGGESTION_INPUT, LIVE_ENV)).rejects.toBeInstanceOf(AiProviderError);
+  });
+
+  it('throws AiProviderError when the LiteLLM call itself fails', async () => {
+    create.mockRejectedValueOnce(new Error('network error'));
+    await expect(requestParagraphSuggestions(SUGGESTION_INPUT, LIVE_ENV)).rejects.toBeInstanceOf(AiProviderError);
   });
 });
