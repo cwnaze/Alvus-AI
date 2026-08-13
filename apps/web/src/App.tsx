@@ -10,6 +10,7 @@ import ProjectPage from './pages/ProjectPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import SignupPage from './pages/SignupPage';
 import StatusScreen from './pages/StatusScreen';
+import UsagePage from './pages/UsagePage';
 import WritingPage from './pages/WritingPage';
 
 function LoadingScreen() {
@@ -68,6 +69,14 @@ export default function App() {
               <AdminRoute>
                 <AdminUsersPage />
               </AdminRoute>
+            }
+          />
+          <Route
+            path="/usage"
+            element={
+              <ProjectRoute>
+                <UsagePage />
+              </ProjectRoute>
             }
           />
           <Route

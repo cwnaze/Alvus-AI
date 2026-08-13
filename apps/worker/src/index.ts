@@ -6,6 +6,7 @@ import type { AuthVariables } from './middleware/auth';
 import { CORRELATION_ID_HEADER, onError, type ErrorVariables } from './middleware/errors';
 import adminRoutes from './routes/admin';
 import authRoutes from './routes/auth';
+import billingRoutes from './routes/billing';
 import editorRoutes from './routes/editor';
 import feedbackRoutes from './routes/feedback';
 import projectsRoutes from './routes/projects';
@@ -33,6 +34,7 @@ app.onError(onError);
 
 app.route('/api/auth', authRoutes);
 app.route('/api/admin', adminRoutes);
+app.route('/api/billing', billingRoutes);
 app.route('/api/projects', projectsRoutes);
 app.route('/api/projects/:projectId/sources', sourcesRoutes);
 app.route('/api/projects/:projectId/document', editorRoutes);

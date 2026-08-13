@@ -242,6 +242,9 @@ export default function DashboardPage() {
         <h1 className="text-xl font-semibold text-brand">Alvus AI</h1>
         <div className="flex items-center gap-4 text-sm text-slate-600">
           <span>{auth.user?.email}</span>
+          <Link to="/usage" className="text-brand underline">
+            Usage
+          </Link>
           {auth.user?.role === 'admin' && (
             <>
               <Link to="/admin/waitlist" className="text-brand underline">
