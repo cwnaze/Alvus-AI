@@ -747,7 +747,7 @@
       "dependsOn": [
         "US-022"
       ],
-      "status": "in_progress",
+      "status": "pending",
       "demoKind": "browser",
       "verification": {
         "commands": [
