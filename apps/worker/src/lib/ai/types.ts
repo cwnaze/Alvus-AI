@@ -1,3 +1,5 @@
+import type { FeedbackCategory } from '@alvus-ai/shared';
+
 export type AiEnv = {
   LITELLM_BASE_URL?: string;
   LITELLM_API_KEY?: string;
@@ -31,6 +33,20 @@ export type AnalysisInput = {
 
 export type SuggestionInput = {
   cursorContext: string;
+};
+
+export type FeedbackInput = {
+  documentText: string;
+};
+
+// Raw model output before anchor resolution -- `quote` is a verbatim excerpt
+// the route locates in the document to compute a `{from, to}` ProseMirror
+// position (lib/document/feedback-anchors.ts); the model has no notion of
+// ProseMirror positions itself.
+export type FeedbackCommentDraft = {
+  category: FeedbackCategory;
+  text: string;
+  quote: string;
 };
 
 // Thrown when the LiteLLM proxy itself is unreachable/erroring -- maps to the

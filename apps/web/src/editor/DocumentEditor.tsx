@@ -3,6 +3,7 @@ import { EditorContent, useEditor, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { useEffect, useRef } from 'react';
 import { Citation } from './citationExtension';
+import { FeedbackHighlight } from './feedbackHighlightExtension';
 
 type DocumentEditorProps = {
   initialContent: DocumentContent;
@@ -48,7 +49,7 @@ function Toolbar({ editor }: { editor: Editor }) {
 // -- TipTap owns the document after that; edits flow out via `onChange`, never back in.
 export default function DocumentEditor({ initialContent, onChange, onEditorReady }: DocumentEditorProps) {
   const editor = useEditor({
-    extensions: [StarterKit, Citation],
+    extensions: [StarterKit, Citation, FeedbackHighlight],
     content: initialContent,
     immediatelyRender: false,
     editorProps: {

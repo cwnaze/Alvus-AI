@@ -1,0 +1,19 @@
+{
+  "comments": [
+    {
+      "category": "wording",
+      "text": "Consider a simpler, more direct word than \"utilization\" -- \"use\" says the same thing.",
+      "quote": "utilization"
+    },
+    {
+      "category": "grammar",
+      "text": "Subject-verb agreement: the subject here is singular (\"methodology\"), so this should be \"is\", not \"are\".",
+      "quote": "methodology in this context are"
+    },
+    {
+      "category": "content",
+      "text": "This claim is broad -- consider specifying which aspect of climate discourse this methodology actually illuminates.",
+      "quote": "important for understanding climate discourse"
+    }
+  ]
+}

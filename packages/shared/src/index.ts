@@ -24,6 +24,13 @@ export {
   type DanglingCitation,
   type DocumentFormatResponse,
   type SuggestionsResponse,
+  FEEDBACK_CATEGORIES,
+  type FeedbackCategory,
+  type FeedbackAnchor,
+  type FeedbackComment,
+  type FeedbackPassResponse,
+  type FeedbackPassSummary,
+  type FeedbackPassesResponse,
 } from './document';
 export {
   WAITLIST_STATUSES,

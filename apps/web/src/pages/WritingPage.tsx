@@ -1,12 +1,95 @@
-import type { BibliographyEntry, CitationFormat, DocumentContent, Project } from '@alvus-ai/shared';
+import type { BibliographyEntry, CitationFormat, DocumentContent, FeedbackComment, FeedbackPassSummary, Project } from '@alvus-ai/shared';
 import type { Editor } from '@tiptap/react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import DocumentEditor from '../editor/DocumentEditor';
 import DocumentPreview from '../editor/DocumentPreview';
-import { ApiError, fetchBibliography, fetchDocument, fetchProject, fetchSuggestions, formatDocument, saveDocument } from '../lib/api';
+import {
+  ApiError,
+  fetchBibliography,
+  fetchDocument,
+  fetchFeedbackPass,
+  fetchFeedbackPasses,
+  fetchProject,
+  fetchSuggestions,
+  formatDocument,
+  requestFeedbackPass,
+  saveDocument,
+} from '../lib/api';
 
 const CITATION_FORMAT_LABELS: Record<CitationFormat, string> = { mla: 'MLA', apa: 'APA', chicago: 'Chicago' };
+
+const FEEDBACK_CATEGORY_LABELS: Record<FeedbackComment['category'], string> = {
+  wording: 'Wording',
+  phrasing: 'Phrasing',
+  grammar: 'Grammar',
+  content: 'Content',
+};
+
+function FeedbackPanel({
+  comments,
+  onSelect,
+}: {
+  comments: FeedbackComment[];
+  onSelect: (comment: FeedbackComment) => void;
+}) {
+  if (comments.length === 0) {
+    return <p className="text-sm text-slate-500">This pass found nothing to flag.</p>;
+  }
+  return (
+    <ul className="flex flex-col gap-3">
+      {comments.map((comment) => (
+        <li key={comment.id} data-testid={`feedback-comment-${comment.id}`}>
+          <button
+            type="button"
+            onClick={() => onSelect(comment)}
+            className="flex w-full flex-col gap-1 rounded border border-slate-200 px-3 py-2 text-left hover:border-brand"
+          >
+            <span className="w-fit rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+              {FEEDBACK_CATEGORY_LABELS[comment.category]}
+            </span>
+            <span className="text-sm text-slate-700">{comment.text}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function FeedbackHistory({
+  passes,
+  onReopen,
+}: {
+  passes: FeedbackPassSummary[];
+  onReopen: (passId: string) => void;
+}) {
+  if (passes.length === 0) {
+    return <p className="text-sm text-slate-500">No past feedback passes yet.</p>;
+  }
+  return (
+    <ul className="flex flex-col gap-2">
+      {passes.map((pass) => (
+        <li
+          key={pass.pass_id}
+          data-testid={`feedback-history-item-${pass.pass_id}`}
+          className="flex items-center justify-between gap-2 rounded border border-slate-200 px-3 py-2 text-sm"
+        >
+          <span className="text-slate-600">
+            {new Date(pass.created_at).toLocaleString()} · {pass.comment_count} comment{pass.comment_count === 1 ? '' : 's'}
+          </span>
+          <button
+            type="button"
+            onClick={() => onReopen(pass.pass_id)}
+            data-testid={`reopen-feedback-${pass.pass_id}`}
+            className="shrink-0 rounded border border-brand px-2 py-1 text-xs text-brand"
+          >
+            Reopen
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 // How much text immediately before the cursor to send as context -- enough for a
 // useful suggestion without shipping the whole document on every request.
@@ -66,6 +149,12 @@ export default function WritingPage() {
   const [suggestions, setSuggestions] = useState<string[] | null>(null);
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const [suggestionsError, setSuggestionsError] = useState<string | null>(null);
+
+  const [feedbackComments, setFeedbackComments] = useState<FeedbackComment[] | null>(null);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  const [feedbackHistory, setFeedbackHistory] = useState<FeedbackPassSummary[] | null>(null);
+  const [feedbackHistoryLoading, setFeedbackHistoryLoading] = useState(false);
 
   const editorRef = useRef<Editor | null>(null);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -181,6 +270,81 @@ export default function WritingPage() {
     }
   }
 
+  // A feedback pass is metered (unlike suggestions), so this always flushes
+  // the pending autosave first -- the AI should comment on exactly what's
+  // persisted, not a stale version, and the request shouldn't burn quota
+  // against content that's about to be overwritten by a delayed autosave.
+  async function handleRequestFeedback() {
+    if (!projectId || !editorRef.current) return;
+    setFeedbackLoading(true);
+    setFeedbackError(null);
+    try {
+      await flushPendingSave();
+      const result = await requestFeedbackPass(projectId);
+      setFeedbackComments(result.comments);
+      editorRef.current.commands.setFeedbackComments(result.comments);
+      setFeedbackHistory((prev) =>
+        prev ? [{ pass_id: result.pass_id, created_at: result.created_at, comment_count: result.comments.length }, ...prev] : prev,
+      );
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 402) {
+        setFeedbackError("You've reached your monthly feedback pass limit on your current plan.");
+      } else if (err instanceof ApiError && err.status === 422) {
+        setFeedbackError('Write something before requesting feedback.');
+      } else {
+        setFeedbackError(err instanceof ApiError ? err.message : 'Failed to get feedback.');
+      }
+      setFeedbackComments(null);
+    } finally {
+      setFeedbackLoading(false);
+    }
+  }
+
+  async function handleToggleFeedbackHistory() {
+    if (!projectId) return;
+    if (feedbackHistory !== null) {
+      setFeedbackHistory(null);
+      return;
+    }
+    setFeedbackHistoryLoading(true);
+    setFeedbackError(null);
+    try {
+      const result = await fetchFeedbackPasses(projectId);
+      setFeedbackHistory(result.passes);
+    } catch (err) {
+      setFeedbackError(err instanceof ApiError ? err.message : 'Failed to load feedback history.');
+    } finally {
+      setFeedbackHistoryLoading(false);
+    }
+  }
+
+  // Reopening a past pass just re-fetches its comments and re-applies them to
+  // the live editor -- no separate viewer, same rendering path as a freshly
+  // requested pass.
+  async function handleReopenFeedbackPass(passId: string) {
+    if (!projectId || !editorRef.current) return;
+    setFeedbackLoading(true);
+    setFeedbackError(null);
+    try {
+      const result = await fetchFeedbackPass(projectId, passId);
+      setFeedbackComments(result.comments);
+      editorRef.current.commands.setFeedbackComments(result.comments);
+    } catch (err) {
+      setFeedbackError(err instanceof ApiError ? err.message : 'Failed to reopen this feedback pass.');
+    } finally {
+      setFeedbackLoading(false);
+    }
+  }
+
+  function handleSelectFeedbackComment(comment: FeedbackComment) {
+    editorRef.current
+      ?.chain()
+      .focus()
+      .setTextSelection({ from: comment.anchor.from, to: comment.anchor.to })
+      .scrollIntoView()
+      .run();
+  }
+
   if (loadError) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-white text-slate-900">
@@ -218,6 +382,24 @@ export default function WritingPage() {
           >
             {rendering ? 'Rendering…' : 'Render full document'}
           </button>
+          <button
+            type="button"
+            onClick={handleRequestFeedback}
+            disabled={feedbackLoading || docContent === null}
+            data-testid="request-feedback"
+            className="rounded border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-50"
+          >
+            {feedbackLoading ? 'Getting feedback…' : 'Get feedback'}
+          </button>
+          <button
+            type="button"
+            onClick={handleToggleFeedbackHistory}
+            disabled={feedbackHistoryLoading}
+            data-testid="toggle-feedback-history"
+            className="rounded border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-50"
+          >
+            {feedbackHistoryLoading ? 'Loading…' : feedbackHistory !== null ? 'Hide feedback history' : 'Feedback history'}
+          </button>
           {projectId && (
             <Link to={`/projects/${projectId}`} className="text-brand underline">
               Sources & bibliography
@@ -247,6 +429,17 @@ export default function WritingPage() {
                 {danglingSourceIds.length === 1 ? 's' : ''} a source no longer in your bibliography. Dangling citations are
                 highlighted in the editor below.
               </p>
+            )}
+            {feedbackError && (
+              <p role="alert" data-testid="feedback-error" className="text-sm text-red-600">
+                {feedbackError}
+              </p>
+            )}
+            {feedbackHistory !== null && (
+              <div data-testid="feedback-history">
+                <h2 className="mb-3 text-sm font-semibold text-slate-700">Past feedback passes</h2>
+                <FeedbackHistory passes={feedbackHistory} onReopen={handleReopenFeedbackPass} />
+              </div>
             )}
 
             <div className="flex gap-6">
@@ -281,6 +474,15 @@ export default function WritingPage() {
               <aside className="w-64 shrink-0">
                 <h2 className="mb-3 text-sm font-semibold text-slate-700">Bibliography</h2>
                 <BibliographySidebar entries={bibliography} onInsert={insertCitation} />
+
+                {feedbackComments && (
+                  <div data-testid="feedback-panel" className="mt-6">
+                    <h2 className="mb-3 text-sm font-semibold text-slate-700">
+                      Feedback -- advisory only, nothing is changed in your document
+                    </h2>
+                    <FeedbackPanel comments={feedbackComments} onSelect={handleSelectFeedbackComment} />
+                  </div>
+                )}
               </aside>
             </div>
 

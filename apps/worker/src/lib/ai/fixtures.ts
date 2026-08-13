@@ -1,4 +1,5 @@
 import normalAnalysis from '../../../../../tests/fixtures/litellm/normal.json';
+import normalFeedback from '../../../../../tests/fixtures/litellm/feedback.json';
 import normalSuggestions from '../../../../../tests/fixtures/litellm/suggestions.json';
 import type { AiEnv } from './types';
 
@@ -36,4 +37,18 @@ export function fixtureKindForSuggestion(text: string): SuggestionFixtureKind {
 
 export function suggestionsFixture(): unknown {
   return normalSuggestions;
+}
+
+// Feedback has no "unreadable" state either (the one 422 this endpoint has,
+// empty_document, is a pre-AI-call check the route does directly against the
+// document, never reaching lib/ai at all) -- same normal-vs-outage shape as
+// suggestions.
+export type FeedbackFixtureKind = 'normal' | 'error';
+
+export function fixtureKindForFeedback(text: string): FeedbackFixtureKind {
+  return text.toLowerCase().includes('zzz-ai-error') ? 'error' : 'normal';
+}
+
+export function feedbackFixture(): unknown {
+  return normalFeedback;
 }

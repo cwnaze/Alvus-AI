@@ -5,6 +5,8 @@ import type {
   CitationFormat,
   DocumentContent,
   DocumentFormatResponse,
+  FeedbackPassResponse,
+  FeedbackPassesResponse,
   LoginResponse,
   Project,
   ProjectDocumentResponse,
@@ -230,4 +232,16 @@ export function fetchSuggestions(projectId: string, cursorContext: string): Prom
     method: 'POST',
     body: JSON.stringify({ cursor_context: cursorContext }),
   });
+}
+
+export function requestFeedbackPass(projectId: string): Promise<FeedbackPassResponse> {
+  return request(`/projects/${projectId}/document/feedback`, { method: 'POST', body: JSON.stringify({}) });
+}
+
+export function fetchFeedbackPasses(projectId: string, cursor?: string | null): Promise<FeedbackPassesResponse> {
+  return request(`/projects/${projectId}/document/feedback${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ''}`);
+}
+
+export function fetchFeedbackPass(projectId: string, passId: string): Promise<FeedbackPassResponse> {
+  return request(`/projects/${projectId}/document/feedback/${passId}`);
 }
