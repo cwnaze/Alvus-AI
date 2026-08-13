@@ -83,3 +83,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-13T04:59:00.683Z | US-021 | done | PR #50 merged after 1 review round(s)
 2026-08-13T14:03:21.716Z | US-022 | in_progress | Branch feature/us-022-usage-dashboard-and-limit-exceeded-ux created; building the usage dashboard (current usage vs. plan tier for source analyses/feedback passes, billing-period reset date) and confirming the existing limit-exceeded UX gives a clear upgrade-or-wait message.
 2026-08-13T17:50:23.020Z | US-022 | done | PR #52 merged after 1 review round(s)
+2026-08-13T21:46:18.000Z | US-023 | in_progress | Branch feature/us-023-stripe-checkout-and-billing-portal created; building Stripe Checkout session creation for Plus/Pro upgrades, Billing Portal session for subscription management, and a duplicate-tier checkout guard.
