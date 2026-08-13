@@ -264,7 +264,7 @@ describe('GET /:projectId/bibliography', () => {
     asCaller();
     getProjectById.mockResolvedValueOnce(projectRow({ citationFormat: 'apa' }));
     listProjectSources.mockResolvedValueOnce([
-      { id: 'src-1', citationString: 'Doe, J. (2020). Title. Venue.' },
+      { id: 'src-1', citationString: 'Doe, J. (2020). Title. Venue.', work: { authors: ['Jane Doe'], publicationYear: 2020 } },
       { id: 'src-2', citationString: null },
     ]);
 
@@ -274,7 +274,7 @@ describe('GET /:projectId/bibliography', () => {
     expect(listProjectSources).toHaveBeenCalledWith(expect.anything(), { projectId: PROJECT_ID, state: 'selected' });
     expect(await res.json()).toEqual({
       citation_format: 'apa',
-      entries: [{ source_id: 'src-1', citation_text: 'Doe, J. (2020). Title. Venue.' }],
+      entries: [{ source_id: 'src-1', citation_text: 'Doe, J. (2020). Title. Venue.', in_text_citation: '(Doe, 2020)' }],
     });
   });
 

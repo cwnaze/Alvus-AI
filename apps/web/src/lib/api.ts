@@ -4,6 +4,7 @@ import type {
   BibliographyResponse,
   CitationFormat,
   DocumentContent,
+  DocumentFormatResponse,
   LoginResponse,
   Project,
   ProjectDocumentResponse,
@@ -217,4 +218,8 @@ export function fetchDocument(projectId: string): Promise<ProjectDocumentRespons
 
 export function saveDocument(projectId: string, content: DocumentContent): Promise<SaveDocumentResponse> {
   return request(`/projects/${projectId}/document`, { method: 'PUT', body: JSON.stringify({ content }) });
+}
+
+export function formatDocument(projectId: string): Promise<DocumentFormatResponse> {
+  return request(`/projects/${projectId}/document/format`, { method: 'POST', body: JSON.stringify({}) });
 }

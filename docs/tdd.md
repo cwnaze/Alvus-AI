@@ -108,7 +108,7 @@ sessions/handles webhooks; it never decides whether an action is allowed —
 ### Flow 2 — writing in the editor with live citation-format formatting
 
 1. `GET /api/projects/:id/document` (`routes/editor.ts` → `lib/db`) loads TipTap JSON + confirmed source list into the editor.
-2. In-text citations inserted from the confirmed-source list render client-side per the project's format, using the same rules as `lib/citation` (shared via `packages/shared` so in-text and bibliography formatting always match).
+2. In-text citations inserted from the confirmed-source list render client-side per the project's format. Text is computed once, server-side, by `lib/citation`'s `formatInTextCitation` (delivered pre-formatted on the bibliography endpoint, alongside the existing bibliography-entry string) and displayed by a TipTap `citation` node -- one implementation instead of a client/server duplicate, which is a stronger guarantee that in-text and bibliography formatting always match than sharing rules across two copies would be. `POST .../document/format` re-runs the same formatter over the saved document to refresh citation text and flag dangling ones (source no longer `selected`).
 3. Paragraph/structure suggestions surface as inline UI hints (not inserted text) via a lighter `routes/editor.ts` / `lib/ai` call — rate-limited, not counted against tier usage limits.
 4. `PUT /api/projects/:id/document` autosaves TipTap JSON via `lib/db`. No AI call needed for save — formatting is deterministic client-side, not regenerated per keystroke.
 5. Full document (headers/margins/running heads/bibliography page) assembled client-side from TipTap doc + format ruleset.

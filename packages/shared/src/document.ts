@@ -10,3 +10,14 @@ export type ProjectDocumentResponse = {
 export type SaveDocumentResponse = {
   updated_at: string;
 };
+
+// A citation node's `sourceId` no longer resolves to a `selected`
+// project_source -- deleted, deselected, or rejected since it was inserted.
+export type DanglingCitation = {
+  source_id: string;
+};
+
+export type DocumentFormatResponse = {
+  content: DocumentContent;
+  dangling_citations: DanglingCitation[];
+};

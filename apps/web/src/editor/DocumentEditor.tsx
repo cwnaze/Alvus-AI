@@ -1,10 +1,13 @@
 import type { DocumentContent } from '@alvus-ai/shared';
 import { EditorContent, useEditor, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import { useEffect, useRef } from 'react';
+import { Citation } from './citationExtension';
 
 type DocumentEditorProps = {
   initialContent: DocumentContent;
   onChange: (content: DocumentContent) => void;
+  onEditorReady?: (editor: Editor) => void;
 };
 
 function ToolbarButton({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
@@ -43,9 +46,9 @@ function Toolbar({ editor }: { editor: Editor }) {
 // keys this by projectId to force a remount on project change), so
 // `initialContent` seeds the editor once per instance and is never fed back in
 // -- TipTap owns the document after that; edits flow out via `onChange`, never back in.
-export default function DocumentEditor({ initialContent, onChange }: DocumentEditorProps) {
+export default function DocumentEditor({ initialContent, onChange, onEditorReady }: DocumentEditorProps) {
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [StarterKit, Citation],
     content: initialContent,
     immediatelyRender: false,
     editorProps: {
@@ -58,6 +61,14 @@ export default function DocumentEditor({ initialContent, onChange }: DocumentEdi
     },
     onUpdate: ({ editor }) => onChange(editor.getJSON() as DocumentContent),
   });
+
+  const onEditorReadyRef = useRef(onEditorReady);
+  useEffect(() => {
+    onEditorReadyRef.current = onEditorReady;
+  });
+  useEffect(() => {
+    if (editor) onEditorReadyRef.current?.(editor);
+  }, [editor]);
 
   if (!editor) return null;
 

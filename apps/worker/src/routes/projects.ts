@@ -1,6 +1,7 @@
 import type { BibliographyResponse, Project, ProjectsResponse } from '@alvus-ai/shared';
 import { CITATION_FORMATS } from '@alvus-ai/shared';
 import { Hono } from 'hono';
+import { formatInTextCitation } from '../lib/citation';
 import { createDb, type Db } from '../lib/db/client';
 import {
   createProject,
@@ -130,7 +131,14 @@ projects.get('/:projectId/bibliography', async (c) => {
   const rows = await listProjectSources(db, { projectId: project.id, state: 'selected' });
   const entries = rows
     .filter((row): row is typeof row & { citationString: string } => row.citationString !== null)
-    .map((row) => ({ source_id: row.id, citation_text: row.citationString }));
+    .map((row) => ({
+      source_id: row.id,
+      citation_text: row.citationString,
+      in_text_citation: formatInTextCitation(project.citationFormat, {
+        authors: row.work?.authors ?? [],
+        year: row.work?.publicationYear ?? null,
+      }),
+    }));
   const response: BibliographyResponse = { citation_format: project.citationFormat, entries };
   return c.json(response, 200);
 });
