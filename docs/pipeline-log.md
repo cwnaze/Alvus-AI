@@ -75,3 +75,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-11T18:00:00.000Z | US-019 | pending | Crash resume: the 2026-08-11T11:50:17.000Z in_progress marker's story-start run died before creating the branch or PR on remote (no local/remote branch, no PR found); no work exists to resume, so reset to pending for clean re-selection.
 2026-08-11T18:00:30.000Z | US-019 | in_progress | Branch feature/us-019-citation-format-rendering created; building in-text citation insertion from the bibliography, full-document re-render (headers/margins/bibliography page per citation style), and dangling-citation detection.
 2026-08-13T00:10:21.506Z | US-019 | done | PR #44 merged after 3 review round(s)
+2026-08-13T00:15:00.000Z | US-020 | in_progress | Branch feature/us-020-paragraph-and-structure-suggestions-in-the-editor created; building the rate-limited (not metered) paragraph/structure suggestion endpoint on routes/editor.ts and inline hint UI in the writing view.
