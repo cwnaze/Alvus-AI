@@ -236,14 +236,18 @@ Indexes: `(project_id, created_at)`. Sensitive: same RLS boundary as
 |---|---|---|
 | `id` | uuid PK | |
 | `project_id` | uuid, FK → `projects.id` ON DELETE CASCADE | |
-| `token_hash` | text, unique, not null | hash only, plaintext shown once at creation |
+| `token_hash` | text, unique, not null | SHA-256 digest of the raw token, one-way — used to look up a link by the token a visitor presents |
+| `token_encrypted` | text, not null | AES-GCM encryption of the same raw token under the Worker-held `SHARE_LINK_ENCRYPTION_KEY` secret (never stored in the DB) — reversible only by the app, needed so a repeat generate/GET returns the same link |
 | `created_by` | uuid, FK → `users.id` | |
 | `created_at` / `expires_at` / `revoked_at` | timestamptz, nullable except created_at | expiry and revocation are distinct |
 | `last_accessed_at` | timestamptz, nullable | |
 | `access_count` | integer, default `0` | |
 
-Indexes: unique `token_hash`; `project_id`. Sensitive: `token_hash` is
-credential-equivalent — long, cryptographically random, never logged in plaintext.
+Indexes: unique `token_hash`; `project_id`. Sensitive: both `token_hash` and
+`token_encrypted` are credential-equivalent — a raw DB read alone recovers
+neither the token (the hash is one-way, the ciphertext needs the Worker
+secret), only the app holding `SHARE_LINK_ENCRYPTION_KEY` can. Never logged in
+plaintext.
 
 ## Migration strategy
 
@@ -273,6 +277,6 @@ credential-equivalent — long, cryptographically random, never logged in plaint
 | `uploaded_files` | entire row + Storage object | private source material |
 | `project_sources` | summaries, quotes, citation | derived from private context |
 | `feedback_passes` | `comments` | derived from private document content |
-| `share_links` | `token_hash` | credential-equivalent |
+| `share_links` | `token_hash`, `token_encrypted` | credential-equivalent |
 | `external_works` | none | public metadata |
 | `tier_limits` | none | public config |

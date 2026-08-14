@@ -6,16 +6,29 @@ import type { AuthBindings, AuthVariables } from '../middleware/auth';
 
 type ErrorEnvelope = { error: { code: string; message: string; correlationId: string } };
 
-const { getUser, getUserById, getProjectById, getActiveShareLinkByProject, createShareLink, revokeShareLink, generateShareToken } =
-  vi.hoisted(() => ({
-    getUser: vi.fn(),
-    getUserById: vi.fn(),
-    getProjectById: vi.fn(),
-    getActiveShareLinkByProject: vi.fn(),
-    createShareLink: vi.fn(),
-    revokeShareLink: vi.fn(),
-    generateShareToken: vi.fn(),
-  }));
+const {
+  getUser,
+  getUserById,
+  getProjectById,
+  getActiveShareLinkByProject,
+  createShareLink,
+  revokeShareLink,
+  generateShareToken,
+  hashShareToken,
+  encryptShareToken,
+  decryptShareToken,
+} = vi.hoisted(() => ({
+  getUser: vi.fn(),
+  getUserById: vi.fn(),
+  getProjectById: vi.fn(),
+  getActiveShareLinkByProject: vi.fn(),
+  createShareLink: vi.fn(),
+  revokeShareLink: vi.fn(),
+  generateShareToken: vi.fn(),
+  hashShareToken: vi.fn(),
+  encryptShareToken: vi.fn(),
+  decryptShareToken: vi.fn(),
+}));
 
 vi.mock('../lib/supabase/client', () => ({
   createSupabaseAdmin: () => ({ auth: { getUser } }),
@@ -24,11 +37,11 @@ vi.mock('../lib/db/client', () => ({ createDb: () => ({}) }));
 vi.mock('../lib/db/queries/waitlist', () => ({ getUserById }));
 vi.mock('../lib/db/queries/projects', () => ({ getProjectById }));
 vi.mock('../lib/db/queries/share-links', () => ({ getActiveShareLinkByProject, createShareLink, revokeShareLink }));
-vi.mock('../lib/share-links/token', () => ({ generateShareToken }));
+vi.mock('../lib/share-links/token', () => ({ generateShareToken, hashShareToken, encryptShareToken, decryptShareToken }));
 
 const { default: shareLinkRoutes } = await import('./share-links');
 
-const app = new Hono<{ Bindings: AuthBindings; Variables: AuthVariables }>();
+const app = new Hono<{ Bindings: AuthBindings & { SHARE_LINK_ENCRYPTION_KEY: string }; Variables: AuthVariables }>();
 app.use('*', requestId({ headerName: CORRELATION_ID_HEADER }));
 app.onError(onError);
 app.route('/:projectId', shareLinkRoutes);
@@ -38,6 +51,7 @@ const ENV = {
   SUPABASE_URL: 'http://localhost',
   SUPABASE_SECRET_KEY: 'secret',
   PUBLIC_APP_URL: 'http://localhost:8787',
+  SHARE_LINK_ENCRYPTION_KEY: 'test-key',
 };
 const OWNER_ID = 'owner-1';
 const OTHER_USER_ID = 'other-1';
@@ -75,11 +89,12 @@ function projectRow(overrides: Partial<{ id: string; ownerId: string }> = {}) {
   };
 }
 
-function linkRow(overrides: Partial<{ id: string; projectId: string; token: string }> = {}) {
+function linkRow(overrides: Partial<{ id: string; projectId: string; tokenHash: string; tokenEncrypted: string }> = {}) {
   return {
     id: overrides.id ?? LINK_ID,
     projectId: overrides.projectId ?? PROJECT_ID,
-    token: overrides.token ?? 'a'.repeat(64),
+    tokenHash: overrides.tokenHash ?? 'hash-a',
+    tokenEncrypted: overrides.tokenEncrypted ?? 'encrypted-a',
     createdBy: OWNER_ID,
     createdAt: new Date('2026-01-03T00:00:00Z'),
     expiresAt: null,
@@ -97,7 +112,9 @@ describe('POST /:projectId/', () => {
     getProjectById.mockResolvedValueOnce(projectRow());
     getActiveShareLinkByProject.mockResolvedValueOnce(undefined);
     generateShareToken.mockReturnValueOnce('b'.repeat(64));
-    createShareLink.mockResolvedValueOnce(linkRow({ token: 'b'.repeat(64) }));
+    hashShareToken.mockResolvedValueOnce('hash-b');
+    encryptShareToken.mockResolvedValueOnce('encrypted-b');
+    createShareLink.mockResolvedValueOnce(linkRow({ tokenHash: 'hash-b', tokenEncrypted: 'encrypted-b' }));
 
     const res = await request(`/${PROJECT_ID}`, { method: 'POST', body: '{}' });
 
@@ -105,8 +122,10 @@ describe('POST /:projectId/', () => {
     expect(createShareLink).toHaveBeenCalledWith(expect.anything(), {
       projectId: PROJECT_ID,
       createdBy: OWNER_ID,
-      token: 'b'.repeat(64),
+      tokenHash: 'hash-b',
+      tokenEncrypted: 'encrypted-b',
     });
+    expect(decryptShareToken).not.toHaveBeenCalled();
     const body = (await res.json()) as { token: string; url: string };
     expect(body.token).toBe('b'.repeat(64));
     expect(body.url).toBe(`http://localhost:8787/shared/${'b'.repeat(64)}`);
@@ -115,12 +134,14 @@ describe('POST /:projectId/', () => {
   it('returns the existing active link instead of creating a second one (idempotent)', async () => {
     asCaller();
     getProjectById.mockResolvedValueOnce(projectRow());
-    getActiveShareLinkByProject.mockResolvedValueOnce(linkRow({ token: 'c'.repeat(64) }));
+    getActiveShareLinkByProject.mockResolvedValueOnce(linkRow({ tokenEncrypted: 'encrypted-c' }));
+    decryptShareToken.mockResolvedValueOnce('c'.repeat(64));
 
     const res = await request(`/${PROJECT_ID}`, { method: 'POST', body: '{}' });
 
     expect(res.status).toBe(200);
     expect(createShareLink).not.toHaveBeenCalled();
+    expect(decryptShareToken).toHaveBeenCalledWith('encrypted-c', 'test-key');
     const body = (await res.json()) as { token: string; url: string };
     expect(body.token).toBe('c'.repeat(64));
   });
@@ -150,11 +171,13 @@ describe('GET /:projectId/', () => {
   it('returns the active link', async () => {
     asCaller();
     getProjectById.mockResolvedValueOnce(projectRow());
-    getActiveShareLinkByProject.mockResolvedValueOnce(linkRow());
+    getActiveShareLinkByProject.mockResolvedValueOnce(linkRow({ tokenEncrypted: 'encrypted-a' }));
+    decryptShareToken.mockResolvedValueOnce('a'.repeat(64));
 
     const res = await request(`/${PROJECT_ID}`);
 
     expect(res.status).toBe(200);
+    expect(decryptShareToken).toHaveBeenCalledWith('encrypted-a', 'test-key');
     const body = (await res.json()) as { token: string };
     expect(body.token).toBe('a'.repeat(64));
   });

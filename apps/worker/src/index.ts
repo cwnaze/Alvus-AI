@@ -19,6 +19,7 @@ type Bindings = {
   SUPABASE_URL: string;
   SUPABASE_SECRET_KEY: string;
   PUBLIC_APP_URL: string;
+  SHARE_LINK_ENCRYPTION_KEY: string;
   SOURCES_PROVIDER_MODE?: string;
   SEMANTIC_SCHOLAR_API_KEY?: string;
   CROSSREF_CONTACT_EMAIL?: string;

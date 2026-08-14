@@ -22,6 +22,7 @@ export default defineConfig({
     './apps/worker/src/lib/db/schema/project-documents.ts',
     './apps/worker/src/lib/db/schema/feedback-passes.ts',
     './apps/worker/src/lib/db/schema/share-links.ts',
+    './apps/worker/src/lib/db/schema/share-link-lookups.ts',
     './apps/worker/src/lib/db/schema/usage-events.ts',
     './apps/worker/src/lib/db/schema/suggestion-requests.ts',
   ],

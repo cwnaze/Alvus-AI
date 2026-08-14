@@ -86,7 +86,12 @@ bypass = treat as a full data breach.
   rate limiting as a first layer.
 - **Share-link brute force/leak:** high-entropy token (128-bit class), optional
   expiry + owner revocation, rate-limit lookups; blast radius scoped to one
-  read-only paper by design.
+  read-only paper by design. Also not stored in plaintext: the DB holds a
+  one-way hash (lookup) and a copy encrypted under a Worker-held secret
+  (redisplay), so a narrower DB-read exposure (leaked replica/backup,
+  over-scoped support access) short of a full secret/DB-credential compromise
+  doesn't hand over live tokens either — see `docs/data-model.md`'s
+  `share_links` entry.
 - **Malicious upload / PDF parsing:** parser is untrusted-input-facing code (historic
   RCE/DoS in PDF libs) — parse timeouts, output size caps, never execute embedded
   content, keep dependency patched.

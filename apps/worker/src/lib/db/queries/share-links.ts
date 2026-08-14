@@ -17,11 +17,16 @@ export async function getActiveShareLinkByProject(db: Db, projectId: string): Pr
 
 export async function createShareLink(
   db: Db,
-  params: { projectId: string; createdBy: string; token: string },
+  params: { projectId: string; createdBy: string; tokenHash: string; tokenEncrypted: string },
 ): Promise<ShareLinkRow> {
   const [created] = await db
     .insert(shareLinks)
-    .values({ projectId: params.projectId, createdBy: params.createdBy, token: params.token })
+    .values({
+      projectId: params.projectId,
+      createdBy: params.createdBy,
+      tokenHash: params.tokenHash,
+      tokenEncrypted: params.tokenEncrypted,
+    })
     .returning();
   if (!created) throw new Error('createShareLink: insert returned no row');
   return created;
@@ -33,9 +38,10 @@ export async function revokeShareLink(db: Db, params: { id: string }): Promise<v
 
 // Returns the row regardless of revoked/expired state -- the caller
 // distinguishes "unknown token" (404) from "revoked/expired token" (410),
-// which requires knowing the row exists.
-export async function findShareLinkByToken(db: Db, token: string): Promise<ShareLinkRow | undefined> {
-  const [row] = await db.select().from(shareLinks).where(eq(shareLinks.token, token));
+// which requires knowing the row exists. Takes the token's hash, not the raw
+// token, since that's the only form stored for indexed lookup.
+export async function findShareLinkByTokenHash(db: Db, tokenHash: string): Promise<ShareLinkRow | undefined> {
+  const [row] = await db.select().from(shareLinks).where(eq(shareLinks.tokenHash, tokenHash));
   return row;
 }
 

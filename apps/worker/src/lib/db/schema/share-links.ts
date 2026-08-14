@@ -2,14 +2,14 @@ import { index, integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-c
 import { projects } from './projects';
 import { users } from './users';
 
-// See docs/data-model.md. `token` is mapped onto the `token_hash` column name
-// inherited from that doc's schema sketch, but stores the raw high-entropy
-// token rather than a digest -- AC4 ("generating a link twice returns the
-// existing active link") requires the plaintext to be retrievable on repeat
-// GET/POST calls, which a hash-only column can't support. Entropy (256-bit
-// random) plus revocation plus the read-only, single-project blast radius
-// (docs/security.md's threat note) is the actual defense here, not at-rest
-// hashing.
+// See docs/data-model.md. `tokenHash` is a one-way SHA-256 digest of the raw
+// token, used to look up a link by the token a visitor presents -- a raw DB
+// read recovers only this hash, never the token. `tokenEncrypted` is a
+// separate, reversible AES-GCM encryption of the same raw token under a
+// server-held Worker secret (SHARE_LINK_ENCRYPTION_KEY, never stored in the
+// DB), which is what AC4 ("generating a link twice returns the existing
+// active link") actually needs: the app can recover the plaintext to
+// redisplay it, but a raw DB read alone cannot. See lib/share-links/token.ts.
 export const shareLinks = pgTable(
   'share_links',
   {
@@ -17,7 +17,8 @@ export const shareLinks = pgTable(
     projectId: uuid('project_id')
       .notNull()
       .references(() => projects.id, { onDelete: 'cascade' }),
-    token: text('token_hash').notNull().unique(),
+    tokenHash: text('token_hash').notNull().unique(),
+    tokenEncrypted: text('token_encrypted').notNull(),
     createdBy: uuid('created_by')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),

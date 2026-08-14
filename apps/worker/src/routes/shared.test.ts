@@ -5,19 +5,33 @@ import { CORRELATION_ID_HEADER, onError, type ErrorVariables } from '../middlewa
 
 type ErrorEnvelope = { error: { code: string; message: string; correlationId: string } };
 
-const { findShareLinkByToken, recordShareLinkAccess, getProjectById, getOrCreateDocument, listProjectSources } = vi.hoisted(() => ({
-  findShareLinkByToken: vi.fn(),
+const {
+  findShareLinkByTokenHash,
+  recordShareLinkAccess,
+  getProjectById,
+  getOrCreateDocument,
+  listProjectSources,
+  hashShareToken,
+  countShareLinkLookupsSince,
+  recordShareLinkLookup,
+} = vi.hoisted(() => ({
+  findShareLinkByTokenHash: vi.fn(),
   recordShareLinkAccess: vi.fn(),
   getProjectById: vi.fn(),
   getOrCreateDocument: vi.fn(),
   listProjectSources: vi.fn(),
+  hashShareToken: vi.fn(),
+  countShareLinkLookupsSince: vi.fn(),
+  recordShareLinkLookup: vi.fn(),
 }));
 
 vi.mock('../lib/db/client', () => ({ createDb: () => ({}) }));
-vi.mock('../lib/db/queries/share-links', () => ({ findShareLinkByToken, recordShareLinkAccess }));
+vi.mock('../lib/db/queries/share-links', () => ({ findShareLinkByTokenHash, recordShareLinkAccess }));
 vi.mock('../lib/db/queries/projects', () => ({ getProjectById }));
 vi.mock('../lib/db/queries/documents', () => ({ getOrCreateDocument }));
 vi.mock('../lib/db/queries/sources', () => ({ listProjectSources }));
+vi.mock('../lib/share-links/token', () => ({ hashShareToken }));
+vi.mock('../lib/db/queries/share-link-lookups', () => ({ countShareLinkLookupsSince, recordShareLinkLookup }));
 
 const { default: sharedRoutes } = await import('./shared');
 
@@ -30,12 +44,14 @@ const ENV = { DATABASE_URL: 'unused' };
 const PROJECT_ID = '11111111-1111-1111-1111-111111111111';
 const LINK_ID = '22222222-2222-2222-2222-222222222222';
 const TOKEN = 'a'.repeat(64);
+const TOKEN_HASH = 'hash-a';
 
 function linkRow(overrides: Partial<{ revokedAt: Date | null; expiresAt: Date | null }> = {}) {
   return {
     id: LINK_ID,
     projectId: PROJECT_ID,
-    token: TOKEN,
+    tokenHash: TOKEN_HASH,
+    tokenEncrypted: 'encrypted-a',
     createdBy: 'owner-1',
     createdAt: new Date('2026-01-03T00:00:00Z'),
     expiresAt: overrides.expiresAt ?? null,
@@ -58,10 +74,43 @@ function projectRow() {
 }
 
 describe('GET /:token', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    hashShareToken.mockResolvedValue(TOKEN_HASH);
+    countShareLinkLookupsSince.mockResolvedValue(0);
+  });
+
+  it('records a lookup attempt for every request, keyed by the requester IP', async () => {
+    findShareLinkByTokenHash.mockResolvedValueOnce(undefined);
+
+    await app.request(`/${TOKEN}`, undefined, ENV);
+
+    expect(countShareLinkLookupsSince).toHaveBeenCalledWith(expect.anything(), { ipAddress: 'unknown', since: expect.any(Date) });
+    expect(recordShareLinkLookup).toHaveBeenCalledWith(expect.anything(), { ipAddress: 'unknown' });
+  });
+
+  it('429s with a Retry-After header once the requester is at the rate-limit ceiling', async () => {
+    countShareLinkLookupsSince.mockResolvedValueOnce(30);
+
+    const res = await app.request(`/${TOKEN}`, undefined, ENV);
+
+    expect(res.status).toBe(429);
+    expect(res.headers.get('Retry-After')).toBeTruthy();
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('rate_limited');
+    expect(findShareLinkByTokenHash).not.toHaveBeenCalled();
+    expect(recordShareLinkLookup).not.toHaveBeenCalled();
+  });
+
+  it('resolves the requester IP from CF-Connecting-IP when present', async () => {
+    findShareLinkByTokenHash.mockResolvedValueOnce(undefined);
+
+    await app.request(`/${TOKEN}`, { headers: { 'CF-Connecting-IP': '203.0.113.7' } }, ENV);
+
+    expect(countShareLinkLookupsSince).toHaveBeenCalledWith(expect.anything(), { ipAddress: '203.0.113.7', since: expect.any(Date) });
+  });
 
   it('returns the read-only paper for a valid token and records access', async () => {
-    findShareLinkByToken.mockResolvedValueOnce(linkRow());
+    findShareLinkByTokenHash.mockResolvedValueOnce(linkRow());
     getProjectById.mockResolvedValueOnce(projectRow());
     getOrCreateDocument.mockResolvedValueOnce({ content: { type: 'doc', content: [] }, updatedAt: new Date('2026-01-04T00:00:00Z') });
     listProjectSources.mockResolvedValueOnce([
@@ -83,7 +132,7 @@ describe('GET /:token', () => {
   });
 
   it('404s an unknown token', async () => {
-    findShareLinkByToken.mockResolvedValueOnce(undefined);
+    findShareLinkByTokenHash.mockResolvedValueOnce(undefined);
 
     const res = await app.request(`/${TOKEN}`, undefined, ENV);
 
@@ -92,7 +141,7 @@ describe('GET /:token', () => {
   });
 
   it('410s a revoked token', async () => {
-    findShareLinkByToken.mockResolvedValueOnce(linkRow({ revokedAt: new Date('2026-01-05T00:00:00Z') }));
+    findShareLinkByTokenHash.mockResolvedValueOnce(linkRow({ revokedAt: new Date('2026-01-05T00:00:00Z') }));
 
     const res = await app.request(`/${TOKEN}`, undefined, ENV);
 
@@ -101,7 +150,7 @@ describe('GET /:token', () => {
   });
 
   it('410s an expired token', async () => {
-    findShareLinkByToken.mockResolvedValueOnce(linkRow({ expiresAt: new Date('2020-01-01T00:00:00Z') }));
+    findShareLinkByTokenHash.mockResolvedValueOnce(linkRow({ expiresAt: new Date('2020-01-01T00:00:00Z') }));
 
     const res = await app.request(`/${TOKEN}`, undefined, ENV);
 

@@ -4,8 +4,10 @@ import { formatInTextCitation } from '../lib/citation';
 import { createDb } from '../lib/db/client';
 import { getOrCreateDocument } from '../lib/db/queries/documents';
 import { getProjectById } from '../lib/db/queries/projects';
-import { findShareLinkByToken, recordShareLinkAccess } from '../lib/db/queries/share-links';
+import { findShareLinkByTokenHash, recordShareLinkAccess } from '../lib/db/queries/share-links';
 import { listProjectSources } from '../lib/db/queries/sources';
+import { assertWithinShareLinkLookupRateLimit, recordShareLinkLookupHit } from '../lib/rate-limit';
+import { hashShareToken } from '../lib/share-links/token';
 import { AppError } from '../middleware/errors';
 
 type Env = { Bindings: { DATABASE_URL: string } };
@@ -21,8 +23,14 @@ const shared = new Hono<Env>();
 shared.get('/:token', async (c) => {
   const token = c.req.param('token');
   const db = createDb(c.env.DATABASE_URL);
+  const ipAddress = c.req.header('CF-Connecting-IP') ?? 'unknown';
 
-  const link = await findShareLinkByToken(db, token);
+  const now = new Date();
+  await assertWithinShareLinkLookupRateLimit(db, { ipAddress, now });
+  await recordShareLinkLookupHit(db, { ipAddress });
+
+  const tokenHash = await hashShareToken(token);
+  const link = await findShareLinkByTokenHash(db, tokenHash);
   if (!link) throw new AppError(404, 'invalid_token', 'This share link does not exist');
   if (link.revokedAt) throw new AppError(410, 'link_revoked', 'This share link has been revoked');
   if (link.expiresAt && link.expiresAt.getTime() <= Date.now()) {
