@@ -70,6 +70,11 @@ Applies to every story. Do not restate these in individual acceptance criteria.
 - Validate every external input at the boundary. No exceptions for internal callers.
 - Authorization is enforced server-side. Client-side checks are UX, never security.
 - No secrets in source or logs. Everything through env vars, documented in `.env.example`.
+- Test fixtures that need a key-shaped value must be obviously fake — a repeating
+  pattern like `'ab'.repeat(32)`, never the output of `openssl rand` or similar. Secret
+  scanning runs over full branch history and cannot tell real entropy from a fixture, so
+  a random-looking constant fails CI on every future run and can only be cleared by an
+  allowlist entry or a history rewrite.
 - Errors surface to the user meaningfully. A blank screen is a bug.
 - Demo spec titles start with the story ID: `US-H01: compose and send`.
 

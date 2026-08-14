@@ -17,11 +17,16 @@ class Demo {
   private steps: Step[] = [];
   constructor(private storyId: string, private title: string, private page: Page) {}
 
-  /** Capture one meaningful moment in the user flow. */
-  async step(caption: string) {
+  /**
+   * Capture one meaningful moment in the user flow. Defaults to the fixture
+   * page; pass an explicit `page` for a step that happens in a different
+   * browser context (e.g. an anonymous visitor's session in a story that
+   * demos a public/no-login view alongside the owner's).
+   */
+  async step(caption: string, page: Page = this.page) {
     const n = String(this.steps.length + 1).padStart(2, '0');
     const shot = `${this.storyId.toLowerCase()}-${n}.png`;
-    await this.page.screenshot({
+    await page.screenshot({
       path: path.join('docs/demos/assets', shot),
       animations: 'disabled',
     });

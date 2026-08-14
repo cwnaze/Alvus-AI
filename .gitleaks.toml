@@ -20,4 +20,14 @@ useDefault = true
     # It still trips generic-api-key on entropy, so demo docs that record a
     # local `curl` invocation (e.g. docs/demos/US-008.md) need this allowed.
     '''sb_publishable_[A-Za-z0-9_-]+''',
+
+    # Historical only. A throwaway AES-GCM test key that lived in
+    # apps/worker/src/lib/share-links/token.test.ts for two commits (43b0702,
+    # 52d385b) before being replaced with a low-entropy fixture. It encrypted
+    # and decrypted a value inside that one test and never protected anything;
+    # the real SHARE_LINK_ENCRYPTION_KEY is a Worker secret and is not in
+    # source. Needed because the scan walks full branch history, so the old
+    # blob is still reachable. Delete this once the branch is merged and
+    # squashed out of history.
+    '''1af1819ce0454b073a627c4690f7d71431d762225ada33a42989a0c64f304021''',
   ]

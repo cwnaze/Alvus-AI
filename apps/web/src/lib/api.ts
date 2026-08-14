@@ -16,6 +16,8 @@ import type {
   ProjectsResponse,
   RefreshResponse,
   SaveDocumentResponse,
+  SharedPaperResponse,
+  ShareLinkResponse,
   SourceAnalysis,
   SourceSearchResponse,
   SourceStateResponse,
@@ -249,4 +251,20 @@ export function fetchFeedbackPasses(projectId: string, cursor?: string | null): 
 
 export function fetchFeedbackPass(projectId: string, passId: string): Promise<FeedbackPassResponse> {
   return request(`/projects/${projectId}/document/feedback/${passId}`);
+}
+
+export function createShareLink(projectId: string): Promise<ShareLinkResponse> {
+  return request(`/projects/${projectId}/share-link`, { method: 'POST', body: JSON.stringify({}) });
+}
+
+export function fetchShareLink(projectId: string): Promise<ShareLinkResponse> {
+  return request(`/projects/${projectId}/share-link`);
+}
+
+export function revokeShareLink(projectId: string): Promise<void> {
+  return request(`/projects/${projectId}/share-link`, { method: 'DELETE' });
+}
+
+export function fetchSharedPaper(token: string): Promise<SharedPaperResponse> {
+  return request(`/shared/${token}`);
 }

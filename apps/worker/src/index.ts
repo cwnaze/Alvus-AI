@@ -10,6 +10,8 @@ import billingRoutes from './routes/billing';
 import editorRoutes from './routes/editor';
 import feedbackRoutes from './routes/feedback';
 import projectsRoutes from './routes/projects';
+import shareLinkRoutes from './routes/share-links';
+import sharedRoutes from './routes/shared';
 import sourcesRoutes from './routes/sources';
 
 type Bindings = {
@@ -17,6 +19,7 @@ type Bindings = {
   SUPABASE_URL: string;
   SUPABASE_SECRET_KEY: string;
   PUBLIC_APP_URL: string;
+  SHARE_LINK_ENCRYPTION_KEY: string;
   SOURCES_PROVIDER_MODE?: string;
   SEMANTIC_SCHOLAR_API_KEY?: string;
   CROSSREF_CONTACT_EMAIL?: string;
@@ -39,6 +42,8 @@ app.route('/api/projects', projectsRoutes);
 app.route('/api/projects/:projectId/sources', sourcesRoutes);
 app.route('/api/projects/:projectId/document', editorRoutes);
 app.route('/api/projects/:projectId/document/feedback', feedbackRoutes);
+app.route('/api/projects/:projectId/share-link', shareLinkRoutes);
+app.route('/api/shared', sharedRoutes);
 
 app.get('/api/health', async (c) => {
   // Deliberately not closed: one connection per request against Supabase's

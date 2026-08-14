@@ -1,4 +1,5 @@
 import type { Db } from '../db/client';
+import { countShareLinkLookupsSince, recordShareLinkLookup } from '../db/queries/share-link-lookups';
 import { countSuggestionRequestsSince, recordSuggestionRequest } from '../db/queries/suggestion-requests';
 import { AppError } from '../../middleware/errors';
 
@@ -30,4 +31,34 @@ export async function assertWithinSuggestionRateLimit(db: Db, params: { userId: 
 // attempts, so a burst of failing calls must still trip it.
 export async function recordSuggestionRequestHit(db: Db, params: { userId: string }): Promise<void> {
   await recordSuggestionRequest(db, params);
+}
+
+// Secondary layer behind the share-link token's own entropy (docs/security.md's
+// "Share-link brute force/leak" threat note lists "rate-limit lookups"
+// alongside entropy and revocation) -- generous enough that visitors behind a
+// shared/NAT'd IP legitimately reloading a paper don't get caught, but tight
+// enough to meaningfully slow a scripted scan of the token space.
+const SHARE_LINK_LOOKUP_WINDOW_MS = 60_000;
+const MAX_SHARE_LINK_LOOKUPS_PER_WINDOW = 30;
+
+export async function assertWithinShareLinkLookupRateLimit(db: Db, params: { ipAddress: string; now: Date }): Promise<void> {
+  const since = new Date(params.now.getTime() - SHARE_LINK_LOOKUP_WINDOW_MS);
+  const count = await countShareLinkLookupsSince(db, { ipAddress: params.ipAddress, since });
+  if (count >= MAX_SHARE_LINK_LOOKUPS_PER_WINDOW) {
+    const retryAfterSeconds = Math.ceil(SHARE_LINK_LOOKUP_WINDOW_MS / 1000);
+    throw new AppError(
+      429,
+      'rate_limited',
+      'Too many share link requests. Please slow down and try again shortly.',
+      { retry_after: retryAfterSeconds },
+      { 'Retry-After': String(retryAfterSeconds) },
+    );
+  }
+}
+
+// Recorded for every lookup attempt regardless of outcome (unknown/revoked/
+// valid token) -- same reasoning as recordSuggestionRequestHit: the limit
+// caps attempts, so a scan of invalid tokens must still trip it.
+export async function recordShareLinkLookupHit(db: Db, params: { ipAddress: string }): Promise<void> {
+  await recordShareLinkLookup(db, params);
 }
