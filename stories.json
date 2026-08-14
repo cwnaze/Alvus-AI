@@ -747,7 +747,7 @@
       "dependsOn": [
         "US-022"
       ],
-      "status": "in_progress",
+      "status": "pending",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -761,7 +761,7 @@
         ]
       },
       "demo": "docs/demos/US-023.md",
-      "branch": "feature/us-023-stripe-checkout-and-billing-portal",
+      "branch": null,
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,
