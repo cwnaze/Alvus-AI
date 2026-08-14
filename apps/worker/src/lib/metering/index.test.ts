@@ -1,14 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppError } from '../../middleware/errors';
 
-const { getMonthlyLimit, sumUsage, recordUsageEvent } = vi.hoisted(() => ({
+const { getMonthlyLimit, sumUsage, recordUsageEvent, getSubscriptionByUserId } = vi.hoisted(() => ({
   getMonthlyLimit: vi.fn(),
   sumUsage: vi.fn(),
   recordUsageEvent: vi.fn(),
+  getSubscriptionByUserId: vi.fn(),
 }));
 
 vi.mock('../db/queries/tier-limits', () => ({ getMonthlyLimit }));
 vi.mock('../db/queries/usage', () => ({ sumUsage, recordUsageEvent }));
+vi.mock('../db/queries/subscriptions', () => ({ getSubscriptionByUserId }));
 
 const { assertWithinUsageLimit, checkUsageLimit, currentBillingPeriod, recordUsage, resolveTier } = await import('./index');
 
@@ -17,8 +19,16 @@ const USER_ID = 'user-1';
 const NOW = new Date('2026-03-15T12:00:00Z');
 
 describe('resolveTier', () => {
-  it('is always "free" until billing lands', () => {
-    expect(resolveTier()).toBe('free');
+  beforeEach(() => vi.clearAllMocks());
+
+  it('is "free" when the user has no subscription row', async () => {
+    getSubscriptionByUserId.mockResolvedValueOnce(null);
+    expect(await resolveTier(DB, USER_ID)).toBe('free');
+  });
+
+  it('reads the tier off the subscription row when one exists', async () => {
+    getSubscriptionByUserId.mockResolvedValueOnce({ tier: 'plus' });
+    expect(await resolveTier(DB, USER_ID)).toBe('plus');
   });
 });
 
@@ -35,6 +45,7 @@ describe('currentBillingPeriod', () => {
 describe('checkUsageLimit', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    getSubscriptionByUserId.mockResolvedValue(null);
   });
 
   it('allows the action when usage is under the limit', async () => {
@@ -65,6 +76,7 @@ describe('checkUsageLimit', () => {
 describe('assertWithinUsageLimit', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    getSubscriptionByUserId.mockResolvedValue(null);
   });
 
   it('resolves silently when within the limit', async () => {

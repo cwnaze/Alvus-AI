@@ -28,6 +28,9 @@ type Bindings = {
   LITELLM_BASE_URL?: string;
   LITELLM_API_KEY?: string;
   LITELLM_MODEL?: string;
+  STRIPE_SECRET_KEY: string;
+  STRIPE_PRICE_ID_PLUS: string;
+  STRIPE_PRICE_ID_PRO: string;
 };
 
 const app = new Hono<{ Bindings: Bindings; Variables: ErrorVariables & AuthVariables }>();

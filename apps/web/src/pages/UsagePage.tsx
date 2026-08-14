@@ -1,7 +1,8 @@
-import type { BillingStatusResponse, MeteredAction, Tier } from '@alvus-ai/shared';
+import type { BillingStatusResponse, MeteredAction, PaidTier, Tier } from '@alvus-ai/shared';
+import { PAID_TIERS } from '@alvus-ai/shared';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ApiError, fetchBillingStatus } from '../lib/api';
+import { Link, useSearchParams } from 'react-router-dom';
+import { ApiError, createCheckoutSession, createPortalSession, fetchBillingStatus } from '../lib/api';
 import { useAuth } from '../lib/AuthContext';
 
 const TIER_LABELS: Record<Tier, string> = { free: 'Free', plus: 'Plus', pro: 'Pro' };
@@ -38,24 +39,62 @@ function UsageRow({ action, used, limit }: { action: MeteredAction; used: number
 
 export default function UsagePage() {
   const auth = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [status, setStatus] = useState<BillingStatusResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [billingError, setBillingError] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] = useState<PaidTier | 'portal' | null>(null);
+  const [justUpgraded, setJustUpgraded] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
+    const sessionId = searchParams.get('session_id');
     async function load() {
       try {
-        const res = await fetchBillingStatus();
-        if (!cancelled) setStatus(res);
+        const res = await fetchBillingStatus(sessionId);
+        if (!cancelled) {
+          setStatus(res);
+          if (sessionId) setJustUpgraded(true);
+        }
       } catch (err) {
         if (!cancelled) setError(err instanceof ApiError ? err.message : 'Failed to load usage.');
+      } finally {
+        // Strip session_id from the URL either way -- a refresh must not
+        // re-confirm (Stripe rejects retrieving an already-consumed intent
+        // in some flows) or re-show the success banner.
+        if (sessionId && !cancelled) setSearchParams({}, { replace: true });
       }
     }
     load();
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount; session_id is read from the URL at that moment only
   }, []);
+
+  async function handleUpgrade(tier: PaidTier) {
+    setBillingError(null);
+    setPendingAction(tier);
+    try {
+      const { url } = await createCheckoutSession(tier);
+      window.location.assign(url);
+    } catch (err) {
+      setBillingError(err instanceof ApiError ? err.message : 'Failed to start checkout.');
+      setPendingAction(null);
+    }
+  }
+
+  async function handleManageBilling() {
+    setBillingError(null);
+    setPendingAction('portal');
+    try {
+      const { url } = await createPortalSession();
+      window.location.assign(url);
+    } catch (err) {
+      setBillingError(err instanceof ApiError ? err.message : 'Failed to open the billing portal.');
+      setPendingAction(null);
+    }
+  }
 
   return (
     <main className="min-h-screen bg-white text-slate-900">
@@ -81,6 +120,18 @@ export default function UsagePage() {
           </p>
         )}
 
+        {billingError && (
+          <p role="alert" data-testid="billing-error" className="text-sm text-red-600">
+            {billingError}
+          </p>
+        )}
+
+        {justUpgraded && (
+          <p role="status" data-testid="checkout-success" className="text-sm text-green-700">
+            Your subscription is active.
+          </p>
+        )}
+
         {status === null ? (
           !error && <p>Loading…</p>
         ) : (
@@ -88,6 +139,33 @@ export default function UsagePage() {
             <div data-testid="usage-tier" className="rounded border border-slate-200 px-4 py-3">
               <span className="text-sm text-slate-600">Current plan</span>
               <p className="text-lg font-medium">{TIER_LABELS[status.tier]}</p>
+            </div>
+
+            <div className="flex flex-col gap-3 rounded border border-slate-200 px-4 py-3">
+              <span className="text-sm text-slate-600">Billing</span>
+              <div className="flex flex-wrap gap-2">
+                {PAID_TIERS.filter((tier) => tier !== status.tier).map((tier) => (
+                  <button
+                    key={tier}
+                    data-testid={`upgrade-${tier}`}
+                    onClick={() => handleUpgrade(tier)}
+                    disabled={pendingAction !== null}
+                    className="rounded bg-brand px-3 py-1 text-sm text-white disabled:opacity-50"
+                  >
+                    {pendingAction === tier ? 'Redirecting…' : `Upgrade to ${TIER_LABELS[tier]}`}
+                  </button>
+                ))}
+                {status.subscription_status !== null && (
+                  <button
+                    data-testid="manage-billing"
+                    onClick={() => handleManageBilling()}
+                    disabled={pendingAction !== null}
+                    className="rounded border border-slate-300 px-3 py-1 text-sm disabled:opacity-50"
+                  >
+                    {pendingAction === 'portal' ? 'Redirecting…' : 'Manage billing'}
+                  </button>
+                )}
+              </div>
             </div>
 
             <ul className="flex flex-col gap-3">

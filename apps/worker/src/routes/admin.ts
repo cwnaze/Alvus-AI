@@ -33,9 +33,10 @@ function toWaitlistEntry(row: WaitlistSignupRow): WaitlistEntry {
   };
 }
 
-// There is no `subscriptions` table yet (that's US-023/024's Stripe billing
-// work per docs/data-model.md) -- until then no account can be on a paid
-// plan, so every user is on `free` by definition.
+// The `subscriptions` table exists (US-023), but the admin directory isn't
+// wired to it yet -- out of this story's scope (checkout/portal for the
+// account's own owner, not admin-facing tier display). Every user still
+// shows as `free` here regardless of their actual tier.
 function toAdminUser(row: UserRow): AdminUser {
   return {
     id: row.id,

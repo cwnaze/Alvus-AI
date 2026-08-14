@@ -3,7 +3,9 @@ import { createClient } from '@supabase/supabase-js';
 import { and, eq } from 'drizzle-orm';
 import { createDb } from '../apps/worker/src/lib/db/client';
 import { tierLimits, usageEvents, users, waitlistSignups } from '../apps/worker/src/lib/db/schema';
+import { getSubscriptionByUserId, upsertSubscription } from '../apps/worker/src/lib/db/queries/subscriptions';
 import { currentBillingPeriod } from '../apps/worker/src/lib/metering';
+import { createStripeClient } from '../apps/worker/src/lib/stripe/client';
 import { findAuthUserIdByEmail } from './lib/find-auth-user-id';
 
 // Never run against a production database by accident. This is the only environment
@@ -23,6 +25,12 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
 if (!supabaseUrl || !supabaseSecretKey) {
   throw new Error('SUPABASE_URL and SUPABASE_SECRET_KEY are required (see .env.example)');
+}
+
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const stripePriceIdPlus = process.env.STRIPE_PRICE_ID_PLUS;
+if (!stripeSecretKey || !stripePriceIdPlus) {
+  throw new Error('STRIPE_SECRET_KEY and STRIPE_PRICE_ID_PLUS are required (see .env.example)');
 }
 
 // Public, synthetic fixture credential for @example.test accounts on non-production
@@ -56,6 +64,12 @@ const FIXTURE_USERS: Array<{
   // "hit a usage limit" demo doesn't have to burn 5 real analyses through the
   // UI to get there (docs/testing.md).
   { key: 'free-tier-at-limit', email: 'free-tier-at-limit@example.test', status: 'approved', role: 'member' },
+  // A real Stripe test-mode customer + active subscription (see
+  // seedPaidTierSubscription) -- exercises the Billing Portal and
+  // duplicate-checkout-guard demos against a genuine `subscriptions` row
+  // rather than a hand-inserted one, per docs/testing.md's "paid-tier
+  // (fixture Stripe IDs)" fixture.
+  { key: 'paid-tier', email: 'paid-tier@example.test', status: 'approved', role: 'member' },
 ];
 
 const FREE_TIER_SOURCE_ANALYSIS_LIMIT = 5;
@@ -143,10 +157,56 @@ async function seedUsageAtLimit() {
   console.log(`Seeded usage_events for "free-tier-at-limit" at the free tier's ${FREE_TIER_SOURCE_ANALYSIS_LIMIT}/mo source_analysis cap.`);
 }
 
+// Real Stripe test-mode customer + active Plus subscription (see
+// docs/testing.md's "Stripe: Checkout Session creation is a real test-mode
+// call" mocking boundary -- the same applies to fixture setup, so the
+// Billing Portal and duplicate-checkout-guard demos exercise a genuine
+// `subscriptions` row, not a hand-inserted one). Idempotent: does nothing if
+// this user already has a Stripe subscription id recorded.
+async function seedPaidTierSubscription() {
+  const authUserId = await ensureAuthUser('paid-tier@example.test');
+  const existing = await getSubscriptionByUserId(db, authUserId);
+  if (existing?.stripeSubscriptionId) {
+    console.log('Seeded subscription for "paid-tier" already exists -- skipping Stripe calls.');
+    return;
+  }
+
+  const stripe = createStripeClient(stripeSecretKey as string);
+
+  const found = await stripe.customers.search({ query: "email:'paid-tier@example.test'" });
+  const customer = found.data[0] ?? (await stripe.customers.create({ email: 'paid-tier@example.test', metadata: { fixture: 'alvus-ai-seed' } }));
+
+  const existingSubs = await stripe.subscriptions.list({ customer: customer.id, status: 'active', limit: 1 });
+  let subscription = existingSubs.data[0];
+  if (!subscription) {
+    const paymentMethod = await stripe.paymentMethods.attach('pm_card_visa', { customer: customer.id });
+    await stripe.customers.update(customer.id, { invoice_settings: { default_payment_method: paymentMethod.id } });
+    subscription = await stripe.subscriptions.create({
+      customer: customer.id,
+      items: [{ price: stripePriceIdPlus as string }],
+    });
+  }
+
+  const item = subscription.items.data[0];
+  await upsertSubscription(db, {
+    userId: authUserId,
+    tier: 'plus',
+    stripeCustomerId: customer.id,
+    stripeSubscriptionId: subscription.id,
+    status: subscription.status === 'active' ? 'active' : 'incomplete',
+    currentPeriodStart: new Date(item.current_period_start * 1000),
+    currentPeriodEnd: new Date(item.current_period_end * 1000),
+    cancelAtPeriodEnd: subscription.cancel_at_period_end,
+  });
+
+  console.log(`Seeded a Stripe test-mode subscription for "paid-tier" (customer ${customer.id}, subscription ${subscription.id}).`);
+}
+
 async function main() {
   await seedTierLimits();
   await seedFixtureUsers();
   await seedUsageAtLimit();
+  await seedPaidTierSubscription();
 }
 
 main()
