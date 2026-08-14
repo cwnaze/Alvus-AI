@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { decryptShareToken, encryptShareToken, generateShareToken, hashShareToken } from './token';
 
-const SECRET_HEX = '1af1819ce0454b073a627c4690f7d71431d762225ada33a42989a0c64f304021';
+// Deliberately low-entropy so secret scanning can tell a fixture from a real
+// key. Nothing here depends on randomness — it only has to be 32 valid hex
+// bytes and differ from the wrong-key case below.
+const SECRET_HEX = 'ab'.repeat(32);
 
 describe('generateShareToken', () => {
   it('returns a 256-bit (64 hex char) random token', () => {
