@@ -814,7 +814,7 @@
       "dependsOn": [
         "US-019"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -828,7 +828,7 @@
         ]
       },
       "demo": "docs/demos/US-025.md",
-      "branch": null,
+      "branch": "feature/us-025-read-only-share-link",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,
