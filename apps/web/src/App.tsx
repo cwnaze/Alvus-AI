@@ -8,6 +8,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import LoginPage from './pages/LoginPage';
 import ProjectPage from './pages/ProjectPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import SharedPaperPage from './pages/SharedPaperPage';
 import SignupPage from './pages/SignupPage';
 import StatusScreen from './pages/StatusScreen';
 import UsagePage from './pages/UsagePage';
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/shared/:token" element={<SharedPaperPage />} />
           <Route
             path="/admin/waitlist"
             element={

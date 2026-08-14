@@ -1,13 +1,16 @@
-import type { BibliographyEntry, CitationFormat, OaStatus, Project, SourceAnalysis, SourceCandidate } from '@alvus-ai/shared';
+import type { BibliographyEntry, CitationFormat, OaStatus, Project, ShareLinkResponse, SourceAnalysis, SourceCandidate } from '@alvus-ai/shared';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   analyzeSource,
   ApiError,
+  createShareLink,
   deselectSource,
   fetchBibliography,
   fetchProject,
+  fetchShareLink,
   rejectSource,
+  revokeShareLink,
   searchSources,
   selectSource,
   uploadSource,
@@ -284,6 +287,100 @@ function BibliographyEntryRow({
   );
 }
 
+// A link is loaded lazily and starts `null` (loading); a 404 from the fetch
+// means no active link exists yet, represented as `'none'` rather than kept
+// as an error -- that's the expected steady state for most projects.
+function ShareLinkPanel({ projectId }: { projectId: string }) {
+  const [link, setLink] = useState<ShareLinkResponse | 'none' | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchShareLink(projectId)
+      .then((res) => {
+        if (!cancelled) setLink(res);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        if (err instanceof ApiError && err.status === 404) setLink('none');
+        else setError(err instanceof ApiError ? err.message : 'Failed to load the share link.');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
+  async function handleGenerate() {
+    setBusy(true);
+    setError(null);
+    try {
+      setLink(await createShareLink(projectId));
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to create a share link.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleRevoke() {
+    setBusy(true);
+    setError(null);
+    try {
+      await revokeShareLink(projectId);
+      setLink('none');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to revoke the share link.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="rounded border border-slate-200 p-4">
+      <h2 className="text-sm font-medium text-slate-700">Share</h2>
+      {error && (
+        <p role="alert" className="mt-2 text-sm text-red-600">
+          {error}
+        </p>
+      )}
+      {link === null ? (
+        <p className="mt-2 text-sm text-slate-500">Loading…</p>
+      ) : link === 'none' ? (
+        <button
+          type="button"
+          onClick={handleGenerate}
+          disabled={busy}
+          data-testid="generate-share-link"
+          className="mt-2 rounded bg-brand px-4 py-2 text-sm text-white disabled:opacity-50"
+        >
+          {busy ? 'Generating…' : 'Get a read-only share link'}
+        </button>
+      ) : (
+        <div className="mt-2 flex flex-col gap-2">
+          <input
+            type="text"
+            readOnly
+            value={link.url}
+            data-testid="share-link-url"
+            onFocus={(e) => e.currentTarget.select()}
+            className="rounded border border-slate-300 px-3 py-2 text-sm"
+          />
+          <button
+            type="button"
+            onClick={handleRevoke}
+            disabled={busy}
+            data-testid="revoke-share-link"
+            className="w-fit rounded border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-50"
+          >
+            {busy ? 'Revoking…' : 'Revoke link'}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ProjectPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const [project, setProject] = useState<Project | null>(null);
@@ -424,6 +521,8 @@ export default function ProjectPage() {
         )}
 
         {projectId && <UploadSourceForm projectId={projectId} onUploaded={refreshBibliography} />}
+
+        {projectId && <ShareLinkPanel projectId={projectId} />}
 
         {candidates !== null && candidates.length === 0 && (
           <div className="flex flex-col items-center gap-3 py-16 text-center">
