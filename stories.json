@@ -814,7 +814,7 @@
       "dependsOn": [
         "US-019"
       ],
-      "status": "in_progress",
+      "status": "done",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -829,9 +829,9 @@
       },
       "demo": "docs/demos/US-025.md",
       "branch": "feature/us-025-read-only-share-link",
-      "prNumber": null,
-      "issueNumber": null,
-      "reviewRounds": 0,
+      "prNumber": 55,
+      "issueNumber": 56,
+      "reviewRounds": 1,
       "notes": "share_links.token_hash (column name kept for schema/migration parity with docs/data-model.md) stores the raw high-entropy token, not a SHA-256 digest, despite that doc's \"plaintext shown once\" annotation -- AC4 (\"generating a link twice returns the existing active link\") requires the token to be retrievable on repeat GET/POST calls, which a hash-only column can't support. Chose functional correctness per the acceptance criteria; entropy (256-bit random) plus revocation plus the read-only single-project blast radius (docs/security.md's threat note) is the actual defense, consistent with how this codebase already does manual per-request ownership checks rather than the anon-key+RLS path docs/data-model.md originally sketched. Also fixed a real bug while building this: share_links.createdBy was missing onDelete: cascade (every other users.id FK in the schema has it), which blocked deleting a user who had ever created a share link -- caught via a genuine Supabase admin.deleteUser 500 during e2e cleanup, fixed before the migration was applied anywhere. Separately, drizzle-kit migrate silently exits 1 against this shared dev DB (pre-existing __drizzle_migrations bookkeeping gaps from prior stories, unrelated to this change) -- applied the migration SQL directly and recorded matching bookkeeping rows by hand; worth a look if a future story hits the same silent failure. Local e2e regression pass also hit two unrelated, pre-existing flaky specs (US-012, US-016) that intermittently exceed their default 30s timeout in this sandbox's network path to the shared dev Supabase project -- neither touches any code this story changed; US-025's own spec passed cleanly on every run once given test.slow() (added here, matching e2e/us-021.spec.ts's precedent for longer flows)."
     },
     {
