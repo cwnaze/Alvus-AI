@@ -6,7 +6,8 @@
   "workspaces": [
     "apps/web",
     "apps/worker",
-    "packages/shared"
+    "packages/shared",
+    "tests/rls"
   ],
   "scripts": {
     "dev": "wrangler dev --env-file .env",
