@@ -12,6 +12,7 @@ export default function SharedPaperPage() {
   const { token } = useParams<{ token: string }>();
   const [paper, setPaper] = useState<SharedPaperResponse | null>(null);
   const [invalid, setInvalid] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -23,6 +24,7 @@ export default function SharedPaperPage() {
       .catch((err) => {
         if (cancelled) return;
         if (err instanceof ApiError && (err.status === 404 || err.status === 410)) setInvalid(true);
+        else setError(err instanceof ApiError ? err.message : 'Failed to load this paper.');
       });
     return () => {
       cancelled = true;
@@ -34,6 +36,16 @@ export default function SharedPaperPage() {
       <main className="flex min-h-screen items-center justify-center bg-white text-slate-900">
         <p data-testid="share-link-invalid" className="text-slate-600">
           This link no longer works.
+        </p>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-white text-slate-900">
+        <p role="alert" data-testid="share-link-error" className="text-red-600">
+          {error}
         </p>
       </main>
     );

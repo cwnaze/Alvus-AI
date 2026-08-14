@@ -294,6 +294,7 @@ function ShareLinkPanel({ projectId }: { projectId: string }) {
   const [link, setLink] = useState<ShareLinkResponse | 'none' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -320,6 +321,17 @@ function ShareLinkPanel({ projectId }: { projectId: string }) {
       setError(err instanceof ApiError ? err.message : 'Failed to create a share link.');
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function handleCopy() {
+    if (link === null || link === 'none') return;
+    try {
+      await navigator.clipboard.writeText(link.url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setError('Failed to copy the share link.');
     }
   }
 
@@ -366,15 +378,25 @@ function ShareLinkPanel({ projectId }: { projectId: string }) {
             onFocus={(e) => e.currentTarget.select()}
             className="rounded border border-slate-300 px-3 py-2 text-sm"
           />
-          <button
-            type="button"
-            onClick={handleRevoke}
-            disabled={busy}
-            data-testid="revoke-share-link"
-            className="w-fit rounded border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-50"
-          >
-            {busy ? 'Revoking…' : 'Revoke link'}
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handleCopy}
+              data-testid="copy-share-link"
+              className="w-fit rounded border border-slate-300 px-3 py-1.5 text-sm"
+            >
+              {copied ? 'Copied!' : 'Copy link'}
+            </button>
+            <button
+              type="button"
+              onClick={handleRevoke}
+              disabled={busy}
+              data-testid="revoke-share-link"
+              className="w-fit rounded border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-50"
+            >
+              {busy ? 'Revoking…' : 'Revoke link'}
+            </button>
+          </div>
         </div>
       )}
     </div>
