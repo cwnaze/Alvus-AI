@@ -747,7 +747,7 @@
       "dependsOn": [
         "US-022"
       ],
-      "status": "in_progress",
+      "status": "needs_human",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -763,9 +763,9 @@
       "demo": "docs/demos/US-023.md",
       "branch": "feature/us-023-stripe-checkout-and-billing-portal",
       "prNumber": null,
-      "issueNumber": null,
+      "issueNumber": 54,
       "reviewRounds": 0,
-      "notes": ""
+      "notes": "Fully implemented on the branch (subscriptions table, checkout-session/portal-session/status routes, usage-page UI, real Stripe test-mode paid-tier fixture) and verified end-to-end against the real shared dev DB/Supabase/Stripe -- status, portal-session, and the 409 duplicate-checkout guard all work. Blocked only on Stripe Checkout Session creation itself, which 502s because the Stripe test account has never had a business/account name set; that field can only be written with a live Stripe key or a Dashboard login, neither of which this pipeline has. See issue #54 for the exact fix and how to resume. All 13 previously-done stories' demo specs still pass against the current code."
     },
     {
       "id": "US-024",
