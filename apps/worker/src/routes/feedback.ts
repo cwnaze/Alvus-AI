@@ -7,6 +7,7 @@ import { createFeedbackPass, getFeedbackPassById, listFeedbackPasses, type Feedb
 import { isEmptyDocument } from '../lib/document/citations';
 import { extractPlainText, locateQuote } from '../lib/document/feedback-anchors';
 import { assertWithinUsageLimit, recordUsage } from '../lib/metering';
+import { assertWithinAiRateLimit, recordAiRateLimitHit } from '../lib/rate-limit';
 import { authenticate, requireApproved, type AuthBindings, type AuthVariables } from '../middleware/auth';
 import { AppError } from '../middleware/errors';
 import { loadOwnedProject } from './projects';
@@ -42,6 +43,8 @@ feedback.post('/', async (c) => {
 
   const now = new Date();
   await assertWithinUsageLimit(db, { userId: authUser.id, actionType: 'feedback_pass', now });
+  await assertWithinAiRateLimit(db, { userId: authUser.id, actionType: 'feedback_pass', now });
+  await recordAiRateLimitHit(db, { userId: authUser.id, actionType: 'feedback_pass' });
 
   const extracted = extractPlainText(docContent);
 

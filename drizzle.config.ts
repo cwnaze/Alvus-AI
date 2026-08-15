@@ -26,6 +26,8 @@ export default defineConfig({
     './apps/worker/src/lib/db/schema/usage-events.ts',
     './apps/worker/src/lib/db/schema/suggestion-requests.ts',
     './apps/worker/src/lib/db/schema/subscriptions.ts',
+    './apps/worker/src/lib/db/schema/auth-rate-limit-attempts.ts',
+    './apps/worker/src/lib/db/schema/ai-rate-limit-attempts.ts',
   ],
   out: './drizzle/migrations',
   dbCredentials: {

@@ -2,6 +2,7 @@ import type { AuthUser, LoginResponse, RefreshResponse } from '@alvus-ai/shared'
 import { Hono } from 'hono';
 import { createDb } from '../lib/db/client';
 import { createPendingUser, getUserById, type UserRow } from '../lib/db/queries/waitlist';
+import { assertWithinAuthRateLimit, recordAuthRateLimitHit } from '../lib/rate-limit';
 import { createSupabaseAdmin } from '../lib/supabase/client';
 import { authenticate, extractBearerToken, type AuthBindings, type AuthVariables } from '../middleware/auth';
 import { AppError } from '../middleware/errors';
@@ -35,6 +36,11 @@ auth.post('/signup', async (c) => {
     throw new AppError(400, 'invalid_password', `Password must be at least ${MIN_PASSWORD_LENGTH} characters`);
   }
 
+  const db = createDb(c.env.DATABASE_URL);
+  const ipAddress = c.req.header('CF-Connecting-IP') ?? 'unknown';
+  await assertWithinAuthRateLimit(db, { ipAddress, endpoint: 'signup', now: new Date() });
+  await recordAuthRateLimitHit(db, { ipAddress, endpoint: 'signup' });
+
   const supabase = createSupabaseAdmin(c.env.SUPABASE_URL, c.env.SUPABASE_SECRET_KEY);
   const { data, error } = await supabase.auth.admin.createUser({ email, password, email_confirm: true });
   if (error || !data.user) {
@@ -44,7 +50,6 @@ auth.post('/signup', async (c) => {
     throw new AppError(400, 'signup_failed', error?.message ?? 'Could not create account');
   }
 
-  const db = createDb(c.env.DATABASE_URL);
   try {
     await createPendingUser(db, { id: data.user.id, email });
   } catch (err) {
@@ -62,13 +67,17 @@ auth.post('/login', async (c) => {
   const { email, password } = await parseCredentials(c);
   if (!email || !password) throw new AppError(401, 'invalid_credentials', 'Invalid email or password');
 
+  const db = createDb(c.env.DATABASE_URL);
+  const ipAddress = c.req.header('CF-Connecting-IP') ?? 'unknown';
+  await assertWithinAuthRateLimit(db, { ipAddress, endpoint: 'login', now: new Date() });
+  await recordAuthRateLimitHit(db, { ipAddress, endpoint: 'login' });
+
   const supabase = createSupabaseAdmin(c.env.SUPABASE_URL, c.env.SUPABASE_SECRET_KEY);
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error || !data.session || !data.user) {
     throw new AppError(401, 'invalid_credentials', 'Invalid email or password');
   }
 
-  const db = createDb(c.env.DATABASE_URL);
   const userRow = await getUserById(db, data.user.id);
   if (!userRow) throw new AppError(401, 'invalid_credentials', 'Invalid email or password');
 
@@ -112,6 +121,11 @@ auth.post('/logout', authenticate, async (c) => {
 auth.post('/password-reset/request', async (c) => {
   const body = (await c.req.json().catch(() => null)) as { email?: unknown } | null;
   const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
+
+  const db = createDb(c.env.DATABASE_URL);
+  const ipAddress = c.req.header('CF-Connecting-IP') ?? 'unknown';
+  await assertWithinAuthRateLimit(db, { ipAddress, endpoint: 'password_reset_request', now: new Date() });
+  await recordAuthRateLimitHit(db, { ipAddress, endpoint: 'password_reset_request' });
 
   // Only ever attempt the Supabase call for a well-formed address, but return
   // the exact same 202 regardless of format, existence, or delivery outcome --

@@ -27,6 +27,7 @@ import {
 } from '../lib/db/queries/sources';
 import { EmptyExtractionError, extractTextFromFile, UnparseableFileError, type UploadMimeType } from '../lib/files';
 import { assertWithinUsageLimit, recordUsage } from '../lib/metering';
+import { assertWithinAiRateLimit, recordAiRateLimitHit } from '../lib/rate-limit';
 import { searchSources } from '../lib/sources';
 import { StorageError, uploadSourceFile } from '../lib/storage';
 import { createSupabaseAdmin } from '../lib/supabase/client';
@@ -291,6 +292,8 @@ sources.post('/upload', async (c) => {
 
   const now = new Date();
   await assertWithinUsageLimit(db, { userId: authUser.id, actionType: 'source_analysis', now });
+  await assertWithinAiRateLimit(db, { userId: authUser.id, actionType: 'source_analysis', now });
+  await recordAiRateLimitHit(db, { userId: authUser.id, actionType: 'source_analysis' });
 
   const effectiveTitle = requestedTitle ?? titleForUploadedFile({ title: null, originalFilename: file.name });
 
@@ -423,6 +426,8 @@ sources.post('/:sourceId/analyze', async (c) => {
 
   const now = new Date();
   await assertWithinUsageLimit(db, { userId: authUser.id, actionType: 'source_analysis', now });
+  await assertWithinAiRateLimit(db, { userId: authUser.id, actionType: 'source_analysis', now });
+  await recordAiRateLimitHit(db, { userId: authUser.id, actionType: 'source_analysis' });
 
   let result;
   try {
