@@ -17,8 +17,8 @@ export DATABASE_URL
 node e2e/demo-command.mjs US-026 "RLS integration test suite (deny-by-default across roles)" \
   --step "Confirm the local Supabase Postgres service is reachable" \
     "psql $DATABASE_URL -c 'select 1;'" \
-  --step "Apply the RLS-enabling migration (supabase/migrations -- idempotent)" \
-    "npx supabase db push --db-url \"$DATABASE_URL\" --yes" \
+  --step "Apply the RLS-enabling migration (drizzle/migrations -- idempotent)" \
+    "npx drizzle-kit migrate" \
   --step "Confirm every public table has row-level security enabled" \
     "psql $DATABASE_URL -c \"select relname as table, relrowsecurity as rls_enabled from pg_class where relnamespace = 'public'::regnamespace and relkind = 'r' order by relname;\"" \
   --step "The lint/test step: fails the build the moment a table ships without RLS" \

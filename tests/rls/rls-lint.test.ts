@@ -27,7 +27,7 @@ describe('Every public table ships with RLS enabled', () => {
     const withoutRls = rows.filter((r) => !r.relrowsecurity).map((r) => r.relname);
     expect(
       withoutRls,
-      `Tables missing RLS: ${withoutRls.join(', ')} -- add "alter table public.<name> enable row level security;" plus an explicit policy in a new supabase/migrations/*.sql file.`,
+      `Tables missing RLS: ${withoutRls.join(', ')} -- add "alter table public.<name> enable row level security;" plus an explicit policy in a new drizzle/migrations/*.sql file (RLS on public tables belongs in the drizzle chain, which runs after the tables exist -- supabase/migrations is applied by "supabase start" before they do).`,
     ).toEqual([]);
   });
 });

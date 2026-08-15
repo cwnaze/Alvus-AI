@@ -78,6 +78,13 @@
       "when": 1786729884970,
       "tag": "0010_add_share_link_lookups",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1786732800000,
+      "tag": "0011_enable_row_level_security",
+      "breakpoints": true
     }
   ]
 }
