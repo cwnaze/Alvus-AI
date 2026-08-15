@@ -782,7 +782,7 @@
       "dependsOn": [
         "US-023"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -794,7 +794,7 @@
         "specs": []
       },
       "demo": "docs/demos/US-024.md",
-      "branch": null,
+      "branch": "feature/us-024-stripe-webhook-sync",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,
