@@ -782,7 +782,7 @@
       "dependsOn": [
         "US-023"
       ],
-      "status": "in_progress",
+      "status": "done",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -795,9 +795,9 @@
       },
       "demo": "docs/demos/US-024.md",
       "branch": "feature/us-024-stripe-webhook-sync",
-      "prNumber": null,
-      "issueNumber": null,
-      "reviewRounds": 0,
+      "prNumber": 61,
+      "issueNumber": 62,
+      "reviewRounds": 3,
       "notes": "Demoed via signed fixture events POSTed directly to the webhook route (per docs/testing.md), not a browser flow -- there is no user-visible page for webhook delivery itself."
     },
     {

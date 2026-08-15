@@ -97,3 +97,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-15T02:00:00.000Z | US-023 | in_progress | Re-selected per steering resume (issue #1). Confirmed the Stripe blocker in #54 is cleared (POST /v1/checkout/sessions now returns a session url). Rebasing feature/us-023-stripe-checkout-and-billing-portal onto main and renumbering its migration 0008 -> 0012 with a regenerated snapshot.
 2026-08-15T10:51:50.676Z | US-023 | done | PR #59 merged after 1 review round(s)
 2026-08-15T14:56:32.693Z | US-024 | in_progress | Branch feature/us-024-stripe-webhook-sync created; building the Stripe webhook endpoint (checkout.session.completed, customer.subscription.created/updated/deleted, invoice.payment_failed) to keep subscriptions.status/period/cancel_at_period_end in sync with signature verification and a payment-failure grace period before downgrade.
+2026-08-15T18:24:36.436Z | US-024 | done | PR #61 merged after 3 review round(s)
