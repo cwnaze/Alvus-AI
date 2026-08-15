@@ -19,7 +19,13 @@ export type BillingBindings = AuthBindings & {
 type Env = { Bindings: BillingBindings; Variables: AuthVariables };
 
 const billing = new Hono<Env>();
-billing.use('*', authenticate, requireApproved);
+// Scoped to each route explicitly, not '*' -- `index.ts` mounts `billingWebhookRoutes`
+// at this same `/api/billing` base path, and a wildcard here would swallow its
+// unauthenticated `/webhook` route too (Hono matches middleware by compiled path
+// pattern across every router sharing a base path, not by which router added it).
+billing.use('/status', authenticate, requireApproved);
+billing.use('/checkout-session', authenticate, requireApproved);
+billing.use('/portal-session', authenticate, requireApproved);
 
 function priceIdForTier(env: BillingBindings, tier: PaidTier): string {
   return tier === 'plus' ? env.STRIPE_PRICE_ID_PLUS : env.STRIPE_PRICE_ID_PRO;

@@ -37,3 +37,17 @@ describe('GET /api/health', () => {
     consoleError.mockRestore();
   });
 });
+
+describe('POST /api/billing/webhook', () => {
+  // billingRoutes and billingWebhookRoutes are both mounted at '/api/billing' in
+  // this real, composed app -- billing.ts's authenticate/requireApproved middleware
+  // must not leak onto the webhook route just because they share that base path.
+  // Regression coverage for a bug where a `billing.use('*', ...)` wildcard did
+  // exactly that; billing-webhook.test.ts alone can't catch it since it mounts the
+  // webhook router in isolation.
+  it('is reachable without an Authorization header, rejected only by its own signature check', async () => {
+    const res = await app.request('/api/billing/webhook', { method: 'POST', body: '{}' }, { DATABASE_URL: 'unused' });
+    expect(res.status).toBe(400);
+    expect(((await res.json()) as { error: { code: string } }).error.code).toBe('invalid_signature');
+  });
+});
