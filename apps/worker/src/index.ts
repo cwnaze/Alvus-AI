@@ -7,6 +7,7 @@ import { CORRELATION_ID_HEADER, onError, type ErrorVariables } from './middlewar
 import adminRoutes from './routes/admin';
 import authRoutes from './routes/auth';
 import billingRoutes from './routes/billing';
+import billingWebhookRoutes from './routes/billing-webhook';
 import editorRoutes from './routes/editor';
 import feedbackRoutes from './routes/feedback';
 import projectsRoutes from './routes/projects';
@@ -29,6 +30,7 @@ type Bindings = {
   LITELLM_API_KEY?: string;
   LITELLM_MODEL?: string;
   STRIPE_SECRET_KEY: string;
+  STRIPE_WEBHOOK_SECRET: string;
   STRIPE_PRICE_ID_PLUS: string;
   STRIPE_PRICE_ID_PRO: string;
 };
@@ -41,6 +43,7 @@ app.onError(onError);
 app.route('/api/auth', authRoutes);
 app.route('/api/admin', adminRoutes);
 app.route('/api/billing', billingRoutes);
+app.route('/api/billing', billingWebhookRoutes);
 app.route('/api/projects', projectsRoutes);
 app.route('/api/projects/:projectId/sources', sourcesRoutes);
 app.route('/api/projects/:projectId/document', editorRoutes);

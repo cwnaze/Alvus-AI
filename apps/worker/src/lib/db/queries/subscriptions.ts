@@ -57,3 +57,37 @@ export async function upsertSubscription(
   if (!row) throw new Error('upsertSubscription: insert/update returned no row');
   return row;
 }
+
+// Webhook-driven sync (US-024): `customer.subscription.*` events carry no
+// user id, only the Stripe subscription id (the "webhook lookup key" per
+// docs/data-model.md), so this updates in place rather than upserting.
+// A `null` return means no linked row exists yet -- the caller should treat
+// that as a no-op, since `checkout.session.completed`'s own handler creates
+// the row (keyed by user id) independently and will fill it in regardless of
+// event delivery order. `tier: undefined` leaves the stored tier untouched
+// (used when the event's price id doesn't map to a known tier).
+export async function updateSubscriptionByStripeSubscriptionId(
+  db: Db,
+  params: {
+    stripeSubscriptionId: string;
+    tier?: SubscriptionTier;
+    status: SubscriptionStatus;
+    currentPeriodStart: Date;
+    currentPeriodEnd: Date;
+    cancelAtPeriodEnd: boolean;
+  },
+): Promise<SubscriptionRow | null> {
+  const [row] = await db
+    .update(subscriptions)
+    .set({
+      ...(params.tier ? { tier: params.tier } : {}),
+      status: params.status,
+      currentPeriodStart: params.currentPeriodStart,
+      currentPeriodEnd: params.currentPeriodEnd,
+      cancelAtPeriodEnd: params.cancelAtPeriodEnd,
+      updatedAt: new Date(),
+    })
+    .where(eq(subscriptions.stripeSubscriptionId, params.stripeSubscriptionId))
+    .returning();
+  return row ?? null;
+}

@@ -66,6 +66,13 @@ jobs:
           # requires an approval from a real user; otherwise the github-actions
           # bot approves, which satisfies a plain "require approvals" rule.
           GH_TOKEN: ${{ secrets.REVIEWER_TOKEN || secrets.GITHUB_TOKEN }}
+          # ...but the recovery block's `gh issue edit --add-label agent-fix` exists
+          # solely to fire pr-fix, and an issue event actored by GITHUB_TOKEN triggers
+          # nothing — the same constraint the claude step above uses PIPELINE_PAT for.
+          # One identity can't satisfy both rules, so the label edit gets its own.
+          # (Alvus PR #61, 2026-08-15: the fallback requested changes, re-labelled as
+          # github-actions[bot], no pr-fix ran, and the PR sat blocked indefinitely.)
+          ISSUE_TOKEN: ${{ secrets.PIPELINE_PAT }}
           PR: ${{ github.event.pull_request.number || github.event.issue.number }}
         run: |
           set -euo pipefail
@@ -95,7 +102,10 @@ jobs:
               exit 1
             fi
             round=$(echo "$issue" | jq -r '.title' | grep -oE 'round [0-9]+' | grep -oE '[0-9]+' || echo 1)
-            blocking=$(echo "$issue" | jq -r '.body' | awk '/^## Blocking/{f=1;next} /^## /{f=0} f' | grep -c '^- \[' || true)
+            # '^- \[ \]', not '^- \[': on a re-review after pr-fix every finding in the
+            # issue is checked off as '- [x]', and counting those as outstanding makes a
+            # fully-fixed PR score non-zero and take the changes-requested path forever.
+            blocking=$(echo "$issue" | jq -r '.body' | awk '/^## Blocking/{f=1;next} /^## /{f=0} f' | grep -c '^- \[ \]' || true)
             echo "Recovered from issue #$issue_num: round=$round blocking_findings=${blocking:-0}"
             note="(recovered: pr-review omitted its verdict file this run; derived from issue #$issue_num's recorded findings)"
             if [ "${blocking:-0}" -eq 0 ]; then
@@ -103,7 +113,7 @@ jobs:
             elif [ "$round" -lt 3 ]; then
               body=$(echo "$issue" | jq -r '.body')
               printf '%s\n\n---\n_pr-review omitted its verdict file this run; the workflow fallback recovered this as changes-requested and routed it to pr-fix._\n' "$body" \
-                | gh issue edit "$issue_num" --add-label agent-fix --body-file -
+                | GH_TOKEN="${ISSUE_TOKEN:-$GH_TOKEN}" gh issue edit "$issue_num" --add-label agent-fix --body-file -
               gh pr review "$PR" --request-changes --body "Findings in #$issue_num (round $round), routed to pr-fix. $note"
             else
               gh pr edit "$PR" --add-label needs-human || true
