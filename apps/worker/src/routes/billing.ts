@@ -1,31 +1,100 @@
-import type { BillingStatusResponse } from '@alvus-ai/shared';
+import type { BillingStatusResponse, CheckoutSessionResponse, PaidTier, PortalSessionResponse } from '@alvus-ai/shared';
+import { PAID_TIERS } from '@alvus-ai/shared';
 import { Hono } from 'hono';
-import { createDb } from '../lib/db/client';
-import { checkUsageLimit, resolveTier } from '../lib/metering';
+import Stripe from 'stripe';
+import { createDb, type Db } from '../lib/db/client';
+import { getSubscriptionByUserId, upsertSubscription, type SubscriptionStatus } from '../lib/db/queries/subscriptions';
+import { checkUsageLimit } from '../lib/metering';
+import { createStripeClient } from '../lib/stripe/client';
 import { authenticate, requireApproved, type AuthBindings, type AuthVariables } from '../middleware/auth';
 import { AppError } from '../middleware/errors';
 
-type Env = { Bindings: AuthBindings; Variables: AuthVariables };
+export type BillingBindings = AuthBindings & {
+  STRIPE_SECRET_KEY: string;
+  STRIPE_PRICE_ID_PLUS: string;
+  STRIPE_PRICE_ID_PRO: string;
+};
+
+type Env = { Bindings: BillingBindings; Variables: AuthVariables };
 
 const billing = new Hono<Env>();
 billing.use('*', authenticate, requireApproved);
+
+const KNOWN_SUBSCRIPTION_STATUSES: SubscriptionStatus[] = ['active', 'trialing', 'past_due', 'canceled', 'incomplete'];
+
+function priceIdForTier(env: BillingBindings, tier: PaidTier): string {
+  return tier === 'plus' ? env.STRIPE_PRICE_ID_PLUS : env.STRIPE_PRICE_ID_PRO;
+}
+
+function requestOrigin(c: { req: { url: string } }): string {
+  return new URL(c.req.url).origin;
+}
+
+// The success redirect is the only place `subscriptions` gets written until
+// US-024's webhook lands (see docs/data-model.md) -- Stripe is queried
+// directly with the session id the browser was redirected back with, rather
+// than waiting on webhook delivery, which docs/testing.md deliberately never
+// relies on in the automated suite (too async/flaky). A session that fails
+// any check here is silently ignored: `GET /billing/status` just reports
+// whatever the DB already had, same as if `session_id` had never been passed.
+async function confirmCheckoutSession(stripe: Stripe, db: Db, params: { sessionId: string; userId: string }): Promise<void> {
+  let session: Stripe.Checkout.Session;
+  try {
+    session = await stripe.checkout.sessions.retrieve(params.sessionId, { expand: ['subscription'] });
+  } catch {
+    return;
+  }
+  if (session.client_reference_id !== params.userId) return;
+  if (session.payment_status !== 'paid') return;
+
+  const subscription = session.subscription;
+  if (!subscription || typeof subscription === 'string') return;
+  const customerId = typeof session.customer === 'string' ? session.customer : session.customer?.id;
+  if (!customerId) return;
+
+  const tier = session.metadata?.tier;
+  if (tier !== 'plus' && tier !== 'pro') return;
+
+  const item = subscription.items.data[0];
+  if (!item) return;
+  const status: SubscriptionStatus = KNOWN_SUBSCRIPTION_STATUSES.includes(subscription.status as SubscriptionStatus)
+    ? (subscription.status as SubscriptionStatus)
+    : 'active';
+
+  await upsertSubscription(db, {
+    userId: params.userId,
+    tier,
+    stripeCustomerId: customerId,
+    stripeSubscriptionId: subscription.id,
+    status,
+    currentPeriodStart: new Date(item.current_period_start * 1000),
+    currentPeriodEnd: new Date(item.current_period_end * 1000),
+    cancelAtPeriodEnd: subscription.cancel_at_period_end,
+  });
+}
 
 billing.get('/status', async (c) => {
   const authUser = c.get('authUser');
   if (!authUser) throw new AppError(401, 'unauthorized', 'Authentication required');
 
   const db = createDb(c.env.DATABASE_URL);
+
+  const sessionId = c.req.query('session_id');
+  if (sessionId) {
+    const stripe = createStripeClient(c.env.STRIPE_SECRET_KEY);
+    await confirmCheckoutSession(stripe, db, { sessionId, userId: authUser.id });
+  }
+
   const now = new Date();
-  const [sourceAnalysis, feedbackPass] = await Promise.all([
+  const [subscription, sourceAnalysis, feedbackPass] = await Promise.all([
+    getSubscriptionByUserId(db, authUser.id),
     checkUsageLimit(db, { userId: authUser.id, actionType: 'source_analysis', now }),
     checkUsageLimit(db, { userId: authUser.id, actionType: 'feedback_pass', now }),
   ]);
 
   const response: BillingStatusResponse = {
-    tier: resolveTier(),
-    // No `subscriptions` table until Stripe billing lands (US-023/024) -- see
-    // lib/metering's resolveTier for the same reasoning.
-    subscription_status: null,
+    tier: subscription?.tier ?? 'free',
+    subscription_status: subscription?.status ?? null,
     usage: {
       source_analysis: { used: sourceAnalysis.used, limit: sourceAnalysis.limit },
       feedback_pass: { used: feedbackPass.used, limit: feedbackPass.limit },
@@ -34,6 +103,76 @@ billing.get('/status', async (c) => {
     // taking either is fine.
     renews_at: sourceAnalysis.resetsAt,
   };
+  return c.json(response, 200);
+});
+
+billing.post('/checkout-session', async (c) => {
+  const authUser = c.get('authUser');
+  if (!authUser) throw new AppError(401, 'unauthorized', 'Authentication required');
+
+  const body = (await c.req.json().catch(() => null)) as { tier?: unknown } | null;
+  const tier = body?.tier;
+  if (typeof tier !== 'string' || !PAID_TIERS.includes(tier as PaidTier)) {
+    throw new AppError(400, 'invalid_tier', `tier must be one of ${PAID_TIERS.join(', ')}`);
+  }
+
+  const db = createDb(c.env.DATABASE_URL);
+  const subscription = await getSubscriptionByUserId(db, authUser.id);
+  if (subscription && subscription.tier === tier && (subscription.status === 'active' || subscription.status === 'trialing')) {
+    throw new AppError(409, 'already_subscribed', `You are already subscribed to the ${tier} plan`);
+  }
+
+  const stripe = createStripeClient(c.env.STRIPE_SECRET_KEY);
+  const origin = requestOrigin(c);
+  let session: Stripe.Checkout.Session;
+  try {
+    session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      client_reference_id: authUser.id,
+      ...(subscription?.stripeCustomerId ? { customer: subscription.stripeCustomerId } : { customer_email: authUser.email }),
+      line_items: [{ price: priceIdForTier(c.env, tier as PaidTier), quantity: 1 }],
+      metadata: { tier, user_id: authUser.id },
+      success_url: `${origin}/usage?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/usage`,
+    });
+  } catch (err) {
+    if (err instanceof Stripe.errors.StripeError) {
+      throw new AppError(502, 'stripe_error', 'Could not start checkout with Stripe. Please try again later.');
+    }
+    throw err;
+  }
+
+  if (!session.url) throw new AppError(502, 'stripe_error', 'Stripe did not return a Checkout URL');
+  const response: CheckoutSessionResponse = { url: session.url };
+  return c.json(response, 200);
+});
+
+billing.post('/portal-session', async (c) => {
+  const authUser = c.get('authUser');
+  if (!authUser) throw new AppError(401, 'unauthorized', 'Authentication required');
+
+  const db = createDb(c.env.DATABASE_URL);
+  const subscription = await getSubscriptionByUserId(db, authUser.id);
+  if (!subscription?.stripeCustomerId) {
+    throw new AppError(404, 'no_stripe_customer', 'No billing account found -- start a subscription first');
+  }
+
+  const stripe = createStripeClient(c.env.STRIPE_SECRET_KEY);
+  const origin = requestOrigin(c);
+  let session: Stripe.BillingPortal.Session;
+  try {
+    session = await stripe.billingPortal.sessions.create({
+      customer: subscription.stripeCustomerId,
+      return_url: `${origin}/usage`,
+    });
+  } catch (err) {
+    if (err instanceof Stripe.errors.StripeError) {
+      throw new AppError(502, 'stripe_error', 'Could not open the billing portal. Please try again later.');
+    }
+    throw err;
+  }
+
+  const response: PortalSessionResponse = { url: session.url };
   return c.json(response, 200);
 });
 

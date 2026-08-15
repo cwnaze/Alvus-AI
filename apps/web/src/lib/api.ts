@@ -3,12 +3,15 @@ import type {
   AuthUser,
   BibliographyResponse,
   BillingStatusResponse,
+  CheckoutSessionResponse,
   CitationFormat,
   DocumentContent,
   DocumentFormatResponse,
   FeedbackPassResponse,
   FeedbackPassesResponse,
   LoginResponse,
+  PaidTier,
+  PortalSessionResponse,
   Project,
   ProjectDocumentResponse,
   ProjectSource,
@@ -154,8 +157,16 @@ export function revokeUserAccess(userId: string, reason?: string): Promise<{ use
   return request(`/admin/users/${userId}/revoke`, { method: 'POST', body: JSON.stringify({ reason }) });
 }
 
-export function fetchBillingStatus(): Promise<BillingStatusResponse> {
-  return request('/billing/status');
+export function fetchBillingStatus(sessionId?: string | null): Promise<BillingStatusResponse> {
+  return request(`/billing/status${sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : ''}`);
+}
+
+export function createCheckoutSession(tier: PaidTier): Promise<CheckoutSessionResponse> {
+  return request('/billing/checkout-session', { method: 'POST', body: JSON.stringify({ tier }) });
+}
+
+export function createPortalSession(): Promise<PortalSessionResponse> {
+  return request('/billing/portal-session', { method: 'POST', body: JSON.stringify({}) });
 }
 
 export function fetchProjects(cursor?: string | null): Promise<ProjectsResponse> {

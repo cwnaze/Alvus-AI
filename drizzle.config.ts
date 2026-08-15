@@ -25,6 +25,7 @@ export default defineConfig({
     './apps/worker/src/lib/db/schema/share-link-lookups.ts',
     './apps/worker/src/lib/db/schema/usage-events.ts',
     './apps/worker/src/lib/db/schema/suggestion-requests.ts',
+    './apps/worker/src/lib/db/schema/subscriptions.ts',
   ],
   out: './drizzle/migrations',
   dbCredentials: {

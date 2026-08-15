@@ -1,18 +1,17 @@
 import type { Tier } from '@alvus-ai/shared';
 import type { Db } from '../db/client';
+import { getSubscriptionByUserId } from '../db/queries/subscriptions';
 import { getMonthlyLimit } from '../db/queries/tier-limits';
 import { recordUsageEvent, sumUsage, type ActionType } from '../db/queries/usage';
 import { AppError } from '../../middleware/errors';
 
 export type { ActionType } from '../db/queries/usage';
 
-// There is no `subscriptions` table yet (that's US-023/024's Stripe billing
-// work per docs/data-model.md) -- until then no account can be on a paid
-// plan, so every user is on `free` by definition. Same call as
-// routes/admin.ts's `toAdminUser`; once billing lands this becomes a lookup
-// against `subscriptions.tier`.
-export function resolveTier(): Tier {
-  return 'free';
+// No `subscriptions` row means the user has never checked out -- `free` by
+// definition (see schema/subscriptions.ts), not an error condition.
+export async function resolveTier(db: Db, userId: string): Promise<Tier> {
+  const subscription = await getSubscriptionByUserId(db, userId);
+  return subscription?.tier ?? 'free';
 }
 
 // First-of-month UTC, calendar-month for all tiers (docs/data-model.md).
@@ -41,7 +40,7 @@ export async function checkUsageLimit(
   db: Db,
   params: { userId: string; actionType: ActionType; now: Date },
 ): Promise<UsageLimitStatus> {
-  const tier = resolveTier();
+  const tier = await resolveTier(db, params.userId);
   const billingPeriod = currentBillingPeriod(params.now);
   const [limit, used] = await Promise.all([
     getMonthlyLimit(db, { tier, actionType: params.actionType }),

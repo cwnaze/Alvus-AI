@@ -50,7 +50,12 @@ export {
 export {
   METERED_ACTIONS,
   type MeteredAction,
+  PAID_TIERS,
+  type PaidTier,
   type UsageLimitSummary,
   type BillingStatusResponse,
+  type CheckoutSessionRequest,
+  type CheckoutSessionResponse,
+  type PortalSessionResponse,
 } from './billing';
 export { type ShareLinkResponse, type SharedProject, type SharedPaperResponse } from './share-links';

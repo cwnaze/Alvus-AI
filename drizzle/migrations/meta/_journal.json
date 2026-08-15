@@ -85,6 +85,13 @@
       "when": 1786732800000,
       "tag": "0011_enable_row_level_security",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1786787716966,
+      "tag": "0012_burly_makkari",
+      "breakpoints": true
     }
   ]
 }

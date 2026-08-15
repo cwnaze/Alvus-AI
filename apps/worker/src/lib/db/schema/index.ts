@@ -12,3 +12,4 @@ export * from './share-links';
 export * from './share-link-lookups';
 export * from './usage-events';
 export * from './suggestion-requests';
+export * from './subscriptions';
