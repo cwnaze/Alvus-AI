@@ -747,7 +747,7 @@
       "dependsOn": [
         "US-022"
       ],
-      "status": "needs_human",
+      "status": "pending",
       "demoKind": "browser",
       "verification": {
         "commands": [
