@@ -86,13 +86,41 @@ test('US-023: Stripe Checkout and Billing Portal', async ({ page, demo }) => {
   await page.waitForURL(/^https:\/\/checkout\.stripe\.com\//, { timeout: 15_000 });
   await demo.step('Upgrading redirects to a real Stripe test-mode Checkout session');
 
-  await page.getByLabel('Email').fill(DEMO_EMAIL);
-  const cardNumberFrame = page.frameLocator('iframe[title="Secure card number input frame"]');
-  await cardNumberFrame.getByPlaceholder('Card number').fill(TEST_CARD_NUMBER);
-  await page.frameLocator('iframe[title="Secure expiration date input frame"]').getByPlaceholder('MM / YY').fill('12/34');
-  await page.frameLocator('iframe[title="Secure CVC input frame"]').getByPlaceholder('CVC').fill('123');
-  const nameField = page.getByLabel('Cardholder name');
+  // Stripe Link may recognize this fixture email from a prior real
+  // test-mode Checkout run and gate the page behind a "Confirm it's you"
+  // verification-code screen instead of the plain card form. "Pay without
+  // Link" is Stripe's own escape hatch back to a guest checkout -- click it
+  // when present so the flow is deterministic regardless of Link state.
+  const payWithoutLink = page.getByRole('button', { name: 'Pay without Link' });
+  const linkChallengeShown = await payWithoutLink
+    .waitFor({ state: 'visible', timeout: 10_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (linkChallengeShown) {
+    await payWithoutLink.click();
+  }
+  // After dismissing the Link challenge, Stripe sometimes shows the email as
+  // a pre-filled, non-editable value (it already knows it from the Checkout
+  // Session) rather than an empty input -- only fill it when there's an
+  // actual field to fill.
+  await page.getByLabel('Email').fill(DEMO_EMAIL, { timeout: 5_000 }).catch(() => {});
+  // With multiple payment methods on offer (Card/Cash App Pay/Bank), Card's
+  // detail fields are collapsed behind an accordion whose expand control is
+  // an invisible click-catcher overlaying the radio -- force the click past
+  // Playwright's actionability check, which is exactly what a real click
+  // does here since the overlay isn't hit-test-visible either.
+  await page.getByRole('radio', { name: 'Card' }).click({ force: true });
+  // This account's Checkout renders card fields as plain inputs on the page
+  // itself, not inside per-field iframes -- select by id, not by iframe +
+  // placeholder (the placeholder text is "1234 1234 1234 1234", not "Card
+  // number").
+  await page.locator('#cardNumber').fill(TEST_CARD_NUMBER);
+  await page.locator('#cardExpiry').fill('12/34');
+  await page.locator('#cardCvc').fill('123');
+  const nameField = page.locator('#billingName');
   if (await nameField.isVisible().catch(() => false)) await nameField.fill('Demo Account');
+  const zipField = page.locator('#billingPostalCode');
+  if (await zipField.isVisible().catch(() => false)) await zipField.fill('94103');
   await page.getByTestId('hosted-payment-submit-button').click();
 
   await page.waitForURL(/\/usage(\?|$)/, { timeout: 30_000 });
