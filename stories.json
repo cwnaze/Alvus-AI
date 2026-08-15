@@ -851,7 +851,7 @@
         "US-019",
         "US-025"
       ],
-      "status": "in_progress",
+      "status": "done",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -864,9 +864,9 @@
       },
       "demo": "docs/demos/US-026.md",
       "branch": "feature/us-026-rls-integration-test-suite",
-      "prNumber": null,
-      "issueNumber": null,
-      "reviewRounds": 0,
+      "prNumber": 57,
+      "issueNumber": 58,
+      "reviewRounds": 2,
       "notes": ""
     },
     {
