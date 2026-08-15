@@ -95,3 +95,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-15T01:02:02.946Z | US-026 | done | PR #57 merged after 2 review round(s)
 2026-08-15T01:06:43.000Z | US-023 | pending | Reset from needs_human to re-enter the pipeline. The Stripe blocker in #54 is reported cleared by the owner. The full implementation already exists on feature/us-023-stripe-checkout-and-billing-portal and must be rebased, not rewritten: its migration is still 0008, which main now owns through 0011, so it renumbers to 0012 with a regenerated snapshot.
 2026-08-15T02:00:00.000Z | US-023 | in_progress | Re-selected per steering resume (issue #1). Confirmed the Stripe blocker in #54 is cleared (POST /v1/checkout/sessions now returns a session url). Rebasing feature/us-023-stripe-checkout-and-billing-portal onto main and renumbering its migration 0008 -> 0012 with a regenerated snapshot.
+2026-08-15T10:51:50.676Z | US-023 | done | PR #59 merged after 1 review round(s)

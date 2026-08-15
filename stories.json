@@ -747,7 +747,7 @@
       "dependsOn": [
         "US-022"
       ],
-      "status": "in_progress",
+      "status": "done",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -762,9 +762,9 @@
       },
       "demo": "docs/demos/US-023.md",
       "branch": "feature/us-023-stripe-checkout-and-billing-portal",
-      "prNumber": null,
-      "issueNumber": 54,
-      "reviewRounds": 0,
+      "prNumber": 59,
+      "issueNumber": 60,
+      "reviewRounds": 1,
       "notes": "Resuming from needs_human per steering (issue #1 comment 2026-08-15): Stripe blocker in #54 confirmed cleared (POST /v1/checkout/sessions now returns a session url). Rebasing feature/us-023-stripe-checkout-and-billing-portal onto main and renumbering its migration from 0008 to 0012 (main now owns 0008-0011), regenerating the snapshot rather than reusing the stale one."
     },
     {
