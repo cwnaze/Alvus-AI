@@ -17,7 +17,7 @@ export async function confirmCheckoutSession(stripe: Stripe, db: Db, params: { s
   } catch {
     return;
   }
-  if (session.client_reference_id !== params.userId) return;
+  if (session.client_reference_id !== params.userId && session.metadata?.user_id !== params.userId) return;
   if (session.payment_status !== 'paid') return;
 
   const subscription = session.subscription;
