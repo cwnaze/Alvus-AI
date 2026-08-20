@@ -55,7 +55,10 @@ jobs:
           github_token: ${{ secrets.PIPELINE_PAT }}
           prompt: /pr-review
           # See story-start.yml: default action permissions have no Bash access.
-          claude_args: --max-turns 100 --allowedTools "Bash,Edit,Write,Glob,Grep"
+          # `Read` is explicit: without it every file read is a permission denial and
+          # the review has to route around it through `cat`. Reviews on PRs #55, #61
+          # and #63 all ended with a non-zero denial count and no recorded verdict.
+          claude_args: --max-turns 100 --allowedTools "Read,Bash,Edit,Write,Glob,Grep"
 
       - name: Apply the review verdict
         if: always()

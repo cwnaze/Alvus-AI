@@ -18,6 +18,8 @@ const {
   requestFeedbackPass,
   assertWithinUsageLimit,
   recordUsage,
+  assertWithinAiRateLimit,
+  recordAiRateLimitHit,
 } = vi.hoisted(() => ({
   getUser: vi.fn(),
   getUserById: vi.fn(),
@@ -29,6 +31,8 @@ const {
   requestFeedbackPass: vi.fn(),
   assertWithinUsageLimit: vi.fn(),
   recordUsage: vi.fn(),
+  assertWithinAiRateLimit: vi.fn(),
+  recordAiRateLimitHit: vi.fn(),
 }));
 
 vi.mock('../lib/supabase/client', () => ({
@@ -44,6 +48,7 @@ vi.mock('../lib/ai', async (importOriginal) => {
   return { ...actual, requestFeedbackPass };
 });
 vi.mock('../lib/metering', () => ({ assertWithinUsageLimit, recordUsage }));
+vi.mock('../lib/rate-limit', () => ({ assertWithinAiRateLimit, recordAiRateLimitHit }));
 
 const { default: feedbackRoutes } = await import('./feedback');
 
@@ -115,6 +120,8 @@ describe('POST /', () => {
     vi.clearAllMocks();
     assertWithinUsageLimit.mockResolvedValue(undefined);
     recordUsage.mockResolvedValue(undefined);
+    assertWithinAiRateLimit.mockResolvedValue(undefined);
+    recordAiRateLimitHit.mockResolvedValue(undefined);
   });
 
   function post(path: string) {
@@ -183,6 +190,28 @@ describe('POST /', () => {
     expect(res.status).toBe(402);
     expect(((await res.json()) as ErrorEnvelope).error.code).toBe('usage_limit_exceeded');
     expect(requestFeedbackPass).not.toHaveBeenCalled();
+  });
+
+  it('429s with a Retry-After once the per-user AI rate limit is exceeded, never calling the AI', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+    getOrCreateDocument.mockResolvedValueOnce(documentRow());
+    const { AppError } = await import('../middleware/errors');
+    assertWithinAiRateLimit.mockRejectedValueOnce(
+      new AppError(429, 'rate_limited', 'Too many requests. Please slow down and try again shortly.', { retry_after: 60 }, { 'Retry-After': '60' }),
+    );
+
+    const res = await post(`/${PROJECT_ID}`);
+
+    expect(res.status).toBe(429);
+    expect(res.headers.get('Retry-After')).toBe('60');
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('rate_limited');
+    expect(requestFeedbackPass).not.toHaveBeenCalled();
+    expect(assertWithinAiRateLimit).toHaveBeenCalledWith(expect.anything(), {
+      userId: OWNER_ID,
+      actionType: 'feedback_pass',
+      now: expect.any(Date),
+    });
   });
 
   it('502s when the AI provider is unreachable', async () => {
