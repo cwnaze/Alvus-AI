@@ -129,3 +129,16 @@ price/product IDs as config, whether JWT verification needs anything beyond
   daily/short retention; budget for a paid plan with PITR once real users exist, given
   the sensitive/private data classification). Storage lacks PITR — mitigate with bucket
   versioning or a periodic export job.
+
+## Known manual repairs
+
+- **2026-08 (US-027, migration `0012`/`0013`)**: the shared "dev" Supabase project's
+  `subscriptions` table had been created by an earlier draft of migration `0012` that
+  predated its three named `UNIQUE` constraints. The live table already had equivalent
+  unique indexes (uniqueness was never actually broken), so the fix promoted those
+  indexes to the named constraints the committed migration expects, then corrected the
+  stale `__drizzle_migrations` bookkeeping row so `0013` could apply. No data changes,
+  no downtime. Applied by hand directly against the shared dev DB, outside any
+  migration file — if a fresh dev database is ever provisioned from the committed
+  migrations alone, `0012` already creates the constraints correctly and this repair
+  is a no-op.

@@ -73,25 +73,27 @@ export async function recordShareLinkLookupHit(db: Db, params: { ipAddress: stri
 // than a human regardless of what GoTrue itself allows. Each endpoint gets
 // its own window so a burst against one doesn't lock out the others.
 //
-// Thresholds are sized the same way share-link-lookup's are (see that
-// comment below): generous enough that a shared/NAT'd IP -- which in
-// practice includes this repo's own e2e regression suite, all 15 browser
-// specs running sequentially from one machine (measured: 14 signups, 48
-// logins per full run) -- never trips them, while still capping sustained
-// abuse to a small fraction of unrestricted throughput.
+// Thresholds are sized by the threat model, not by test convenience: signup
+// is the endpoint that mints new accounts, so its ceiling stays in the
+// single digits per window regardless of what any test suite needs. Each
+// ceiling is overridable per-endpoint via AuthBindings (maxRequestsOverride
+// below) precisely so a looser value can live in CI-only config instead of
+// pulling the production default up to match -- see routes/auth.ts and
+// .env.example.
 export type AuthRateLimitEndpoint = 'signup' | 'login' | 'password_reset_request';
 
 const AUTH_RATE_LIMITS: Record<AuthRateLimitEndpoint, { windowMs: number; maxRequests: number }> = {
-  signup: { windowMs: 10 * 60_000, maxRequests: 50 },
-  login: { windowMs: 10 * 60_000, maxRequests: 150 },
-  password_reset_request: { windowMs: 10 * 60_000, maxRequests: 30 },
+  signup: { windowMs: 10 * 60_000, maxRequests: 5 },
+  login: { windowMs: 10 * 60_000, maxRequests: 20 },
+  password_reset_request: { windowMs: 10 * 60_000, maxRequests: 10 },
 };
 
 export async function assertWithinAuthRateLimit(
   db: Db,
-  params: { ipAddress: string; endpoint: AuthRateLimitEndpoint; now: Date },
+  params: { ipAddress: string; endpoint: AuthRateLimitEndpoint; now: Date; maxRequestsOverride?: number },
 ): Promise<void> {
-  const { windowMs, maxRequests } = AUTH_RATE_LIMITS[params.endpoint];
+  const { windowMs, maxRequests: defaultMaxRequests } = AUTH_RATE_LIMITS[params.endpoint];
+  const maxRequests = params.maxRequestsOverride ?? defaultMaxRequests;
   const since = new Date(params.now.getTime() - windowMs);
   const count = await countAuthRateLimitAttemptsSince(db, { ipAddress: params.ipAddress, endpoint: params.endpoint, since });
   if (count >= maxRequests) {

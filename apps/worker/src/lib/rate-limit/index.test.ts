@@ -153,6 +153,18 @@ describe('assertWithinAuthRateLimit', () => {
       since: new Date('2026-03-15T11:50:00.000Z'),
     });
   });
+
+  it('uses maxRequestsOverride instead of the default ceiling when given', async () => {
+    countAuthRateLimitAttemptsSince.mockResolvedValueOnce(2);
+
+    try {
+      await assertWithinAuthRateLimit(DB, { ipAddress: IP_ADDRESS, endpoint: 'signup', now: NOW, maxRequestsOverride: 2 });
+      expect.unreachable('should have thrown: the default signup ceiling is well above 2');
+    } catch (err) {
+      expect(err).toBeInstanceOf(AppError);
+      expect((err as AppError).status).toBe(429);
+    }
+  });
 });
 
 describe('recordAuthRateLimitHit', () => {

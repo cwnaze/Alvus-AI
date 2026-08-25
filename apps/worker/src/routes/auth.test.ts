@@ -129,13 +129,52 @@ describe('POST /signup', () => {
     expect(recordAuthRateLimitHit).toHaveBeenCalledWith(expect.anything(), { ipAddress: '203.0.113.9', endpoint: 'signup' });
   });
 
+  it('skips the rate limit check entirely when no CF-Connecting-IP header is present, rather than pooling into a shared bucket', async () => {
+    createUser.mockResolvedValueOnce({ data: { user: { id: 'auth-4' } }, error: null });
+    createPendingUser.mockResolvedValueOnce(undefined);
+    const callsBefore = assertWithinAuthRateLimit.mock.calls.length;
+    const recordsBefore = recordAuthRateLimitHit.mock.calls.length;
+
+    const res = await jsonRequest('/signup', { email: 'no-ip@example.test', password: 'longenough1' });
+
+    expect(res.status).toBe(201);
+    expect(assertWithinAuthRateLimit.mock.calls.length).toBe(callsBefore);
+    expect(recordAuthRateLimitHit.mock.calls.length).toBe(recordsBefore);
+  });
+
+  it('passes an AUTH_RATE_LIMIT_SIGNUP_MAX env override through as maxRequestsOverride', async () => {
+    createUser.mockResolvedValueOnce({ data: { user: { id: 'auth-5' } }, error: null });
+    createPendingUser.mockResolvedValueOnce(undefined);
+
+    await app.request(
+      '/signup',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': '203.0.113.9' },
+        body: JSON.stringify({ email: 'override@example.test', password: 'longenough1' }),
+      },
+      { ...ENV, AUTH_RATE_LIMIT_SIGNUP_MAX: '2' },
+    );
+
+    expect(assertWithinAuthRateLimit).toHaveBeenCalledWith(expect.anything(), {
+      ipAddress: '203.0.113.9',
+      endpoint: 'signup',
+      now: expect.any(Date),
+      maxRequestsOverride: 2,
+    });
+  });
+
   it('429s with a Retry-After when the per-IP signup rate limit is exceeded, without calling Supabase', async () => {
     const { AppError } = await import('../middleware/errors');
     assertWithinAuthRateLimit.mockRejectedValueOnce(
       new AppError(429, 'rate_limited', 'Too many requests. Please try again shortly.', { retry_after: 3600 }, { 'Retry-After': '3600' }),
     );
 
-    const res = await jsonRequest('/signup', { email: 'limited@example.test', password: 'longenough1' });
+    const res = await jsonRequest(
+      '/signup',
+      { email: 'limited@example.test', password: 'longenough1' },
+      { headers: { 'CF-Connecting-IP': '203.0.113.9' } },
+    );
 
     expect(res.status).toBe(429);
     expect(((await res.json()) as ErrorEnvelope).error.code).toBe('rate_limited');
