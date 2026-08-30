@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '../net/fetch-with-retry';
 import { isLiveMode, unpaywallFixture } from './fixtures';
 import type { OaStatus, SourcesEnv } from './types';
 
@@ -25,7 +26,11 @@ export async function resolveOaStatus(doi: string, env: SourcesEnv): Promise<OaI
   if (env.UNPAYWALL_CONTACT_EMAIL) url.searchParams.set('email', env.UNPAYWALL_CONTACT_EMAIL);
 
   try {
-    const res = await fetch(url);
+    // Shorter timeout/retry budget than search: this runs once per
+    // DOI-bearing candidate (lib/sources/index.ts maps over the merged
+    // list), so a slow provider here shouldn't multiply into a long tail
+    // across a whole search response.
+    const res = await fetchWithRetry(url, {}, { timeoutMs: 4000, maxRetries: 1 });
     if (!res.ok) return null;
     const body = (await res.json()) as UnpaywallResponse;
     if (!body.is_oa || !body.oa_status) return null;

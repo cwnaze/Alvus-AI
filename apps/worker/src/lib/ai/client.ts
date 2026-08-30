@@ -18,6 +18,26 @@ import {
 const MAX_SCORE = 10;
 const MIN_SCORE = 0;
 
+// Explicit timeout + retry-with-backoff for every LiteLLM call, rather than
+// the SDK's 10-minute default timeout -- a hung proxy shouldn't hang the
+// request that's waiting on it. maxRetries covers transient failures
+// (timeouts, connection errors, 5xx, 429) with the SDK's built-in
+// exponential backoff; a 4xx is never retried. Every call site awaits this
+// client to either resolve once (successfully) or reject once -- retries
+// happen underneath that single promise, so the caller's single
+// usage-recording/DB-write after it resolves can never double-fire.
+const LITELLM_TIMEOUT_MS = 20_000;
+const LITELLM_MAX_RETRIES = 2;
+
+function createLiteLLMClient(env: AiEnv): OpenAI {
+  return new OpenAI({
+    baseURL: env.LITELLM_BASE_URL,
+    apiKey: env.LITELLM_API_KEY,
+    timeout: LITELLM_TIMEOUT_MS,
+    maxRetries: LITELLM_MAX_RETRIES,
+  });
+}
+
 function normalizeAnalysis(raw: unknown): SourceAnalysis {
   if (!raw || typeof raw !== 'object') throw new AiUnreadableSourceError('Analysis response was not valid JSON');
   const r = raw as Record<string, unknown>;
@@ -63,7 +83,7 @@ export async function requestSourceAnalysis(
     throw new AiProviderError('LiteLLM proxy is not configured');
   }
 
-  const client = new OpenAI({ baseURL: env.LITELLM_BASE_URL, apiKey: env.LITELLM_API_KEY });
+  const client = createLiteLLMClient(env);
 
   let content: string | null | undefined;
   try {
@@ -123,7 +143,7 @@ export async function requestParagraphSuggestions(input: SuggestionInput, env: A
     throw new AiProviderError('LiteLLM proxy is not configured');
   }
 
-  const client = new OpenAI({ baseURL: env.LITELLM_BASE_URL, apiKey: env.LITELLM_API_KEY });
+  const client = createLiteLLMClient(env);
 
   try {
     const completion = await client.chat.completions.create({
@@ -184,7 +204,7 @@ export async function requestFeedbackPass(input: FeedbackInput, env: AiEnv): Pro
     throw new AiProviderError('LiteLLM proxy is not configured');
   }
 
-  const client = new OpenAI({ baseURL: env.LITELLM_BASE_URL, apiKey: env.LITELLM_API_KEY });
+  const client = createLiteLLMClient(env);
 
   try {
     const completion = await client.chat.completions.create({
