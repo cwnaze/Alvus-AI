@@ -101,3 +101,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-15T19:00:00.000Z | US-027 | in_progress | Branch feature/us-027-rate-limiting-on-public-and-metered-endpoints created; building per-IP rate limiting on auth signup/login/password-reset-request and per-user rate limiting on the AI-metered analyze/feedback endpoints, both returning 429 with Retry-After.
 2026-08-30T16:16:58.358Z | US-027 | done | PR #63 merged after 1 review round(s)
 2026-08-30T16:20:00.000Z | US-028 | in_progress | Branch feature/us-028-timeout-and-retry-backoff-policy-for-outbound-calls created; adding an explicit timeout and retry-with-backoff policy for outbound calls to Semantic Scholar, CrossRef, Unpaywall, and the LiteLLM proxy, with retries safe against double-charging metered quota or double-writing results.
+2026-08-30T16:47:19.762Z | US-028 | done | PR #66 merged after 1 review round(s)

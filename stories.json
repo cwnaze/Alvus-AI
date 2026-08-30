@@ -918,7 +918,7 @@
         "US-020",
         "US-021"
       ],
-      "status": "in_progress",
+      "status": "done",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -931,9 +931,9 @@
       },
       "demo": "docs/demos/US-028.md",
       "branch": "feature/us-028-timeout-and-retry-backoff-policy-for-outbound-calls",
-      "prNumber": null,
-      "issueNumber": null,
-      "reviewRounds": 0,
+      "prNumber": 66,
+      "issueNumber": 67,
+      "reviewRounds": 1,
       "notes": ""
     },
     {
