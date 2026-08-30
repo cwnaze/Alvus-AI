@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '../net/fetch-with-retry';
 import { fixtureKindForQuery, isLiveMode, semanticScholarFixture } from './fixtures';
 import { ProviderError, type RawCandidate, type SourcesEnv } from './types';
 
@@ -53,7 +54,7 @@ export async function searchSemanticScholar(query: string, env: SourcesEnv): Pro
 
   let res: Response;
   try {
-    res = await fetch(url, { headers });
+    res = await fetchWithRetry(url, { headers });
   } catch (err) {
     throw new ProviderError('semantic_scholar', err instanceof Error ? err.message : 'network error');
   }

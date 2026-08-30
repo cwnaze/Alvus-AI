@@ -1,10 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { create } = vi.hoisted(() => ({ create: vi.fn() }));
+const { create, constructorOptions } = vi.hoisted(() => ({ create: vi.fn(), constructorOptions: vi.fn() }));
 
 vi.mock('openai', () => ({
   default: class {
     chat = { completions: { create } };
+    constructor(options: unknown) {
+      constructorOptions(options);
+    }
   },
 }));
 
@@ -71,6 +74,16 @@ describe('requestSourceAnalysis (live mode)', () => {
       keyQuotes: [{ quote: 'A quote.', location: 'p. 3', usageSuggestion: 'Support the thesis.' }],
     });
     expect(result.tokenUsage).toEqual({ inputTokens: 120, outputTokens: 40 });
+  });
+
+  it('constructs the LiteLLM client with an explicit timeout and retry count', async () => {
+    create.mockResolvedValueOnce(chatResponse(JSON.stringify({ strengths: 'x', weaknesses: 'y', usefulness_score: 5, key_quotes: [] })));
+
+    await requestSourceAnalysis(INPUT, LIVE_ENV);
+
+    expect(constructorOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ timeout: expect.any(Number), maxRetries: expect.any(Number) }),
+    );
   });
 
   it('clamps an out-of-range usefulness_score into 0-10', async () => {

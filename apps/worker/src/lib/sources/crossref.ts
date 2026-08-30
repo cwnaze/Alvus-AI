@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '../net/fetch-with-retry';
 import { crossrefFixture, fixtureKindForQuery, isLiveMode } from './fixtures';
 import { ProviderError, type RawCandidate, type SourcesEnv } from './types';
 
@@ -51,7 +52,7 @@ export async function searchCrossref(query: string, env: SourcesEnv): Promise<Ra
 
   let res: Response;
   try {
-    res = await fetch(url);
+    res = await fetchWithRetry(url);
   } catch (err) {
     throw new ProviderError('crossref', err instanceof Error ? err.message : 'network error');
   }
