@@ -992,7 +992,7 @@
         "US-025",
         "US-029"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "command",
       "verification": {
         "commands": [
