@@ -884,7 +884,7 @@
         "US-016",
         "US-021"
       ],
-      "status": "in_progress",
+      "status": "done",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -897,9 +897,9 @@
       },
       "demo": "docs/demos/US-027.md",
       "branch": "feature/us-027-rate-limiting-on-public-and-metered-endpoints",
-      "prNumber": null,
-      "issueNumber": null,
-      "reviewRounds": 0,
+      "prNumber": 63,
+      "issueNumber": 64,
+      "reviewRounds": 1,
       "notes": ""
     },
     {

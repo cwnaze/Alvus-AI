@@ -99,3 +99,4 @@ Format: `<iso8601> | <story-id> | <transition> | <detail>`
 2026-08-15T14:56:32.693Z | US-024 | in_progress | Branch feature/us-024-stripe-webhook-sync created; building the Stripe webhook endpoint (checkout.session.completed, customer.subscription.created/updated/deleted, invoice.payment_failed) to keep subscriptions.status/period/cancel_at_period_end in sync with signature verification and a payment-failure grace period before downgrade.
 2026-08-15T18:24:36.436Z | US-024 | done | PR #61 merged after 3 review round(s)
 2026-08-15T19:00:00.000Z | US-027 | in_progress | Branch feature/us-027-rate-limiting-on-public-and-metered-endpoints created; building per-IP rate limiting on auth signup/login/password-reset-request and per-user rate limiting on the AI-metered analyze/feedback endpoints, both returning 429 with Retry-After.
+2026-08-30T16:16:58.358Z | US-027 | done | PR #63 merged after 1 review round(s)
