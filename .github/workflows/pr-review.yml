@@ -40,20 +40,6 @@ jobs:
         env:
           ALL_SECRETS: ${{ toJSON(secrets) }}
         run: node .github/scripts/write-env.mjs
-      - name: Loosen auth rate limits for the regression suite
-        # AUTH_RATE_LIMIT_*_MAX (apps/worker/src/lib/rate-limit/index.ts) default to
-        # a tight production ceiling -- signup single digits per 10 minutes. This job
-        # runs the full Playwright regression suite from one shared IP (measured: 14
-        # signups, 48 logins per run), so it needs its own headroom rather than
-        # pulling the production default up to match. Plain tuning knobs, not
-        # secrets, so they're appended directly instead of routed through
-        # write-env.mjs's repo-secrets mechanism.
-        run: |
-          cat >> .env <<'EOF'
-          AUTH_RATE_LIMIT_SIGNUP_MAX=50
-          AUTH_RATE_LIMIT_LOGIN_MAX=150
-          AUTH_RATE_LIMIT_PASSWORD_RESET_REQUEST_MAX=30
-          EOF
       - name: Restore previous demo screenshots
         uses: actions/cache@v4
         with:
@@ -69,12 +55,7 @@ jobs:
           github_token: ${{ secrets.PIPELINE_PAT }}
           prompt: /pr-review
           # See story-start.yml: default action permissions have no Bash access.
-          # `Read` is explicit: without it every file read is a permission denial and
-          # the review has to route around it through `cat`, which is reason enough
-          # to grant it on its own (a proposed link to specific stalled-verdict runs
-          # didn't hold up under review -- see issue #64 round 1 on PR #63 -- so it's
-          # not restated here).
-          claude_args: --max-turns 100 --allowedTools "Read,Bash,Edit,Write,Glob,Grep"
+          claude_args: --max-turns 100 --allowedTools "Bash,Edit,Write,Glob,Grep"
 
       - name: Apply the review verdict
         if: always()
