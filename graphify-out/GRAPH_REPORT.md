@@ -1,16 +1,16 @@
 # Graph Report - Alvus-AI  (2026-08-30)
 
 ## Corpus Check
-- 287 files · ~224,906 words
+- 290 files · ~238,387 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1442 nodes · 2690 edges · 109 communities (82 shown, 22 thin omitted)
+- 1462 nodes · 2718 edges · 126 communities (91 shown, 30 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 58 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9e4d4e9b`
+- Built from commit: `b42d55f2`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -34,7 +34,7 @@
 - dependencies
 - findAuthUserIdByEmail
 - compilerOptions
-- routes/billing.ts
+- queries/subscriptions.ts
 - worker/tsconfig.json
 - compilerOptions
 - shared/package.json
@@ -71,27 +71,27 @@
 - US-015 — source discovery search
 - US-013 — admin user directory
 - push-supabase-auth-config.mjs
-- sources.test.ts
-- ProjectPage.tsx
+- routes/sources.ts
+- request
 - admin.ts
-- DocumentContent
+- DocumentPreview.tsx
 - citation/index.ts
 - api.ts
 - errors.ts
-- AuthVariables
+- middleware/auth.ts
 - AppError
 - rls/package.json
 - worker/src/index.ts
 - US-016 — analyze a candidate source and select or reject it
 - db/client.ts
-- routes/sources.ts
+- share-link.test.ts
 - DashboardPage.tsx
 - ai/client.ts
 - rls/tsconfig.json
 - WritingPage.tsx
-- routes/feedback.ts
-- feedback-anchors.ts
-- editor.test.ts
+- editor.ts
+- DocumentContent
+- ApiError
 - citations.ts
 - schema/index.ts
 - US-017 — upload your own PDF/TXT source
@@ -103,7 +103,7 @@
 - projects.test.ts
 - US-026 — RLS integration test suite (deny-by-default across roles)
 - feedback.test.ts
-- request
+- AdminWaitlistPage.tsx
 - share-links.test.ts
 - US-023 — Stripe Checkout and Billing Portal
 - US-025 — read-only share link
@@ -113,21 +113,38 @@
 - demo-us-024.sh
 - demo-us-026.sh
 - demo-us-027.sh
-- feedbackHighlightExtension.ts
-- admin.test.ts
-- billing-webhook.test.ts
+- DocumentEditor.tsx
+- routes/billing.ts
+- AiProviderError
 - US-028 — Timeout and retry/backoff policy for outbound calls
 - rate-limit/index.test.ts
 - demo-us-028.sh
+- metering/index.ts
+- seed.ts
+- scripts
+- US-029 — accessibility and responsive-layout hardening
+- routes/feedback.ts
+- package.json
+- src/auth.ts
+- AdminUsersPage.tsx
+- client.test.ts
+- subscription-sync.test.ts
+- dotenv
+- eslint-plugin-react-hooks
+- eslint-plugin-react-refresh
+- globals
+- tsx
+- typescript
+- wrangler
 
 ## God Nodes (most connected - your core abstractions)
 1. `request()` - 43 edges
 2. `AppError` - 39 edges
 3. `Db` - 21 edges
-4. `AuthVariables` - 19 edges
-5. `findAuthUserIdByEmail()` - 19 edges
-6. `AuthBindings` - 18 edges
-7. `test` - 18 edges
+4. `findAuthUserIdByEmail()` - 20 edges
+5. `AuthVariables` - 19 edges
+6. `test` - 19 edges
+7. `AuthBindings` - 18 edges
 8. `createDb()` - 17 edges
 9. `onError()` - 17 edges
 10. `CORRELATION_ID_HEADER` - 16 edges
@@ -137,12 +154,12 @@
   apps/web/src/editor/feedbackHighlightExtension.ts → packages/shared/src/document.ts
 - `Storage` --references--> `FeedbackComment`  [EXTRACTED]
   apps/web/src/editor/feedbackHighlightExtension.ts → packages/shared/src/document.ts
-- `PR Review workflow` --references--> `PR Review Skill`  [EXTRACTED]
-  .github/workflows/pr-review.yml → .claude/skills/pr-review/SKILL.md
-- `Production Prep workflow` --references--> `Production Prep Skill`  [EXTRACTED]
-  .github/workflows/production-prep.yml → .claude/skills/production-prep/SKILL.md
 - `seedPaidTierSubscription()` --calls--> `getSubscriptionByUserId()`  [EXTRACTED]
   db/seed.ts → apps/worker/src/lib/db/queries/subscriptions.ts
+- `seedPaidTierSubscription()` --calls--> `upsertSubscription()`  [EXTRACTED]
+  db/seed.ts → apps/worker/src/lib/db/queries/subscriptions.ts
+- `seedUsageAtLimit()` --calls--> `currentBillingPeriod()`  [EXTRACTED]
+  db/seed.ts → apps/worker/src/lib/metering/index.ts
 
 ## Import Cycles
 - None detected.
@@ -152,15 +169,15 @@
 - **Data model entities owned by projects (ON DELETE CASCADE from projects.id)** — docs_data_model_projects, docs_data_model_project_documents, docs_data_model_project_sources, docs_data_model_uploaded_files, docs_data_model_share_links, docs_data_model_feedback_passes [EXTRACTED 1.00]
 - **implement-story / pr-review / pr-fix review-and-merge loop** — claude_skills_implement_story_skill, claude_skills_pr_review_skill, claude_skills_pr_fix_skill [INFERRED 0.85]
 
-## Communities (109 total, 22 thin omitted)
+## Communities (126 total, 30 thin omitted)
 
 ### Community 0 - "API Surface doc"
 Cohesion: 0.06
 Nodes (49): CLAUDE.md project guide, LiteLLM proxy as sole AI access path (rationale: OpenAI-compatible proxy instead of direct Anthropic API/SDK, keeps model swappable via env config), Single Cloudflare Worker deploy target (rationale: fits bootstrap + minimal-budget goal, one deploy pipeline for frontend+API), Implement Story Skill, gh pr merge --auto --squash closes the loop (rationale: branch protection permits a merge but never performs one; without auto-merge armed, pr-review's approval satisfies the last check but nothing merges and the pipeline stalls silently), PR Fix Skill, PR Review Skill, review-verdict.json verdict handoff (rationale: the review agent is authenticated as PIPELINE_PAT, the same identity that opened the PR, and GitHub rejects self-approval, so a separate workflow step with a different token performs the actual gh pr review) (+41 more)
 
 ### Community 1 - "shared.ts"
-Cohesion: 0.10
-Nodes (32): createShareLink(), findShareLinkByTokenHash(), getActiveShareLinkByProject(), recordShareLinkAccess(), revokeShareLink(), ShareLinkRow, shareLinks, decryptShareToken() (+24 more)
+Cohesion: 0.16
+Nodes (18): createShareLink(), findShareLinkByTokenHash(), getActiveShareLinkByProject(), recordShareLinkAccess(), revokeShareLink(), ShareLinkRow, shareLinks, decryptShareToken() (+10 more)
 
 ### Community 2 - "dispatch-next.mjs"
 Cohesion: 0.18
@@ -203,24 +220,24 @@ Cohesion: 0.06
 Nodes (35): dependencies, @alvus-ai/shared, drizzle-orm, hono, openai, postgres, stripe, @supabase/supabase-js (+27 more)
 
 ### Community 15 - "devDependencies"
-Cohesion: 0.04
-Nodes (48): dotenv, drizzle-kit, eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals, devDependencies (+40 more)
+Cohesion: 0.13
+Nodes (15): @axe-core/playwright, drizzle-kit, eslint, @eslint/js, devDependencies, @axe-core/playwright, drizzle-kit, eslint (+7 more)
 
 ### Community 16 - "dependencies"
 Cohesion: 0.05
 Nodes (40): dependencies, @alvus-ai/shared, react, react-dom, react-router-dom, @tiptap/core, @tiptap/pm, @tiptap/react (+32 more)
 
 ### Community 17 - "findAuthUserIdByEmail"
-Cohesion: 0.12
-Nodes (11): db, main(), supabaseAdmin, findAuthUserIdByEmail(), Demo, Step, test, FIXTURES_DIR (+3 more)
+Cohesion: 0.10
+Nodes (16): db, main(), supabaseAdmin, findAuthUserIdByEmail(), assertFocusVisible(), assertNoAccessibilityViolations(), assertNoHorizontalOverflow(), DESKTOP_VIEWPORT (+8 more)
 
 ### Community 18 - "compilerOptions"
 Cohesion: 0.13
 Nodes (14): compilerOptions, jsx, lib, noEmit, types, extends, include, ES2022 (+6 more)
 
-### Community 19 - "routes/billing.ts"
-Cohesion: 0.06
-Nodes (44): getSubscriptionByUserId(), SubscriptionRow, SubscriptionStatus, SubscriptionTier, updateSubscriptionByStripeSubscriptionId(), upsertSubscription(), getMonthlyLimit(), recordUsageEvent() (+36 more)
+### Community 19 - "queries/subscriptions.ts"
+Cohesion: 0.16
+Nodes (14): SubscriptionRow, SubscriptionStatus, SubscriptionTier, updateSubscriptionByStripeSubscriptionId(), upsertSubscription(), subscriptions, confirmCheckoutSession(), KNOWN_SUBSCRIPTION_STATUSES (+6 more)
 
 ### Community 20 - "worker/tsconfig.json"
 Cohesion: 0.15
@@ -239,16 +256,16 @@ Cohesion: 0.22
 Nodes (8): compilerOptions, lib, noEmit, extends, include, ES2022, src, ../../tsconfig.base.json
 
 ### Community 24 - "App.tsx"
-Cohesion: 0.11
-Nodes (23): AdminRoute(), App(), HomeRoute(), ProjectRoute(), AuthLayout(), ApiError, confirmPasswordReset(), login() (+15 more)
+Cohesion: 0.12
+Nodes (20): AdminRoute(), App(), HomeRoute(), ProjectRoute(), createCheckoutSession(), createPortalSession(), fetchBillingStatus(), login() (+12 more)
 
 ### Community 25 - "US-001 — Scaffold monorepo (frontend, Worker, shared package, tooling)"
 Cohesion: 0.29
 Nodes (6): 1. Typecheck every workspace, 2. Lint the whole repo, 3. Build the frontend for the Worker's static-assets binding, 4. Run the worker's test suite, 5. Boot wrangler dev and confirm the placeholder page and the API both respond, US-001 — Scaffold monorepo (frontend, Worker, shared package, tooling)
 
 ### Community 26 - "shared/src/index.ts"
-Cohesion: 0.08
-Nodes (45): ACTION_LABELS, TIER_LABELS, AdminUser, AdminUsersResponse, LoginResponse, RefreshResponse, Tier, TIERS (+37 more)
+Cohesion: 0.16
+Nodes (22): CITATION_FORMATS, CitationFormat, PROJECT_STATUSES, ProjectsResponse, ProjectStatus, SharedPaperResponse, SharedProject, ShareLinkResponse (+14 more)
 
 ### Community 31 - "US-002 — Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema"
 Cohesion: 0.33
@@ -306,112 +323,89 @@ Nodes (5): 1. Opening a project shows its source-discovery view, 2. Searching re
 Cohesion: 0.40
 Nodes (4): 1. The admin searches and filters the directory, and views the user's status, role, and tier, 2. Filtering by a paid tier returns nobody -- no account can be on a paid plan before billing ships, 3. The admin revokes the user's access; their status flips to rejected in the directory, US-013 — admin user directory
 
-### Community 60 - "sources.test.ts"
-Cohesion: 0.10
-Nodes (22): EmptyExtractionError, extractPdf(), extractTextFromFile(), extractTxt(), UnparseableFileError, UploadMimeType, withTimeout(), SOURCE_UPLOADS_BUCKET (+14 more)
+### Community 60 - "routes/sources.ts"
+Cohesion: 0.05
+Nodes (48): createUploadedProjectSource(), deleteProjectSource(), ExternalWorkIdentity, ExternalWorkRow, findExternalWorkByIdentity(), findOrCreateProjectSource(), getProjectSourceById(), listProjectSources() (+40 more)
 
-### Community 61 - "ProjectPage.tsx"
-Cohesion: 0.10
-Nodes (31): analyzeSource(), createShareLink(), deselectSource(), fetchBibliography(), fetchProject(), fetchShareLink(), rejectSource(), revokeShareLink() (+23 more)
+### Community 61 - "request"
+Cohesion: 0.11
+Nodes (32): analyzeSource(), createShareLink(), deselectSource(), fetchBibliography(), fetchProject(), fetchShareLink(), fetchSources(), rejectSource() (+24 more)
 
 ### Community 62 - "admin.ts"
-Cohesion: 0.12
-Nodes (26): createDb(), listUsers(), revokeUserAccess(), approveWaitlistUser(), createPendingUser(), getUserById(), listWaitlistEntries(), rejectWaitlistUser() (+18 more)
-
-### Community 63 - "DocumentContent"
 Cohesion: 0.11
-Nodes (14): Citation, CitationAttrs, Commands, @tiptap/core, DocumentEditor(), DocumentEditorProps, BIBLIOGRAPHY_HEADING, DocumentPreview() (+6 more)
+Nodes (25): createDb(), countAuthRateLimitAttemptsSince(), listUsers(), revokeUserAccess(), approveWaitlistUser(), createPendingUser(), getUserById(), listWaitlistEntries() (+17 more)
+
+### Community 63 - "DocumentPreview.tsx"
+Cohesion: 0.22
+Nodes (8): Citation, CitationAttrs, Commands, @tiptap/core, BIBLIOGRAPHY_HEADING, DocumentPreviewProps, FORMAT_LABEL, BibliographyEntry
 
 ### Community 64 - "citation/index.ts"
 Cohesion: 0.16
 Nodes (21): apaAuthor(), CitationFields, formatApa(), formatAuthorsApa(), formatAuthorsChicago(), formatAuthorsMla(), formatChicago(), formatCitation() (+13 more)
 
 ### Community 65 - "api.ts"
-Cohesion: 0.21
-Nodes (18): ApiErrorBody, apiLogout(), fetchMe(), refreshAccessToken(), AuthContext, AuthContextValue, AuthProvider(), revalidate() (+10 more)
+Cohesion: 0.25
+Nodes (16): ApiErrorBody, apiLogout(), fetchMe(), refreshAccessToken(), AuthContext, AuthContextValue, AuthProvider(), revalidate() (+8 more)
 
 ### Community 66 - "errors.ts"
-Cohesion: 0.18
-Nodes (11): { execute }, CORRELATION_ID_HEADER, ErrorVariables, onError(), buildApp(), ErrorEnvelope, app, ENV (+3 more)
+Cohesion: 0.08
+Nodes (23): { execute }, CORRELATION_ID_HEADER, ErrorVariables, onError(), buildApp(), ErrorEnvelope, BillingWebhookBindings, app (+15 more)
 
-### Community 67 - "AuthVariables"
-Cohesion: 0.16
-Nodes (11): AuthBindings, AuthVariables, ENV, ErrorEnvelope, { getUser, getUserById }, app, {
-  createUser,
-  deleteUser,
-  signOut,
-  updateUserById,
-  signInWithPassword,
-  getUser,
-  refreshSession,
-  resetPasswordForEmail,
-  verifyOtp,
-  createPendingUser,
-  getUserById,
-  assertWithinAuthRateLimit,
-  recordAuthRateLimitHit,
-}, ENV (+3 more)
+### Community 67 - "middleware/auth.ts"
+Cohesion: 0.11
+Nodes (18): AuthBindings, AuthUser, AuthVariables, ENV, ErrorEnvelope, { getUser, getUserById }, app, asCaller() (+10 more)
 
 ### Community 68 - "AppError"
-Cohesion: 0.15
-Nodes (16): createProject(), deleteProject(), getProjectById(), listProjects(), ProjectRow, renameProject(), AppError, parseContent() (+8 more)
+Cohesion: 0.12
+Nodes (20): createProject(), deleteProject(), getProjectById(), listProjects(), ProjectRow, renameProject(), DB, { getMonthlyLimit, sumUsage, recordUsageEvent, getSubscriptionByUserId } (+12 more)
 
 ### Community 69 - "rls/package.json"
 Cohesion: 0.07
 Nodes (27): dependencies, @alvus-ai/shared, drizzle-orm, hono, postgres, @supabase/supabase-js, devDependencies, @cloudflare/workers-types (+19 more)
 
 ### Community 70 - "worker/src/index.ts"
-Cohesion: 0.18
-Nodes (10): app, Bindings, admin, auth, editor, feedback, projects, shareLink (+2 more)
+Cohesion: 0.22
+Nodes (8): app, Bindings, admin, editor, feedback, projects, shareLink, sources
 
 ### Community 71 - "US-016 — analyze a candidate source and select or reject it"
 Cohesion: 0.20
 Nodes (9): 1. Searching returns candidate sources ready for AI analysis, 2. Triggering AI analysis shows the generated citation, summary, usefulness score, and key quotes, 3. A source lacking accessible full text is analyzed from its abstract and flagged as abstract-only, 4. Selecting an analyzed source adds it to the project bibliography, 5. Selecting a candidate adds it to the bibliography even without a prior analysis, 6. Rejecting a candidate, or having already selected one, keeps it from reappearing on a later search, 7. Deselecting a source removes it from the bibliography and returns it to the candidate pool, 8. Analysis is blocked with a clear limit-reached message once the tier quota is exhausted (+1 more)
 
 ### Community 72 - "db/client.ts"
-Cohesion: 0.15
-Nodes (20): Db, countAiRateLimitAttemptsSince(), recordAiRateLimitAttempt(), countAuthRateLimitAttemptsSince(), recordAuthRateLimitAttempt(), countShareLinkLookupsSince(), recordShareLinkLookup(), countSuggestionRequestsSince() (+12 more)
+Cohesion: 0.17
+Nodes (17): Db, countAiRateLimitAttemptsSince(), recordAiRateLimitAttempt(), recordAuthRateLimitAttempt(), countShareLinkLookupsSince(), recordShareLinkLookup(), countSuggestionRequestsSince(), recordSuggestionRequest() (+9 more)
 
-### Community 73 - "routes/sources.ts"
-Cohesion: 0.10
-Nodes (28): createUploadedProjectSource(), deleteProjectSource(), ExternalWorkIdentity, ExternalWorkRow, findExternalWorkByIdentity(), findOrCreateProjectSource(), getProjectSourceById(), listProjectSources() (+20 more)
+### Community 73 - "share-link.test.ts"
+Cohesion: 0.21
+Nodes (15): adminClient(), anonClient(), createTestUser(), deleteTestUser(), scopedClient(), serviceDb(), TestUser, TestUserStatus (+7 more)
 
 ### Community 74 - "DashboardPage.tsx"
-Cohesion: 0.19
-Nodes (13): createProject(), deleteProject(), fetchProjects(), renameProject(), CITATION_FORMAT_LABELS, DashboardPage(), handleLoadMore(), load() (+5 more)
+Cohesion: 0.18
+Nodes (14): createProject(), deleteProject(), fetchProjects(), renameProject(), CITATION_FORMAT_LABELS, DashboardPage(), handleLoadMore(), load() (+6 more)
 
 ### Community 75 - "ai/client.ts"
-Cohesion: 0.11
-Nodes (36): CATEGORY_SET, createLiteLLMClient(), normalizeAnalysis(), normalizeFeedback(), normalizeSuggestions(), requestFeedbackPass(), requestParagraphSuggestions(), requestSourceAnalysis() (+28 more)
+Cohesion: 0.22
+Nodes (18): CATEGORY_SET, normalizeAnalysis(), requestSourceAnalysis(), analysisFixture(), fixtureKindForSource(), buildAnalysisPrompt(), buildFeedbackPrompt(), buildSuggestionPrompt() (+10 more)
 
 ### Community 76 - "rls/tsconfig.json"
 Cohesion: 0.15
 Nodes (12): node, *.ts, compilerOptions, lib, noEmit, types, extends, include (+4 more)
 
 ### Community 77 - "WritingPage.tsx"
-Cohesion: 0.11
-Nodes (20): fetchDocument(), fetchFeedbackPass(), fetchFeedbackPasses(), fetchSuggestions(), formatDocument(), requestFeedbackPass(), saveDocument(), CITATION_FORMAT_LABELS (+12 more)
+Cohesion: 0.12
+Nodes (19): fetchDocument(), fetchFeedbackPass(), fetchFeedbackPasses(), fetchSuggestions(), formatDocument(), requestFeedbackPass(), saveDocument(), CITATION_FORMAT_LABELS (+11 more)
 
-### Community 78 - "routes/feedback.ts"
-Cohesion: 0.10
-Nodes (20): getOrCreateDocument(), ProjectDocumentRow, saveDocumentContent(), createFeedbackPass(), FeedbackPassRow, getFeedbackPassById(), listFeedbackPasses(), projectDocuments (+12 more)
+### Community 78 - "editor.ts"
+Cohesion: 0.12
+Nodes (18): getOrCreateDocument(), ProjectDocumentRow, saveDocumentContent(), projectDocuments, EditorBindings, Env, parseContent(), parseCursorContext() (+10 more)
 
-### Community 79 - "feedback-anchors.ts"
-Cohesion: 0.21
-Nodes (11): BLOCK_TYPES, ExtractedText, extractPlainText(), markParagraphBreak(), pushText(), walk(), LEAF_ATOM_TYPES, locateQuote() (+3 more)
+### Community 79 - "DocumentContent"
+Cohesion: 0.19
+Nodes (12): BLOCK_TYPES, ExtractedText, extractPlainText(), markParagraphBreak(), pushText(), walk(), LEAF_ATOM_TYPES, locateQuote() (+4 more)
 
-### Community 80 - "editor.test.ts"
-Cohesion: 0.22
-Nodes (6): app, asCaller(), callerRow(), ENV, ErrorEnvelope, {
-  getUser,
-  getUserById,
-  getProjectById,
-  getOrCreateDocument,
-  saveDocumentContent,
-  listProjectSources,
-  countSuggestionRequestsSince,
-  recordSuggestionRequest,
-}
+### Community 80 - "ApiError"
+Cohesion: 0.15
+Nodes (14): AuthLayout(), DocumentPreview(), ApiError, confirmPasswordReset(), fetchSharedPaper(), requestPasswordReset(), signup(), ForgotPasswordPage() (+6 more)
 
 ### Community 81 - "citations.ts"
 Cohesion: 0.27
@@ -419,7 +413,7 @@ Nodes (6): CitationLookup, isEmptyDocument(), rerenderCitations(), NodeLike, Tip
 
 ### Community 82 - "schema/index.ts"
 Cohesion: 0.14
-Nodes (12): authSchema, authUsers, authRateLimitAttempts, externalWorks, FeedbackAnchorJson, FeedbackCommentJson, feedbackPasses, projects (+4 more)
+Nodes (14): aiRateLimitAttempts, authSchema, authUsers, externalWorks, FeedbackAnchorJson, FeedbackCommentJson, feedbackPasses, KeyQuoteJson (+6 more)
 
 ### Community 83 - "US-017 — upload your own PDF/TXT source"
 Cohesion: 0.25
@@ -470,9 +464,9 @@ Nodes (8): app, asCaller(), callerRow(), ENV, ErrorEnvelope, {
   recordAiRateLimitHit,
 }, post(), request()
 
-### Community 92 - "request"
-Cohesion: 0.13
-Nodes (19): approveWaitlistEntry(), createCheckoutSession(), createPortalSession(), fetchAdminUsers(), fetchBillingStatus(), fetchSources(), fetchWaitlist(), rejectWaitlistEntry() (+11 more)
+### Community 92 - "AdminWaitlistPage.tsx"
+Cohesion: 0.43
+Nodes (6): approveWaitlistEntry(), fetchWaitlist(), rejectWaitlistEntry(), AdminWaitlistPage(), handleReview(), load()
 
 ### Community 93 - "share-links.test.ts"
 Cohesion: 0.22
@@ -509,17 +503,17 @@ Nodes (7): app, asCaller(), BillingStatusBody, callerRow(), ENV, ErrorEnvelope, 
 Cohesion: 0.33
 Nodes (5): 1. Public auth endpoints (signup, login, password-reset request) are rate-limited per IP, checked before ever calling Supabase, with a 429 + Retry-After once exceeded, 2. Metered AI endpoints (analyze existing candidate, upload+analyze, feedback pass) are rate-limited per user in addition to the tier-quota check, with a 429 + Retry-After once exceeded, 3. The underlying rate-limit module: sliding window per IP/endpoint and per user/action type, always resolving silently under the ceiling and always throwing a 429 rate_limited AppError with Retry-After at it, 4. Full rate-limiting suite, for the record, US-027 — Rate limiting on public and metered endpoints
 
-### Community 103 - "feedbackHighlightExtension.ts"
-Cohesion: 0.32
-Nodes (7): CATEGORY_CLASS, Commands, FeedbackHighlight, feedbackHighlightKey, Storage, @tiptap/core, FeedbackComment
+### Community 103 - "DocumentEditor.tsx"
+Cohesion: 0.19
+Nodes (9): DocumentEditor(), DocumentEditorProps, CATEGORY_CLASS, Commands, FeedbackHighlight, feedbackHighlightKey, Storage, @tiptap/core (+1 more)
 
-### Community 104 - "admin.test.ts"
-Cohesion: 0.29
-Nodes (6): app, asCaller(), callerRow(), ENV, ErrorEnvelope, { getUser, getUserById, listWaitlistEntries, approveWaitlistUser, rejectWaitlistUser, listUsers, revokeUserAccess }
+### Community 104 - "routes/billing.ts"
+Cohesion: 0.15
+Nodes (13): billing, BillingBindings, Env, Tier, BillingStatusResponse, CheckoutSessionRequest, CheckoutSessionResponse, METERED_ACTIONS (+5 more)
 
-### Community 105 - "billing-webhook.test.ts"
-Cohesion: 0.25
-Nodes (6): BillingWebhookBindings, app, { confirmCheckoutSession, syncSubscriptionFromStripe }, ENV, ErrorEnvelope, signingClient
+### Community 105 - "AiProviderError"
+Cohesion: 0.19
+Nodes (14): createLiteLLMClient(), normalizeFeedback(), normalizeSuggestions(), requestFeedbackPass(), requestParagraphSuggestions(), feedbackFixture(), FeedbackFixtureKind, FixtureKind (+6 more)
 
 ### Community 106 - "US-028 — Timeout and retry/backoff policy for outbound calls"
 Cohesion: 0.25
@@ -538,25 +532,61 @@ Nodes (3): {
   recordAiRateLimitAttempt,
 }, DB, NOW
 
+### Community 109 - "metering/index.ts"
+Cohesion: 0.25
+Nodes (13): getSubscriptionByUserId(), getMonthlyLimit(), ActionType, recordUsageEvent(), sumUsage(), usageEvents, assertWithinUsageLimit(), checkUsageLimit() (+5 more)
+
+### Community 110 - "seed.ts"
+Cohesion: 0.22
+Nodes (12): tierLimits, createStripeClient(), db, ensureAuthUser(), FIXTURE_USERS, main(), seedFixtureUsers(), seedPaidTierSubscription() (+4 more)
+
+### Community 111 - "scripts"
+Cohesion: 0.17
+Nodes (12): scripts, build, db:bootstrap-admin, db:generate, db:migrate, db:push, db:seed, deploy (+4 more)
+
+### Community 112 - "US-029 — accessibility and responsive-layout hardening"
+Cohesion: 0.18
+Nodes (10): 1. Signup is completable via keyboard alone, with a visible focus indicator at every stop and no accessibility violations, 2. A project is created via keyboard alone: Tab reaches "New project" and every form field in order, Enter submits, 3. The dashboard renders usably at a mobile viewport width, with no horizontal scrolling, 4. Searching, analyzing, and selecting a source into the bibliography are all keyboard-operable, with no accessibility violations, 5. The source review page renders usably at a mobile viewport width, with no horizontal scrolling, 6. The editor has a visible focus indicator, and requesting/reading feedback comments is keyboard-operable, with no accessibility violations, 7. The editor and its bibliography/feedback sidebar stack usably at a mobile viewport width, with no horizontal scrolling, 8. The checkout entry point is keyboard-operable: Enter on the upgrade button launches real Stripe Checkout, with no accessibility violations on the usage page (+2 more)
+
+### Community 113 - "routes/feedback.ts"
+Cohesion: 0.29
+Nodes (6): createFeedbackPass(), FeedbackPassRow, getFeedbackPassById(), listFeedbackPasses(), Env, FeedbackBindings
+
+### Community 114 - "package.json"
+Cohesion: 0.20
+Nodes (9): name, private, type, version, workspaces, apps/web, apps/worker, packages/shared (+1 more)
+
+### Community 115 - "src/auth.ts"
+Cohesion: 0.20
+Nodes (9): AdminUsersResponse, LoginResponse, RefreshResponse, TIERS, USER_ROLES, UserRole, WAITLIST_STATUSES, WaitlistEntriesResponse (+1 more)
+
+### Community 116 - "AdminUsersPage.tsx"
+Cohesion: 0.38
+Nodes (6): fetchAdminUsers(), revokeUserAccess(), AdminUsersPage(), handleRevoke(), load(), AdminUser
+
+### Community 117 - "client.test.ts"
+Cohesion: 0.29
+Nodes (4): { create, constructorOptions }, INPUT, LIVE_ENV, SUGGESTION_INPUT
+
 ## Knowledge Gaps
-- **498 isolated node(s):** `db`, `story`, `issues`, `rounds`, `UNCOUNTED_WORKFLOWS` (+493 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 650 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **22 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **508 isolated node(s):** `db`, `story`, `issues`, `rounds`, `UNCOUNTED_WORKFLOWS` (+503 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 661 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **30 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `findAuthUserIdByEmail()` connect `findAuthUserIdByEmail` to `routes/billing.ts`?**
-  _High betweenness centrality (0.018) - this node is a cross-community bridge._
-- **Why does `createDb()` connect `admin.ts` to `shared.ts`, `AppError`, `worker/src/index.ts`, `db/client.ts`, `routes/sources.ts`, `routes/feedback.ts`, `findAuthUserIdByEmail`, `routes/billing.ts`?**
+- **Why does `findAuthUserIdByEmail()` connect `findAuthUserIdByEmail` to `seed.ts`?**
+  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+- **Why does `AppError` connect `AppError` to `shared.ts`, `errors.ts`, `middleware/auth.ts`, `db/client.ts`, `routes/billing.ts`, `rate-limit/index.test.ts`, `metering/index.ts`, `editor.ts`, `routes/feedback.ts`, `queries/subscriptions.ts`, `routes/sources.ts`, `admin.ts`?**
   _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **Why does `AppError` connect `AppError` to `shared.ts`, `errors.ts`, `db/client.ts`, `routes/sources.ts`, `rate-limit/index.test.ts`, `routes/feedback.ts`, `routes/billing.ts`, `sources.test.ts`, `admin.ts`?**
-  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+- **Why does `createDb()` connect `admin.ts` to `shared.ts`, `middleware/auth.ts`, `AppError`, `worker/src/index.ts`, `db/client.ts`, `routes/billing.ts`, `editor.ts`, `seed.ts`, `routes/feedback.ts`, `findAuthUserIdByEmail`, `queries/subscriptions.ts`, `routes/sources.ts`?**
+  _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **What connects `db`, `story`, `issues` to the rest of the system?**
-  _498 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _508 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `API Surface doc` be split into smaller, more focused modules?**
   _Cohesion score 0.061224489795918366 - nodes in this community are weakly interconnected._
-- **Should `shared.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.09725158562367865 - nodes in this community are weakly interconnected._
 - **Should `watchdog.mjs` be split into smaller, more focused modules?**
   _Cohesion score 0.12418300653594772 - nodes in this community are weakly interconnected._
+- **Should `dependencies` be split into smaller, more focused modules?**
+  _Cohesion score 0.05555555555555555 - nodes in this community are weakly interconnected._

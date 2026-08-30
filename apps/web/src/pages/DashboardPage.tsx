@@ -43,7 +43,7 @@ function ProjectRow({ project, onChanged }: { project: Project; onChanged: (upda
 
   return (
     <li data-testid={`project-${project.id}`} className="flex flex-col gap-2 rounded border border-slate-200 px-4 py-3">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         {renaming ? (
           <form onSubmit={handleRename} className="flex flex-1 items-center gap-2">
             <label className="flex-1">
@@ -238,9 +238,9 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-white text-slate-900">
-      <header className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+      <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-slate-200 px-6 py-4">
         <h1 className="text-xl font-semibold text-brand">Alvus AI</h1>
-        <div className="flex items-center gap-4 text-sm text-slate-600">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600">
           <span>{auth.user?.email}</span>
           <Link to="/usage" className="text-brand underline">
             Usage
@@ -262,7 +262,7 @@ export default function DashboardPage() {
       </header>
 
       <section className="mx-auto flex max-w-2xl flex-col gap-6 px-6 py-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-lg font-medium">Your projects</h2>
           {!showCreateForm && (
             <button onClick={() => setShowCreateForm(true)} className="rounded bg-brand px-4 py-2 text-white">

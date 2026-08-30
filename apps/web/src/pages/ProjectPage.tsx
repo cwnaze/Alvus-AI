@@ -211,7 +211,7 @@ function SourceRow({
         </p>
       )}
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {!analysis && (
           <button
             type="button"
@@ -499,7 +499,7 @@ export default function ProjectPage() {
 
   return (
     <main className="min-h-screen bg-white text-slate-900">
-      <header className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-6 py-4">
         <Link to="/" className="text-xl font-semibold text-brand">
           Alvus AI
         </Link>
