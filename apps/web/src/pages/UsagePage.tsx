@@ -98,9 +98,9 @@ export default function UsagePage() {
 
   return (
     <main className="min-h-screen bg-white text-slate-900">
-      <header className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+      <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-slate-200 px-6 py-4">
         <h1 className="text-xl font-semibold text-brand">Alvus AI</h1>
-        <div className="flex items-center gap-4 text-sm text-slate-600">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600">
           <span>{auth.user?.email}</span>
           <Link to="/" className="text-brand underline">
             Dashboard

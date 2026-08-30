@@ -55,7 +55,7 @@ export default function DocumentEditor({ initialContent, onChange, onEditorReady
     editorProps: {
       attributes: {
         class:
-          'min-h-[60vh] rounded border border-slate-200 px-4 py-3 focus:outline-none ' +
+          'min-h-[60vh] rounded border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand ' +
           '[&_h2]:text-lg [&_h2]:font-semibold [&_ul]:list-disc [&_ul]:pl-6 [&_p]:my-2',
         'data-testid': 'document-editor',
       },

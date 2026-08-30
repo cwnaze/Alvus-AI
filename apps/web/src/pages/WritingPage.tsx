@@ -357,11 +357,11 @@ export default function WritingPage() {
 
   return (
     <main className="min-h-screen bg-white text-slate-900">
-      <header className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+      <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-slate-200 px-6 py-4">
         <Link to="/" className="text-xl font-semibold text-brand">
           Alvus AI
         </Link>
-        <div className="flex items-center gap-4 text-sm text-slate-600">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600">
           <span role="status" data-testid="save-status">
             {SAVE_STATUS_LABEL[saveStatus]}
           </span>
@@ -442,8 +442,8 @@ export default function WritingPage() {
               </div>
             )}
 
-            <div className="flex gap-6">
-              <div className="flex-1">
+            <div className="flex flex-col gap-6 lg:flex-row">
+              <div className="min-w-0 flex-1">
                 <DocumentEditor
                   key={`${projectId}-${renderVersion}`}
                   initialContent={docContent}
@@ -471,7 +471,7 @@ export default function WritingPage() {
                   </div>
                 )}
               </div>
-              <aside className="w-64 shrink-0">
+              <aside className="w-full shrink-0 lg:w-64">
                 <h2 className="mb-3 text-sm font-semibold text-slate-700">Bibliography</h2>
                 <BibliographySidebar entries={bibliography} onInsert={insertCitation} />
 
