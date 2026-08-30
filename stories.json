@@ -954,7 +954,7 @@
         "US-023",
         "US-025"
       ],
-      "status": "in_progress",
+      "status": "pending",
       "demoKind": "browser",
       "verification": {
         "commands": [
