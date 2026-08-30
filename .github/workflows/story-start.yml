@@ -34,6 +34,16 @@ jobs:
         env:
           ALL_SECRETS: ${{ toJSON(secrets) }}
         run: node .github/scripts/write-env.mjs
+      - name: Loosen auth rate limits for the regression suite
+        # See pr-review.yml's identical step -- AUTH_RATE_LIMIT_*_MAX default tight
+        # in production; this job also runs the full Playwright regression suite
+        # and needs its own headroom instead.
+        run: |
+          cat >> .env <<'EOF'
+          AUTH_RATE_LIMIT_SIGNUP_MAX=50
+          AUTH_RATE_LIMIT_LOGIN_MAX=150
+          AUTH_RATE_LIMIT_PASSWORD_RESET_REQUEST_MAX=30
+          EOF
       - uses: anthropics/claude-code-action@be7b93b1907a4abad570368f3c74b6fe3807510b  # v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}

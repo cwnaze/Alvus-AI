@@ -13,3 +13,5 @@ export * from './share-link-lookups';
 export * from './usage-events';
 export * from './suggestion-requests';
 export * from './subscriptions';
+export * from './auth-rate-limit-attempts';
+export * from './ai-rate-limit-attempts';

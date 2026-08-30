@@ -19,6 +19,13 @@ export type AuthBindings = {
   SUPABASE_URL: string;
   SUPABASE_SECRET_KEY: string;
   PUBLIC_APP_URL: string;
+  // Optional per-endpoint overrides for lib/rate-limit's AUTH_RATE_LIMITS ceilings --
+  // unset in production (tight defaults apply); set to looser values in the
+  // playwright-running CI jobs so the regression suite's own traffic doesn't trip
+  // the same threshold that guards against real abuse. See lib/rate-limit/index.ts.
+  AUTH_RATE_LIMIT_SIGNUP_MAX?: string;
+  AUTH_RATE_LIMIT_LOGIN_MAX?: string;
+  AUTH_RATE_LIMIT_PASSWORD_RESET_REQUEST_MAX?: string;
 };
 
 export function extractBearerToken(c: Context): string {

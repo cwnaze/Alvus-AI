@@ -1,13 +1,51 @@
 import type { AuthUser, LoginResponse, RefreshResponse } from '@alvus-ai/shared';
 import { Hono } from 'hono';
+import type { Db } from '../lib/db/client';
 import { createDb } from '../lib/db/client';
 import { createPendingUser, getUserById, type UserRow } from '../lib/db/queries/waitlist';
+import { assertWithinAuthRateLimit, recordAuthRateLimitHit, type AuthRateLimitEndpoint } from '../lib/rate-limit';
 import { createSupabaseAdmin } from '../lib/supabase/client';
 import { authenticate, extractBearerToken, type AuthBindings, type AuthVariables } from '../middleware/auth';
 import { AppError } from '../middleware/errors';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
+
+const AUTH_RATE_LIMIT_ENV_KEY: Record<AuthRateLimitEndpoint, keyof AuthBindings> = {
+  signup: 'AUTH_RATE_LIMIT_SIGNUP_MAX',
+  login: 'AUTH_RATE_LIMIT_LOGIN_MAX',
+  password_reset_request: 'AUTH_RATE_LIMIT_PASSWORD_RESET_REQUEST_MAX',
+};
+
+function authRateLimitMaxOverride(env: AuthBindings, endpoint: AuthRateLimitEndpoint): number | undefined {
+  const raw = env[AUTH_RATE_LIMIT_ENV_KEY[endpoint]];
+  const parsed = raw ? Number(raw) : NaN;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+// Behind Cloudflare CF-Connecting-IP is always present, but any path where it
+// isn't (direct Worker invocation, a non-CF ingress, a preview/harness
+// request) must not fall back to a shared literal like 'unknown' -- that
+// would pool every un-attributable caller into one counter, so enough
+// header-less traffic from anywhere trips the limit for everyone. Skipping
+// the check entirely when the IP can't be attributed degrades per-caller
+// instead of failing closed against innocent traffic.
+async function enforceAuthRateLimit(
+  db: Db,
+  env: AuthBindings,
+  ipAddress: string | undefined,
+  endpoint: AuthRateLimitEndpoint,
+): Promise<void> {
+  if (!ipAddress) return;
+  const maxRequestsOverride = authRateLimitMaxOverride(env, endpoint);
+  await assertWithinAuthRateLimit(db, {
+    ipAddress,
+    endpoint,
+    now: new Date(),
+    ...(maxRequestsOverride !== undefined && { maxRequestsOverride }),
+  });
+  await recordAuthRateLimitHit(db, { ipAddress, endpoint });
+}
 
 function toAuthUser(row: Pick<UserRow, 'id' | 'email' | 'status' | 'role' | 'createdAt'>): AuthUser {
   return {
@@ -35,6 +73,9 @@ auth.post('/signup', async (c) => {
     throw new AppError(400, 'invalid_password', `Password must be at least ${MIN_PASSWORD_LENGTH} characters`);
   }
 
+  const db = createDb(c.env.DATABASE_URL);
+  await enforceAuthRateLimit(db, c.env, c.req.header('CF-Connecting-IP'), 'signup');
+
   const supabase = createSupabaseAdmin(c.env.SUPABASE_URL, c.env.SUPABASE_SECRET_KEY);
   const { data, error } = await supabase.auth.admin.createUser({ email, password, email_confirm: true });
   if (error || !data.user) {
@@ -44,7 +85,6 @@ auth.post('/signup', async (c) => {
     throw new AppError(400, 'signup_failed', error?.message ?? 'Could not create account');
   }
 
-  const db = createDb(c.env.DATABASE_URL);
   try {
     await createPendingUser(db, { id: data.user.id, email });
   } catch (err) {
@@ -62,13 +102,15 @@ auth.post('/login', async (c) => {
   const { email, password } = await parseCredentials(c);
   if (!email || !password) throw new AppError(401, 'invalid_credentials', 'Invalid email or password');
 
+  const db = createDb(c.env.DATABASE_URL);
+  await enforceAuthRateLimit(db, c.env, c.req.header('CF-Connecting-IP'), 'login');
+
   const supabase = createSupabaseAdmin(c.env.SUPABASE_URL, c.env.SUPABASE_SECRET_KEY);
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error || !data.session || !data.user) {
     throw new AppError(401, 'invalid_credentials', 'Invalid email or password');
   }
 
-  const db = createDb(c.env.DATABASE_URL);
   const userRow = await getUserById(db, data.user.id);
   if (!userRow) throw new AppError(401, 'invalid_credentials', 'Invalid email or password');
 
@@ -112,6 +154,9 @@ auth.post('/logout', authenticate, async (c) => {
 auth.post('/password-reset/request', async (c) => {
   const body = (await c.req.json().catch(() => null)) as { email?: unknown } | null;
   const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
+
+  const db = createDb(c.env.DATABASE_URL);
+  await enforceAuthRateLimit(db, c.env, c.req.header('CF-Connecting-IP'), 'password_reset_request');
 
   // Only ever attempt the Supabase call for a well-formed address, but return
   // the exact same 202 regardless of format, existence, or delivery outcome --

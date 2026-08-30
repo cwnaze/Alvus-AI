@@ -18,6 +18,8 @@ const {
   verifyOtp,
   createPendingUser,
   getUserById,
+  assertWithinAuthRateLimit,
+  recordAuthRateLimitHit,
 } = vi.hoisted(() => ({
   createUser: vi.fn(),
   deleteUser: vi.fn(),
@@ -30,6 +32,8 @@ const {
   verifyOtp: vi.fn(),
   createPendingUser: vi.fn(),
   getUserById: vi.fn(),
+  assertWithinAuthRateLimit: vi.fn(),
+  recordAuthRateLimitHit: vi.fn(),
 }));
 
 vi.mock('../lib/supabase/client', () => ({
@@ -46,6 +50,7 @@ vi.mock('../lib/supabase/client', () => ({
 }));
 vi.mock('../lib/db/client', () => ({ createDb: () => ({}) }));
 vi.mock('../lib/db/queries/waitlist', () => ({ createPendingUser, getUserById }));
+vi.mock('../lib/rate-limit', () => ({ assertWithinAuthRateLimit, recordAuthRateLimitHit }));
 
 const { default: authRoutes } = await import('./auth');
 
@@ -110,6 +115,73 @@ describe('POST /signup', () => {
     expect(((await res.json()) as ErrorEnvelope).error.code).toBe('email_exists');
   });
 
+  it('checks and records the per-IP signup rate limit before calling Supabase', async () => {
+    createUser.mockResolvedValueOnce({ data: { user: { id: 'auth-3' } }, error: null });
+    createPendingUser.mockResolvedValueOnce(undefined);
+
+    await jsonRequest('/signup', { email: 'rl@example.test', password: 'longenough1' }, { headers: { 'CF-Connecting-IP': '203.0.113.9' } });
+
+    expect(assertWithinAuthRateLimit).toHaveBeenCalledWith(expect.anything(), {
+      ipAddress: '203.0.113.9',
+      endpoint: 'signup',
+      now: expect.any(Date),
+    });
+    expect(recordAuthRateLimitHit).toHaveBeenCalledWith(expect.anything(), { ipAddress: '203.0.113.9', endpoint: 'signup' });
+  });
+
+  it('skips the rate limit check entirely when no CF-Connecting-IP header is present, rather than pooling into a shared bucket', async () => {
+    createUser.mockResolvedValueOnce({ data: { user: { id: 'auth-4' } }, error: null });
+    createPendingUser.mockResolvedValueOnce(undefined);
+    const callsBefore = assertWithinAuthRateLimit.mock.calls.length;
+    const recordsBefore = recordAuthRateLimitHit.mock.calls.length;
+
+    const res = await jsonRequest('/signup', { email: 'no-ip@example.test', password: 'longenough1' });
+
+    expect(res.status).toBe(201);
+    expect(assertWithinAuthRateLimit.mock.calls.length).toBe(callsBefore);
+    expect(recordAuthRateLimitHit.mock.calls.length).toBe(recordsBefore);
+  });
+
+  it('passes an AUTH_RATE_LIMIT_SIGNUP_MAX env override through as maxRequestsOverride', async () => {
+    createUser.mockResolvedValueOnce({ data: { user: { id: 'auth-5' } }, error: null });
+    createPendingUser.mockResolvedValueOnce(undefined);
+
+    await app.request(
+      '/signup',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': '203.0.113.9' },
+        body: JSON.stringify({ email: 'override@example.test', password: 'longenough1' }),
+      },
+      { ...ENV, AUTH_RATE_LIMIT_SIGNUP_MAX: '2' },
+    );
+
+    expect(assertWithinAuthRateLimit).toHaveBeenCalledWith(expect.anything(), {
+      ipAddress: '203.0.113.9',
+      endpoint: 'signup',
+      now: expect.any(Date),
+      maxRequestsOverride: 2,
+    });
+  });
+
+  it('429s with a Retry-After when the per-IP signup rate limit is exceeded, without calling Supabase', async () => {
+    const { AppError } = await import('../middleware/errors');
+    assertWithinAuthRateLimit.mockRejectedValueOnce(
+      new AppError(429, 'rate_limited', 'Too many requests. Please try again shortly.', { retry_after: 3600 }, { 'Retry-After': '3600' }),
+    );
+
+    const res = await jsonRequest(
+      '/signup',
+      { email: 'limited@example.test', password: 'longenough1' },
+      { headers: { 'CF-Connecting-IP': '203.0.113.9' } },
+    );
+
+    expect(res.status).toBe(429);
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('rate_limited');
+    expect(res.headers.get('Retry-After')).toBe('3600');
+    expect(createUser).not.toHaveBeenCalledWith({ email: 'limited@example.test', password: 'longenough1', email_confirm: true });
+  });
+
   it('cleans up the orphaned auth user if the DB insert fails', async () => {
     createUser.mockResolvedValueOnce({ data: { user: { id: 'auth-2' } }, error: null });
     createPendingUser.mockRejectedValueOnce(new Error('db down'));
@@ -128,6 +200,28 @@ describe('POST /login', () => {
     const res = await jsonRequest('/login', { email: 'a@example.test', password: 'wrong' });
     expect(res.status).toBe(401);
     expect(((await res.json()) as ErrorEnvelope).error.code).toBe('invalid_credentials');
+  });
+
+  it('429s with a Retry-After when the per-IP login rate limit is exceeded, without calling Supabase', async () => {
+    const { AppError } = await import('../middleware/errors');
+    assertWithinAuthRateLimit.mockRejectedValueOnce(
+      new AppError(429, 'rate_limited', 'Too many requests. Please try again shortly.', { retry_after: 900 }, { 'Retry-After': '900' }),
+    );
+
+    const res = await jsonRequest(
+      '/login',
+      { email: 'rate-limited-login@example.test', password: 'wrong' },
+      { headers: { 'CF-Connecting-IP': '203.0.113.9' } },
+    );
+
+    expect(res.status).toBe(429);
+    expect(res.headers.get('Retry-After')).toBe('900');
+    expect(signInWithPassword).not.toHaveBeenCalledWith({ email: 'rate-limited-login@example.test', password: 'wrong' });
+    expect(assertWithinAuthRateLimit).toHaveBeenCalledWith(expect.anything(), {
+      ipAddress: '203.0.113.9',
+      endpoint: 'login',
+      now: expect.any(Date),
+    });
   });
 
   it('returns 200 with tokens and the users row for correct credentials, regardless of waitlist status', async () => {
@@ -245,6 +339,28 @@ describe('POST /password-reset/request', () => {
 
     expect(res.status).toBe(429);
     expect(((await res.json()) as ErrorEnvelope).error.code).toBe('rate_limited');
+  });
+
+  it('429s with a Retry-After when the app\'s own per-IP rate limit is exceeded, without calling Supabase', async () => {
+    const { AppError } = await import('../middleware/errors');
+    assertWithinAuthRateLimit.mockRejectedValueOnce(
+      new AppError(429, 'rate_limited', 'Too many requests. Please try again shortly.', { retry_after: 900 }, { 'Retry-After': '900' }),
+    );
+
+    const res = await jsonRequest(
+      '/password-reset/request',
+      { email: 'rate-limited-reset@example.test' },
+      { headers: { 'CF-Connecting-IP': '203.0.113.9' } },
+    );
+
+    expect(res.status).toBe(429);
+    expect(res.headers.get('Retry-After')).toBe('900');
+    expect(resetPasswordForEmail).not.toHaveBeenCalledWith('rate-limited-reset@example.test', expect.anything());
+    expect(assertWithinAuthRateLimit).toHaveBeenCalledWith(expect.anything(), {
+      ipAddress: '203.0.113.9',
+      endpoint: 'password_reset_request',
+      now: expect.any(Date),
+    });
   });
 });
 

@@ -25,6 +25,8 @@ const {
   requestSourceAnalysis,
   assertWithinUsageLimit,
   recordUsage,
+  assertWithinAiRateLimit,
+  recordAiRateLimitHit,
   extractTextFromFile,
   uploadSourceFile,
 } = vi.hoisted(() => ({
@@ -43,6 +45,8 @@ const {
   requestSourceAnalysis: vi.fn(),
   assertWithinUsageLimit: vi.fn(),
   recordUsage: vi.fn(),
+  assertWithinAiRateLimit: vi.fn(),
+  recordAiRateLimitHit: vi.fn(),
   extractTextFromFile: vi.fn(),
   uploadSourceFile: vi.fn(),
 }));
@@ -69,6 +73,7 @@ vi.mock('../lib/ai', async (importOriginal) => {
   return { ...actual, requestSourceAnalysis };
 });
 vi.mock('../lib/metering', () => ({ assertWithinUsageLimit, recordUsage }));
+vi.mock('../lib/rate-limit', () => ({ assertWithinAiRateLimit, recordAiRateLimitHit }));
 vi.mock('../lib/files', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../lib/files')>();
   return { ...actual, extractTextFromFile };
@@ -644,6 +649,28 @@ describe('POST /:sourceId/analyze', () => {
     expect(requestSourceAnalysis).not.toHaveBeenCalled();
   });
 
+  it('429s with a Retry-After once the per-user AI rate limit is exceeded, without calling the AI', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+    getProjectSourceById.mockResolvedValueOnce(projectSourceRow());
+    assertWithinUsageLimit.mockResolvedValueOnce(undefined);
+    assertWithinAiRateLimit.mockRejectedValueOnce(
+      new AppError(429, 'rate_limited', 'Too many requests. Please slow down and try again shortly.', { retry_after: 60 }, { 'Retry-After': '60' }),
+    );
+
+    const res = await request(`/${PROJECT_ID}/${PROJECT_SOURCE_ID}/analyze`, { method: 'POST' });
+
+    expect(res.status).toBe(429);
+    expect(res.headers.get('Retry-After')).toBe('60');
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('rate_limited');
+    expect(requestSourceAnalysis).not.toHaveBeenCalled();
+    expect(assertWithinAiRateLimit).toHaveBeenCalledWith(expect.anything(), {
+      userId: OWNER_ID,
+      actionType: 'source_analysis',
+      now: expect.any(Date),
+    });
+  });
+
   it('422s an unreadable source and does not record usage', async () => {
     asCaller();
     getProjectById.mockResolvedValueOnce(projectRow());
@@ -978,6 +1005,24 @@ describe('POST /upload', () => {
     const res = await uploadRequest(PROJECT_ID, form);
 
     expect(res.status).toBe(402);
+    expect(requestSourceAnalysis).not.toHaveBeenCalled();
+  });
+
+  it('429s with a Retry-After once the per-user AI rate limit is exceeded, without calling the AI', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+    extractTextFromFile.mockResolvedValueOnce('Extracted text.');
+    assertWithinUsageLimit.mockResolvedValueOnce(undefined);
+    assertWithinAiRateLimit.mockRejectedValueOnce(
+      new AppError(429, 'rate_limited', 'Too many requests. Please slow down and try again shortly.', { retry_after: 60 }, { 'Retry-After': '60' }),
+    );
+
+    const form = new FormData();
+    form.set('file', pdfFile());
+    const res = await uploadRequest(PROJECT_ID, form);
+
+    expect(res.status).toBe(429);
+    expect(res.headers.get('Retry-After')).toBe('60');
     expect(requestSourceAnalysis).not.toHaveBeenCalled();
   });
 
