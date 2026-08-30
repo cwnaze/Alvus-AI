@@ -954,7 +954,7 @@
         "US-023",
         "US-025"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "browser",
       "verification": {
         "commands": [
@@ -968,7 +968,7 @@
         ]
       },
       "demo": "docs/demos/US-029.md",
-      "branch": null,
+      "branch": "feature/us-029-accessibility-and-responsive-layout-hardening",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,
