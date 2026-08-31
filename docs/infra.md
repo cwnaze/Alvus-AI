@@ -95,10 +95,16 @@ Two classes: CI/deploy-time (never shipped in the Worker) and app-runtime (bound
 | `STRIPE_WEBHOOK_SECRET` | Verifies incoming Stripe webhook signatures. |
 | `STRIPE_PUBLISHABLE_KEY` | Frontend-facing Stripe key (not secret, env-scoped). |
 | `STRIPE_PRICE_ID_PLUS` / `STRIPE_PRICE_ID_PRO` | Stripe Price IDs for checkout-session creation. |
+| `SHARE_LINK_ENCRYPTION_KEY` | 32-byte hex key encrypting share-link tokens at rest, so a raw DB read can't recover them. |
 | `SEMANTIC_SCHOLAR_API_KEY` | Optional — raises rate limit; app works without it. |
 | `CROSSREF_CONTACT_EMAIL` | Polite-pool contact per CrossRef policy; not secret. |
 | `UNPAYWALL_CONTACT_EMAIL` | Required query param per Unpaywall policy; not secret. |
+| `SOURCES_PROVIDER_MODE` | `"live"` calls Semantic Scholar/CrossRef/Unpaywall for real; unset (default everywhere, including production, until set) serves deterministic test fixtures — see `docs/testing.md`'s mocking boundary. |
+| `AI_PROVIDER_MODE` | `"live"` calls the LiteLLM proxy for real; unset (default everywhere, including production, until set) serves deterministic test fixtures — see `docs/testing.md`'s mocking boundary. |
 | `PUBLIC_APP_URL` | Base URL for share links, Stripe redirect URLs, and the password-reset email link. |
+| `AUTH_RATE_LIMIT_SIGNUP_MAX` | Override for the per-IP signup rate-limit ceiling (default 5/10min). Leave unset in production — the default is the security control; set only in CI/test config so the regression suite's own traffic doesn't trip it. |
+| `AUTH_RATE_LIMIT_LOGIN_MAX` | Same, for login (default 20/10min). |
+| `AUTH_RATE_LIMIT_PASSWORD_RESET_REQUEST_MAX` | Same, for password-reset requests (default 10/10min). |
 
 First-draft list — reconcile against data-model/API docs once settled (Stripe
 price/product IDs as config, whether JWT verification needs anything beyond

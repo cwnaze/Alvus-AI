@@ -4,9 +4,20 @@ Invite/waitlist-gated, subscription-based web app for AI-assisted academic paper
 writing — source discovery and scoring, an auto-formatting citation-aware editor, and
 post-writing feedback on wording, grammar, and content.
 
+## Documentation
+
+- **Architecture & decisions**: `docs/tdd.md`
+- **Data model**: `docs/data-model.md`
+- **API surface**: `docs/api.md`
+- **Security model**: `docs/security.md`
+- **Testing strategy**: `docs/testing.md`
+- **Infrastructure, environments, deploy pipeline, env vars, rollback/backups**: `docs/infra.md`
+
 ## Development
 ```bash
-cp .env.example .env    # fill in values
+cp .env.example .env    # fill in values -- each var has a one-line purpose comment;
+                         # see docs/infra.md's Environment variables tables for the
+                         # CI/deploy-time vs. app-runtime split and sensitivity notes
 supabase start           # local Docker Postgres, only if not using the shared dev project
 ```
 Then run the `install` and `serve.dev` commands from `pipeline.json`;
@@ -46,6 +57,23 @@ or by an unauthenticated request. It sets `role='admin'`, `status='approved'` on
 `users` row and creates/updates the matching `waitlist_signups` row, so the account
 shows up correctly in the admin queue too. Safe to re-run; it's idempotent.
 
+## Deploying
+
+CI runs the deploy pipeline (`.github/workflows/deploy-preview.yml`,
+`.github/workflows/deploy.yml`) — this is not a manual step:
+
+- **Preview (per PR)**: every PR gets a Cloudflare Workers Version upload, posted back
+  to the PR as an alias URL. It never receives production traffic and never touches a
+  DB/Stripe/LiteLLM secret.
+- **Production (on merge to `main`)**: install → typecheck → lint → build → test, then
+  migrations (`drizzle-kit migrate`, `supabase db push`, the Supabase Auth config
+  push) — halting on failure so the next step never runs against a bad schema — then
+  `wrangler deploy`, then every app-runtime variable is (re-)bound as a Worker secret
+  via `wrangler secret put` from the same repo secrets.
+
+Full detail — environments matrix, why each step is ordered the way it is, the known
+manual repairs — lives in `docs/infra.md`.
+
 ### Rollback
 
 Full policy (additive-first migration strategy, backup priorities) lives in
@@ -71,12 +99,28 @@ psql "${DATABASE_URL%%\?*}" -v ON_ERROR_STOP=1 -f drizzle/rollback/<name>_down.s
 This drops tables and their data — default to additive/backward-compatible forward
 migrations so this is rarely needed (see `docs/infra.md`).
 
+### Backup / restore
+
+Uploaded sources and drafts are sensitive, irreplaceable, single-owner data — there is
+no user-facing "restore" flow. Recovery relies entirely on Supabase-managed Postgres
+backups (free tier: daily, short retention — no point-in-time recovery). **This is an
+operational runbook item to revisit before scaling past bootstrap budget**: upgrade to
+a paid Supabase plan with PITR once real user data is at stake. Supabase Storage
+(uploaded PDF/TXT files) has no PITR at any tier; mitigate with bucket versioning or a
+periodic export job. Full detail in `docs/infra.md`'s Rollback plan → Backups.
+
 ## Tests and demos
+
+CI's required check runs the same commands locally available via `pipeline.json`
+(`npm run typecheck`, `npm run lint`, `npm run build`, and unit/integration tests via
+`npm test`, against a live local Supabase Postgres started by `supabase start`):
 ```bash
-npx playwright test
+npm test              # unit (Vitest) + Worker/API integration (@cloudflare/vitest-pool-workers)
+npx playwright test   # story demo specs — a real wrangler dev, seeded fixture data
 ```
-Specs generate the demo docs in `docs/demos/` — those are build artifacts, not
-hand-written. Read them to see what the app does, story by story.
+Playwright specs generate the demo docs in `docs/demos/` — those are build artifacts,
+not hand-written. Read them to see what the app does, story by story. Full three-tier
+strategy (unit → Worker/API integration → demo specs) in `docs/testing.md`.
 
 ## Build pipeline
 This repo builds itself one story at a time. The pipeline is built for web applications
