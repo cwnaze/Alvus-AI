@@ -992,7 +992,7 @@
         "US-025",
         "US-029"
       ],
-      "status": "in_progress",
+      "status": "done",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -1005,9 +1005,9 @@
       },
       "demo": "docs/demos/US-030.md",
       "branch": "feature/us-030-readme-and-docs-finalized",
-      "prNumber": null,
-      "issueNumber": null,
-      "reviewRounds": 0,
+      "prNumber": 70,
+      "issueNumber": 71,
+      "reviewRounds": 1,
       "notes": ""
     }
   ]
