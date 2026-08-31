@@ -40,6 +40,20 @@ jobs:
         env:
           ALL_SECRETS: ${{ toJSON(secrets) }}
         run: node .github/scripts/write-env.mjs
+      - name: Loosen auth rate limits for the regression suite
+        # AUTH_RATE_LIMIT_*_MAX defaults are tight in production (signup 5,
+        # login 20, password-reset 10 per 10min). This job runs the full
+        # Playwright regression suite -- ~14 signups / 48 logins from one
+        # shared runner IP -- and needs its own headroom. The same step is in
+        # pr-fix.yml, story-start.yml and production-prep.yml; deploy.yml is
+        # deliberately untouched so production keeps the tight default.
+        # Restored here after 071f0eb dropped it from this file only (#65).
+        run: |
+          cat >> .env <<'EOF'
+          AUTH_RATE_LIMIT_SIGNUP_MAX=50
+          AUTH_RATE_LIMIT_LOGIN_MAX=150
+          AUTH_RATE_LIMIT_PASSWORD_RESET_REQUEST_MAX=30
+          EOF
       - name: Restore previous demo screenshots
         uses: actions/cache@v4
         with:

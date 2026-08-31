@@ -99,6 +99,13 @@
       "when": 1786819568439,
       "tag": "0013_add_rate_limit_attempts",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1788000000000,
+      "tag": "0014_revoke_default_select_grants",
+      "breakpoints": true
     }
   ]
 }

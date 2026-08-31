@@ -16,6 +16,24 @@ outputs:
   serve-url:
     description: The URL the app is served on, for demo specs
     value: ${{ steps.manifest.outputs.serve_url }}
+  # A composite action only exposes outputs listed here; an inner step's output
+  # that isn't re-declared is invisible to the caller. These four were missing,
+  # so ci.yml's required "check" job read empty strings for every command and
+  # skipped typecheck/lint/build/test while still exiting 0 (issue #69) -- the
+  # gate had been a no-op since the bootstrap commit. Anything a workflow reads
+  # off steps.setup.outputs.* has to be re-declared here.
+  cmd_typecheck:
+    description: The project's typecheck command, from pipeline.json
+    value: ${{ steps.manifest.outputs.cmd_typecheck }}
+  cmd_lint:
+    description: The project's lint command, from pipeline.json
+    value: ${{ steps.manifest.outputs.cmd_lint }}
+  cmd_build:
+    description: The project's build command, from pipeline.json
+    value: ${{ steps.manifest.outputs.cmd_build }}
+  cmd_test:
+    description: The project's test command, from pipeline.json
+    value: ${{ steps.manifest.outputs.cmd_test }}
 
 runs:
   using: composite
