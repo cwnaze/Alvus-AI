@@ -1009,6 +1009,122 @@
       "issueNumber": 71,
       "reviewRounds": 1,
       "notes": ""
+    },
+    {
+      "id": "US-031",
+      "repo": "app",
+      "title": "Bump vulnerable TipTap dependencies and harden document content validation",
+      "userStory": "As a user opening a read-only share link, I need the rendered document to be free of a known TipTap XSS/prototype-pollution advisory so a malicious document JSON someone else saved can't run script in my browser.",
+      "acceptanceCriteria": [
+        "@tiptap/core, @tiptap/pm, @tiptap/react, @tiptap/starter-kit (and any @tiptap/extension-* in the tree) bumped to >=3.30.4; npm audit shows GHSA-cp6q-959q-f8rh and related TipTap advisories resolved",
+        "apps/worker/src/routes/editor.ts's parseContent rejects any node/mark attrs object containing a __proto__, constructor, or prototype key, as defense-in-depth independent of the TipTap patch",
+        "Existing editor/document/share-link demo specs (e2e/us-018.spec.ts, e2e/us-019.spec.ts, e2e/us-025.spec.ts) still pass unmodified against the bumped dependency"
+      ],
+      "dependsOn": [],
+      "status": "pending",
+      "demoKind": "command",
+      "verification": {
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
+        "specs": []
+      },
+      "demo": null,
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": "Filed from docs/production-readiness.md must-fix #1 (production-prep pass after US-030). Full detail in docs/production-prep/security-findings.md."
+    },
+    {
+      "id": "US-032",
+      "repo": "app",
+      "title": "Add a query/connection timeout to the shared Postgres client so a stuck DB call can't hang a request forever",
+      "userStory": "As a user, I need the app to fail fast with a clear error if the database connection stalls, instead of the page hanging on a disabled button forever with no error and no log line an operator could see.",
+      "acceptanceCriteria": [
+        "The shared postgres() client in apps/worker/src/lib/db/client.ts has an explicit statement/connection timeout (or every db.execute/query call site is wrapped with one, matching the pattern lib/net/fetch-with-retry.ts already uses for external calls), so a stuck connection surfaces a clean error response instead of hanging indefinitely",
+        "apps/worker/src/middleware/errors.ts's onError logs at least 5xx-class AppErrors (not only unhandled Errors), so a timeout-triggered failure produces a server-side log line with correlationId",
+        "A regression check demonstrates the fix: e2e/us-016.spec.ts, e2e/us-017.spec.ts, e2e/us-018.spec.ts, e2e/us-023.spec.ts, and e2e/us-029.spec.ts all pass reliably (3 consecutive green runs) against a production build served by wrangler dev, the same way production-prep's verification run them"
+      ],
+      "dependsOn": [],
+      "status": "pending",
+      "demoKind": "command",
+      "verification": {
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
+        "specs": []
+      },
+      "demo": null,
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": "Filed from docs/production-readiness.md must-fix #2 (production-prep pass after US-030). Reproduced live during that pass's own verification run: 5/16 demo specs failed with requests that never returned (including a raw Playwright APIRequestContext PUT bypassing all frontend JS, ruling out a frontend-only cause). Full trace analysis and evidence in docs/production-readiness.md must-fix #2 and docs/production-prep/operational-readiness-findings.md should-fix #4. Root cause is suspected but not confirmed to be the Workers postgres.js polyfill connection-lifecycle race apps/worker/src/index.ts:55-58 already comments on for the health check; whoever picks this up should confirm before assuming the timeout alone is sufficient."
+    },
+    {
+      "id": "US-033",
+      "repo": "app",
+      "title": "Correct docs/security.md's Authorization section to match the app's actual enforcement model",
+      "userStory": "As a developer or security reviewer relying on docs/security.md during an incident or audit, I need the Authorization section to describe the controls the app actually enforces, not a design that was superseded during implementation.",
+      "acceptanceCriteria": [
+        "docs/security.md's Authorization per resource section is rewritten to state the real model: the Worker connects as the postgres role over DATABASE_URL, and authorization is enforced by explicit per-route ownership checks (name loadOwnedProject and requireApproved/authenticate) rather than by RLS with the caller's own JWT",
+        "The section clarifies RLS + grants are a secondary, independently-tested backstop (linking US-026's RLS integration suite), not the live enforcement path",
+        "docs/security.md's secret classification table adds a row for SHARE_LINK_ENCRYPTION_KEY (App runtime, sensitive), which the table currently omits despite the same doc treating it as critically sensitive elsewhere",
+        "docs/data-model.md's Migration strategy section is updated to note that RLS is hand-written SQL that is not the app's live enforcement path, matching the corrected security.md"
+      ],
+      "dependsOn": [],
+      "status": "pending",
+      "demoKind": "command",
+      "verification": {
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
+        "specs": []
+      },
+      "demo": null,
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": "Filed from docs/production-readiness.md must-fix #3 (production-prep pass after US-030). Full detail and code citations in docs/production-prep/docs-dx-findings.md finding 1 and finding 8."
+    },
+    {
+      "id": "US-034",
+      "repo": "app",
+      "title": "Document the three rate-limit tables missing from docs/data-model.md",
+      "userStory": "As a developer reading docs/data-model.md to understand the schema, I need every live table documented so I don't miss real tables (and their PII-adjacent sensitivity) that a later story added.",
+      "acceptanceCriteria": [
+        "docs/data-model.md's ER diagram and per-table sections add share_link_lookups, auth_rate_limit_attempts, and ai_rate_limit_attempts (all added by US-027), with field lists mirroring apps/worker/src/lib/db/schema/",
+        "docs/data-model.md's Sensitivity summary table adds rows for all three, classifying the IP address columns as sensitive per the migration comments in drizzle/migrations/0010_add_share_link_lookups.sql and 0013_add_rate_limit_attempts.sql"
+      ],
+      "dependsOn": [],
+      "status": "pending",
+      "demoKind": "command",
+      "verification": {
+        "commands": [
+          "npm run typecheck",
+          "npm run lint",
+          "npm run build",
+          "npm test"
+        ],
+        "specs": []
+      },
+      "demo": null,
+      "branch": null,
+      "prNumber": null,
+      "issueNumber": null,
+      "reviewRounds": 0,
+      "notes": "Filed from docs/production-readiness.md must-fix #4 (production-prep pass after US-030). Full detail in docs/production-prep/docs-dx-findings.md finding 2."
     }
   ]
 }
