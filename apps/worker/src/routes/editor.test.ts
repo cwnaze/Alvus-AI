@@ -176,6 +176,35 @@ describe('PUT /', () => {
     expect(((await res.json()) as ErrorEnvelope).error.code).toBe('invalid_content');
   });
 
+  it.each(['__proto__', 'constructor', 'prototype'])(
+    '400s content whose node attrs carry a "%s" key (GHSA-cp6q-959q-f8rh defense-in-depth)',
+    async (key) => {
+      asCaller();
+      getProjectById.mockResolvedValueOnce(projectRow());
+      // A literal `{ [key]: ... }` object initializer wouldn't create an own
+      // property for "__proto__" -- send raw JSON text instead, matching how
+      // JSON.parse builds the request body from the wire.
+      const body = `{"content":{"type":"doc","content":[{"type":"citation","attrs":{"${key}":{"onerror":"evil"}}}]}}`;
+
+      const res = await request(`/${PROJECT_ID}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body });
+
+      expect(res.status).toBe(400);
+      expect(((await res.json()) as ErrorEnvelope).error.code).toBe('invalid_content');
+      expect(saveDocumentContent).not.toHaveBeenCalled();
+    },
+  );
+
+  it('400s content with a "__proto__" key on the document root itself, not just nested attrs', async () => {
+    asCaller();
+    getProjectById.mockResolvedValueOnce(projectRow());
+    const body = '{"content":{"type":"doc","__proto__":{"onerror":"evil"},"content":[]}}';
+
+    const res = await request(`/${PROJECT_ID}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body });
+
+    expect(res.status).toBe(400);
+    expect(((await res.json()) as ErrorEnvelope).error.code).toBe('invalid_content');
+  });
+
   it('saves the document content and returns updated_at', async () => {
     asCaller();
     getProjectById.mockResolvedValueOnce(projectRow());
