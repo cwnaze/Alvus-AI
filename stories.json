@@ -1021,7 +1021,7 @@
         "Existing editor/document/share-link demo specs (e2e/us-018.spec.ts, e2e/us-019.spec.ts, e2e/us-025.spec.ts) still pass unmodified against the bumped dependency"
       ],
       "dependsOn": [],
-      "status": "in_progress",
+      "status": "done",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -1034,7 +1034,7 @@
       },
       "demo": null,
       "branch": "feature/us-031-bump-vulnerable-tiptap-dependencies-and-harden-document-content-validation",
-      "prNumber": null,
+      "prNumber": 74,
       "issueNumber": null,
       "reviewRounds": 0,
       "notes": "Filed from docs/production-readiness.md must-fix #1 (production-prep pass after US-030). Full detail in docs/production-prep/security-findings.md."
