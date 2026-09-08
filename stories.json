@@ -1021,7 +1021,7 @@
         "Existing editor/document/share-link demo specs (e2e/us-018.spec.ts, e2e/us-019.spec.ts, e2e/us-025.spec.ts) still pass unmodified against the bumped dependency"
       ],
       "dependsOn": [],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -1033,7 +1033,7 @@
         "specs": []
       },
       "demo": null,
-      "branch": null,
+      "branch": "feature/us-031-bump-vulnerable-tiptap-dependencies-and-harden-document-content-validation",
       "prNumber": null,
       "issueNumber": null,
       "reviewRounds": 0,
