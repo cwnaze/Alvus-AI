@@ -1050,7 +1050,7 @@
         "A regression check demonstrates the fix: e2e/us-016.spec.ts, e2e/us-017.spec.ts, e2e/us-018.spec.ts, e2e/us-023.spec.ts, and e2e/us-029.spec.ts all pass reliably (3 consecutive green runs) against a production build served by wrangler dev, the same way production-prep's verification run them"
       ],
       "dependsOn": [],
-      "status": "pending",
+      "status": "in_progress",
       "demoKind": "command",
       "verification": {
         "commands": [
