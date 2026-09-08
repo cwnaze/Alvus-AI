@@ -1,16 +1,16 @@
 # Graph Report - Alvus-AI  (2026-09-08)
 
 ## Corpus Check
-- 296 files · ~242,264 words
+- 299 files · ~247,055 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1463 nodes · 2774 edges · 109 communities (85 shown, 23 thin omitted)
+- 1474 nodes · 2783 edges · 113 communities (88 shown, 24 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 58 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `7799fb77`
+- Built from commit: `2e969245`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -26,12 +26,12 @@
 - read-manifest.mjs
 - write-env.mjs
 - complete-story.mjs
-- shared.ts
+- worker/src/index.ts
 - sync-secrets.sh
 - Notify workflow
 - worker/package.json
-- devDependencies
-- dependencies
+- db/client.ts
+- DocumentContent
 - demo.ts
 - compilerOptions
 - metering/index.ts
@@ -45,10 +45,10 @@
 - demo-us-001-server.sh
 - web/package.json
 - feedbackHighlightExtension.ts
-- routes/sources.ts
+- routes/feedback.ts
 - US-002 — Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema
 - demo-us-002.sh
-- scripts
+- CitationFormat
 - US-010 — Global error handler + structured logging with correlation ID
 - US-003 — Seed the tier_limits catalog and dev/CI fixture users
 - US-004 — Health check reports live database connectivity
@@ -75,24 +75,27 @@
 - US-015 — source discovery search
 - US-013 — admin user directory
 - push-supabase-auth-config.mjs
-- sources.test.ts
+- routes/sources.ts
 - ProjectPage.tsx
 - admin.ts
-- routes/billing.ts
+- AppError
 - citation/index.ts
 - api.ts
 - errors.ts
 - AuthVariables
-- routes/feedback.ts
+- routes/projects.ts
 - rls/package.json
 - US-031 — Bump vulnerable TipTap dependencies and harden document content validation
 - US-016 — analyze a candidate source and select or reject it
 - demo-us-031.sh
+- document.ts
 - DashboardPage.tsx
 - ai/client.ts
 - rls/tsconfig.json
 - WritingPage.tsx
 - editor.ts
+- editor.test.ts
+- US-032 — Add a query/connection timeout to the shared Postgres client
 - citations.ts
 - schema/index.ts
 - US-017 — upload your own PDF/TXT source
@@ -109,6 +112,7 @@
 - US-023 — Stripe Checkout and Billing Portal
 - US-025 — read-only share link
 - US-024 — Stripe webhook sync (subscription status, grace period, signature verification)
+- demo-us-032.sh
 - US-027 — Rate limiting on public and metered endpoints
 - demo-us-024.sh
 - demo-us-026.sh
@@ -156,7 +160,7 @@
 - **Data model entities owned by projects (ON DELETE CASCADE from projects.id)** — docs_data_model_projects, docs_data_model_project_documents, docs_data_model_project_sources, docs_data_model_uploaded_files, docs_data_model_share_links, docs_data_model_feedback_passes [EXTRACTED 1.00]
 - **implement-story / pr-review / pr-fix review-and-merge loop** — claude_skills_implement_story_skill, claude_skills_pr_review_skill, claude_skills_pr_fix_skill [INFERRED 0.85]
 
-## Communities (109 total, 23 thin omitted)
+## Communities (113 total, 24 thin omitted)
 
 ### Community 0 - "API Surface doc"
 Cohesion: 0.06
@@ -164,7 +168,7 @@ Nodes (49): CLAUDE.md project guide, LiteLLM proxy as sole AI access path (ratio
 
 ### Community 1 - "share-link.test.ts"
 Cohesion: 0.14
-Nodes (24): decryptShareToken(), encryptShareToken(), fromHex(), generateShareToken(), hashShareToken(), importEncryptionKey(), SECRET_HEX, toHex() (+16 more)
+Nodes (23): decryptShareToken(), encryptShareToken(), fromHex(), generateShareToken(), hashShareToken(), importEncryptionKey(), SECRET_HEX, toHex() (+15 more)
 
 ### Community 2 - "dispatch-next.mjs"
 Cohesion: 0.18
@@ -202,25 +206,25 @@ Nodes (4): keys, lines, missing, secrets
 Cohesion: 0.29
 Nodes (4): db, issues, rounds, story
 
-### Community 11 - "shared.ts"
-Cohesion: 0.22
-Nodes (9): createShareLink(), findShareLinkByTokenHash(), getActiveShareLinkByProject(), recordShareLinkAccess(), revokeShareLink(), ShareLinkRow, shareLinks, Env (+1 more)
+### Community 11 - "worker/src/index.ts"
+Cohesion: 0.13
+Nodes (17): app, Bindings, createShareLink(), findShareLinkByTokenHash(), getActiveShareLinkByProject(), recordShareLinkAccess(), revokeShareLink(), ShareLinkRow (+9 more)
 
 ### Community 14 - "worker/package.json"
 Cohesion: 0.06
 Nodes (34): dependencies, @alvus-ai/shared, drizzle-orm, hono, openai, postgres, stripe, @supabase/supabase-js (+26 more)
 
-### Community 15 - "devDependencies"
-Cohesion: 0.25
-Nodes (8): devDependencies, tailwindcss, @tailwindcss/vite, @types/react, @types/react-dom, typescript, vite, @vitejs/plugin-react
+### Community 15 - "db/client.ts"
+Cohesion: 0.15
+Nodes (19): Db, { postgres, drizzle }, countAiRateLimitAttemptsSince(), recordAiRateLimitAttempt(), countAuthRateLimitAttemptsSince(), recordAuthRateLimitAttempt(), countShareLinkLookupsSince(), recordShareLinkLookup() (+11 more)
 
-### Community 16 - "dependencies"
-Cohesion: 0.22
-Nodes (9): dependencies, @alvus-ai/shared, react, react-dom, react-router-dom, @tiptap/core, @tiptap/pm, @tiptap/react (+1 more)
+### Community 16 - "DocumentContent"
+Cohesion: 0.19
+Nodes (12): BLOCK_TYPES, ExtractedText, extractPlainText(), markParagraphBreak(), pushText(), walk(), LEAF_ATOM_TYPES, locateQuote() (+4 more)
 
 ### Community 17 - "demo.ts"
-Cohesion: 0.09
-Nodes (19): db, main(), supabaseAdmin, findAuthUserIdByEmail(), assertFocusVisible(), assertNoAccessibilityViolations(), assertNoHorizontalOverflow(), DESKTOP_VIEWPORT (+11 more)
+Cohesion: 0.10
+Nodes (16): findAuthUserIdByEmail(), assertFocusVisible(), assertNoAccessibilityViolations(), assertNoHorizontalOverflow(), DESKTOP_VIEWPORT, MOBILE_VIEWPORT, Demo, Step (+8 more)
 
 ### Community 18 - "compilerOptions"
 Cohesion: 0.22
@@ -228,7 +232,7 @@ Nodes (8): compilerOptions, jsx, lib, noEmit, types, extends, include, ../../tsc
 
 ### Community 19 - "metering/index.ts"
 Cohesion: 0.05
-Nodes (51): Db, getSubscriptionByUserId(), SubscriptionRow, SubscriptionStatus, SubscriptionTier, updateSubscriptionByStripeSubscriptionId(), upsertSubscription(), getMonthlyLimit() (+43 more)
+Nodes (50): getSubscriptionByUserId(), SubscriptionRow, SubscriptionStatus, SubscriptionTier, updateSubscriptionByStripeSubscriptionId(), upsertSubscription(), getMonthlyLimit(), ActionType (+42 more)
 
 ### Community 20 - "worker/tsconfig.json"
 Cohesion: 0.25
@@ -255,28 +259,28 @@ Cohesion: 0.29
 Nodes (6): 1. Typecheck every workspace, 2. Lint the whole repo, 3. Build the frontend for the Worker's static-assets binding, 4. Run the worker's test suite, 5. Boot wrangler dev and confirm the placeholder page and the API both respond, US-001 — Scaffold monorepo (frontend, Worker, shared package, tooling)
 
 ### Community 26 - "shared/src/index.ts"
-Cohesion: 0.05
-Nodes (65): BLOCK_TYPES, ExtractedText, extractPlainText(), markParagraphBreak(), pushText(), walk(), LEAF_ATOM_TYPES, locateQuote() (+57 more)
+Cohesion: 0.10
+Nodes (34): AdminUser, AdminUsersResponse, LoginResponse, RefreshResponse, Tier, TIERS, USER_ROLES, UserRole (+26 more)
 
 ### Community 28 - "web/package.json"
-Cohesion: 0.14
-Nodes (14): @alvus-ai/shared, typescript, name, private, type, version, react-dom, tailwindcss (+6 more)
+Cohesion: 0.06
+Nodes (35): dependencies, @alvus-ai/shared, react, react-dom, react-router-dom, @tiptap/core, @tiptap/pm, @tiptap/react (+27 more)
 
 ### Community 29 - "feedbackHighlightExtension.ts"
 Cohesion: 0.32
-Nodes (7): CATEGORY_CLASS, Commands, FeedbackHighlight, feedbackHighlightKey, Storage, @tiptap/core, FeedbackComment
+Nodes (7): CATEGORY_CLASS, Commands, feedbackHighlightKey, Storage, @tiptap/core, FeedbackComment, @tiptap/core
 
-### Community 30 - "routes/sources.ts"
-Cohesion: 0.11
-Nodes (26): createUploadedProjectSource(), deleteProjectSource(), ExternalWorkIdentity, ExternalWorkRow, findExternalWorkByIdentity(), findOrCreateProjectSource(), getProjectSourceById(), listProjectSources() (+18 more)
+### Community 30 - "routes/feedback.ts"
+Cohesion: 0.21
+Nodes (9): createFeedbackPass(), FeedbackPassRow, getFeedbackPassById(), listFeedbackPasses(), FeedbackCommentJson, feedbackPasses, Env, feedback (+1 more)
 
 ### Community 31 - "US-002 — Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema"
 Cohesion: 0.33
 Nodes (5): 1. Boot the local Supabase stack (dev/CI parity), 2. Confirm the source-uploads Storage bucket is private (RLS-ready, no public read until owner-scoped policies land in US-014/US-017), 3. Apply the baseline schema via drizzle-kit, 4. Confirm users, waitlist_signups, and tier_limits exist, including the users -> auth.users FK, US-002 — Provision Supabase (Postgres + Storage) and connect Drizzle to a migrated baseline schema
 
-### Community 33 - "scripts"
-Cohesion: 0.50
-Nodes (4): scripts, build, dev, typecheck
+### Community 33 - "CitationFormat"
+Cohesion: 0.20
+Nodes (9): CITATION_FORMATS, CitationFormat, PROJECT_STATUSES, ProjectsResponse, ProjectStatus, SharedPaperResponse, SharedProject, ShareLinkResponse (+1 more)
 
 ### Community 34 - "US-010 — Global error handler + structured logging with correlation ID"
 Cohesion: 0.40
@@ -330,21 +334,21 @@ Nodes (5): 1. Opening a project shows its source-discovery view, 2. Searching re
 Cohesion: 0.40
 Nodes (4): 1. The admin searches and filters the directory, and views the user's status, role, and tier, 2. Filtering by a paid tier returns nobody -- no account can be on a paid plan before billing ships, 3. The admin revokes the user's access; their status flips to rejected in the directory, US-013 — admin user directory
 
-### Community 60 - "sources.test.ts"
-Cohesion: 0.10
-Nodes (22): EmptyExtractionError, extractPdf(), extractTextFromFile(), extractTxt(), UnparseableFileError, UploadMimeType, withTimeout(), SOURCE_UPLOADS_BUCKET (+14 more)
+### Community 60 - "routes/sources.ts"
+Cohesion: 0.05
+Nodes (52): createUploadedProjectSource(), deleteProjectSource(), ExternalWorkIdentity, ExternalWorkRow, findExternalWorkByIdentity(), findOrCreateProjectSource(), getProjectSourceById(), listProjectSources() (+44 more)
 
 ### Community 61 - "ProjectPage.tsx"
 Cohesion: 0.10
 Nodes (30): analyzeSource(), createShareLink(), deselectSource(), fetchBibliography(), fetchProject(), fetchShareLink(), rejectSource(), revokeShareLink() (+22 more)
 
 ### Community 62 - "admin.ts"
-Cohesion: 0.12
-Nodes (25): createDb(), listUsers(), revokeUserAccess(), approveWaitlistUser(), createPendingUser(), getUserById(), listWaitlistEntries(), rejectWaitlistUser() (+17 more)
+Cohesion: 0.21
+Nodes (12): listUsers(), revokeUserAccess(), approveWaitlistUser(), createPendingUser(), listWaitlistEntries(), rejectWaitlistUser(), UserRow, WaitlistSignupRow (+4 more)
 
-### Community 63 - "routes/billing.ts"
-Cohesion: 0.14
-Nodes (10): billing, BillingBindings, Env, app, asCaller(), BillingStatusBody, callerRow(), ENV (+2 more)
+### Community 63 - "AppError"
+Cohesion: 0.15
+Nodes (18): createDb(), getUserById(), assertWithinAuthRateLimit(), AuthRateLimitEndpoint, recordAuthRateLimitHit(), createSupabaseAdmin(), authenticate(), AuthUser (+10 more)
 
 ### Community 64 - "citation/index.ts"
 Cohesion: 0.16
@@ -355,12 +359,21 @@ Cohesion: 0.25
 Nodes (16): ApiErrorBody, apiLogout(), fetchMe(), refreshAccessToken(), AuthContext, AuthContextValue, AuthProvider(), revalidate() (+8 more)
 
 ### Community 66 - "errors.ts"
-Cohesion: 0.09
-Nodes (23): app, Bindings, { execute }, CORRELATION_ID_HEADER, ErrorVariables, onError(), buildApp(), ErrorEnvelope (+15 more)
+Cohesion: 0.10
+Nodes (20): { execute }, {
+  countSuggestionRequestsSince,
+  recordSuggestionRequest,
+  countShareLinkLookupsSince,
+  recordShareLinkLookup,
+  countAuthRateLimitAttemptsSince,
+  recordAuthRateLimitAttempt,
+  countAiRateLimitAttemptsSince,
+  recordAiRateLimitAttempt,
+}, DB, NOW, CORRELATION_ID_HEADER, ErrorVariables, onError(), buildApp() (+12 more)
 
 ### Community 67 - "AuthVariables"
 Cohesion: 0.10
-Nodes (17): AuthBindings, AuthVariables, ENV, ErrorEnvelope, { getUser, getUserById }, app, {
+Nodes (18): AuthBindings, AuthVariables, ENV, ErrorEnvelope, { getUser, getUserById }, app, {
   createUser,
   deleteUser,
   signOut,
@@ -374,11 +387,11 @@ Nodes (17): AuthBindings, AuthVariables, ENV, ErrorEnvelope, { getUser, getUserB
   getUserById,
   assertWithinAuthRateLimit,
   recordAuthRateLimitHit,
-}, ENV (+9 more)
+}, ENV (+10 more)
 
-### Community 68 - "routes/feedback.ts"
-Cohesion: 0.11
-Nodes (23): createProject(), deleteProject(), getProjectById(), listProjects(), ProjectRow, renameProject(), assertWithinUsageLimit(), assertWithinAiRateLimit() (+15 more)
+### Community 68 - "routes/projects.ts"
+Cohesion: 0.24
+Nodes (10): createProject(), deleteProject(), getProjectById(), listProjects(), ProjectRow, renameProject(), Env, loadOwnedProject() (+2 more)
 
 ### Community 69 - "rls/package.json"
 Cohesion: 0.07
@@ -391,6 +404,10 @@ Nodes (4): 1. @tiptap/core, @tiptap/pm, @tiptap/react, and @tiptap/starter-kit a
 ### Community 71 - "US-016 — analyze a candidate source and select or reject it"
 Cohesion: 0.20
 Nodes (9): 1. Searching returns candidate sources ready for AI analysis, 2. Triggering AI analysis shows the generated citation, summary, usefulness score, and key quotes, 3. A source lacking accessible full text is analyzed from its abstract and flagged as abstract-only, 4. Selecting an analyzed source adds it to the project bibliography, 5. Selecting a candidate adds it to the bibliography even without a prior analysis, 6. Rejecting a candidate, or having already selected one, keeps it from reappearing on a later search, 7. Deselecting a source removes it from the bibliography and returns it to the candidate pool, 8. Analysis is blocked with a clear limit-reached message once the tier quota is exhausted (+1 more)
+
+### Community 73 - "document.ts"
+Cohesion: 0.18
+Nodes (10): DanglingCitation, DocumentFormatResponse, FEEDBACK_CATEGORIES, FeedbackAnchor, FeedbackPassesResponse, FeedbackPassResponse, FeedbackPassSummary, ProjectDocumentResponse (+2 more)
 
 ### Community 74 - "DashboardPage.tsx"
 Cohesion: 0.19
@@ -412,13 +429,30 @@ Nodes (20): fetchDocument(), fetchFeedbackPass(), fetchFeedbackPasses(), fetchSu
 Cohesion: 0.19
 Nodes (11): getOrCreateDocument(), ProjectDocumentRow, saveDocumentContent(), projectDocuments, assertNoPrototypePollutionKeys(), editor, EditorBindings, Env (+3 more)
 
+### Community 79 - "editor.test.ts"
+Cohesion: 0.22
+Nodes (6): app, asCaller(), callerRow(), ENV, ErrorEnvelope, {
+  getUser,
+  getUserById,
+  getProjectById,
+  getOrCreateDocument,
+  saveDocumentContent,
+  listProjectSources,
+  countSuggestionRequestsSince,
+  recordSuggestionRequest,
+}
+
+### Community 80 - "US-032 — Add a query/connection timeout to the shared Postgres client"
+Cohesion: 0.29
+Nodes (6): 1. The shared postgres() client is configured with an explicit connect_timeout and statement_timeout, and onError now logs 5xx-class AppErrors (with correlationId) that it previously swallowed, 2. Production build -- the same artifact wrangler dev serves in CI, 3. Regression run 1/3 against wrangler dev serving the production build -- these 5 specs hung with zero response during production-prep's own verification run, 4. Regression run 2/3, 5. Regression run 3/3, US-032 — Add a query/connection timeout to the shared Postgres client
+
 ### Community 81 - "citations.ts"
 Cohesion: 0.27
 Nodes (6): CitationLookup, isEmptyDocument(), rerenderCitations(), NodeLike, TiptapNode, walk()
 
 ### Community 82 - "schema/index.ts"
-Cohesion: 0.06
-Nodes (36): countAiRateLimitAttemptsSince(), recordAiRateLimitAttempt(), countAuthRateLimitAttemptsSince(), recordAuthRateLimitAttempt(), createFeedbackPass(), FeedbackPassRow, getFeedbackPassById(), listFeedbackPasses() (+28 more)
+Cohesion: 0.12
+Nodes (16): authSchema, authUsers, authRateLimitAttempts, externalWorks, FeedbackAnchorJson, KeyQuoteJson, projectSources, projects (+8 more)
 
 ### Community 83 - "US-017 — upload your own PDF/TXT source"
 Cohesion: 0.25
@@ -537,24 +571,24 @@ Cohesion: 0.47
 Nodes (5): fetchAdminUsers(), revokeUserAccess(), AdminUsersPage(), handleRevoke(), load()
 
 ## Knowledge Gaps
-- **545 isolated node(s):** `db`, `story`, `issues`, `rounds`, `UNCOUNTED_WORKFLOWS` (+540 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 699 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **23 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **552 isolated node(s):** `db`, `story`, `issues`, `rounds`, `UNCOUNTED_WORKFLOWS` (+547 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 708 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **24 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `findAuthUserIdByEmail()` connect `demo.ts` to `metering/index.ts`?**
+- **Why does `findAuthUserIdByEmail()` connect `demo.ts` to `schema/index.ts`, `metering/index.ts`?**
   _High betweenness centrality (0.031) - this node is a cross-community bridge._
-- **Why does `stripe` connect `metering/index.ts` to `worker/package.json`, `routes/billing.ts`?**
+- **Why does `stripe` connect `metering/index.ts` to `AuthVariables`, `worker/package.json`, `AppError`?**
   _High betweenness centrality (0.021) - this node is a cross-community bridge._
 - **Why does `@playwright/test` connect `demo.ts` to `package.json`?**
-  _High betweenness centrality (0.021) - this node is a cross-community bridge._
+  _High betweenness centrality (0.020) - this node is a cross-community bridge._
 - **What connects `db`, `story`, `issues` to the rest of the system?**
-  _545 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _552 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `API Surface doc` be split into smaller, more focused modules?**
   _Cohesion score 0.061224489795918366 - nodes in this community are weakly interconnected._
 - **Should `share-link.test.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.13709677419354838 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.14408602150537633 - nodes in this community are weakly interconnected._
 - **Should `watchdog.mjs` be split into smaller, more focused modules?**
   _Cohesion score 0.12418300653594772 - nodes in this community are weakly interconnected._
