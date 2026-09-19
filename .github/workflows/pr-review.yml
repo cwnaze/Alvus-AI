@@ -69,7 +69,7 @@ jobs:
           github_token: ${{ secrets.PIPELINE_PAT }}
           prompt: /pr-review
           # See story-start.yml: default action permissions have no Bash access.
-          claude_args: --max-turns 100 --allowedTools "Bash,Edit,Write,Glob,Grep"
+          claude_args: --max-turns 100 --allowedTools "Read,Bash,Edit,Write,Glob,Grep"
 
       - name: Apply the review verdict
         if: always()
