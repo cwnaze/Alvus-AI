@@ -258,7 +258,11 @@ plaintext.
   the infra doc) for reproducible history.
 - RLS policies are hand-written SQL migrations (not modeled in Drizzle's schema DSL);
   which tables need RLS is flagged per-entity above, policies themselves are the
-  security doc's job.
+  security doc's job. RLS is a secondary, independently-tested backstop, not the
+  app's live enforcement path — the Worker always connects as the `postgres` role
+  over `DATABASE_URL`, which bypasses RLS, so authorization is actually enforced by
+  the per-route ownership checks described in `docs/security.md`'s Authorization
+  section.
 - `db/seed.ts` (guarded to local/dev `DATABASE_URL` only) seeds: full `tier_limits`
   matrix (needed in every env including CI), a few fake `users` (member + admin), and
   sample `projects`/`project_documents`/`project_sources` across

@@ -1091,7 +1091,7 @@
         ],
         "specs": []
       },
-      "demo": null,
+      "demo": "docs/demos/US-033.md",
       "branch": "feature/us-033-correct-security-doc-authorization-section",
       "prNumber": null,
       "issueNumber": null,
