@@ -1108,7 +1108,7 @@
         "docs/data-model.md's Sensitivity summary table adds rows for all three, classifying the IP address columns as sensitive per the migration comments in drizzle/migrations/0010_add_share_link_lookups.sql and 0013_add_rate_limit_attempts.sql"
       ],
       "dependsOn": [],
-      "status": "in_progress",
+      "status": "done",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -1121,7 +1121,7 @@
       },
       "demo": null,
       "branch": "feature/us-034-document-rate-limit-tables",
-      "prNumber": null,
+      "prNumber": 78,
       "issueNumber": null,
       "reviewRounds": 0,
       "notes": "Filed from docs/production-readiness.md must-fix #4 (production-prep pass after US-030). Full detail in docs/production-prep/docs-dx-findings.md finding 2."
