@@ -35,24 +35,53 @@ jobs:
       # nothing". Cheap enough to run ahead of setup-project, which lets the
       # no-work case skip the whole toolchain install.
       - id: pre
-        name: Record the PR head and count outstanding findings
+        name: Record the PR head and count outstanding blocking findings
         env:
           GH_TOKEN: ${{ secrets.PIPELINE_PAT }}
-          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE: ${{ github.event.issue.number }}
         run: |
           set -euo pipefail
-          pr=$(printf '%s' "$ISSUE_BODY" | grep -oE '^PR: #[0-9]+' | grep -oE '[0-9]+' | head -1 || true)
+
+          # The event payload is a snapshot taken when the event fired, and the
+          # job-level `if` evaluates against it. pr-review labels `agent-fix`
+          # first and only then swaps it for `needs-human` when it wants human
+          # sign-off (SKILL.md step "N >= 3" and the production-prep PR case), so
+          # the `labeled` event for that first label fires this workflow against a
+          # state that no longer exists two seconds later. Alvus-AI #79
+          # (2026-09-19) is the worked example: created 21:30:01, `agent-fix`
+          # added 21:30:03 -> this workflow started, `agent-fix` removed and
+          # `needs-human` added 21:30:05. The job `if` was correct and still let
+          # a needs-human issue through. Re-read the live labels and decide here.
+          labels=$(gh issue view "$ISSUE" --json labels -q '[.labels[].name] | join(" ")')
+          if [[ " $labels " == *" needs-human "* || " $labels " != *" agent-fix "* ]]; then
+            echo "Issue #$ISSUE now carries [$labels] — not an agent-fix target. Nothing to do."
+            echo "left=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          body=$(gh issue view "$ISSUE" --json body -q .body)
+          pr=$(printf '%s' "$body" | grep -oE '^PR: #[0-9]+' | grep -oE '[0-9]+' | head -1 || true)
           if [ -z "$pr" ]; then
             echo "::error::Findings issue has no 'PR: #<n>' line — cannot tell which branch a fix belongs on."
             exit 1
           fi
-          left=$(printf '%s' "$ISSUE_BODY" | grep -c '^- \[ \]' || true)
+
+          # Count only unchecked boxes under "## Blocking". pr-fix's own SKILL.md
+          # lets the agent leave a non-blocking finding for triage, so counting
+          # every `- [ ]` meant a review with zero blocking findings still burned
+          # a full toolchain install and agent run, then failed the assert step
+          # below for not pushing — which is exactly what it was told to do.
+          left=$(printf '%s' "$body" | awk '
+            /^## Blocking/ { inblock = 1; next }
+            /^## /         { inblock = 0 }
+            inblock && /^- \[ \]/ { n++ }
+            END            { print n + 0 }')
           {
             echo "pr=$pr"
             echo "sha=$(gh pr view "$pr" --json headRefOid -q .headRefOid)"
-            echo "left=${left:-0}"
+            echo "left=$left"
           } >> "$GITHUB_OUTPUT"
-          echo "PR #$pr, ${left:-0} unchecked finding(s)."
+          echo "PR #$pr, $left unchecked blocking finding(s)."
 
       # Every body edit fires this workflow, so a re-review that only *checks off*
       # last round's boxes triggers a fix run with nothing to fix. Run 31606076706
@@ -86,7 +115,7 @@ jobs:
           github_token: ${{ secrets.PIPELINE_PAT }}
           prompt: /pr-fix
           # See story-start.yml: default action permissions have no Bash access.
-          claude_args: --max-turns 200 --allowedTools "Bash,Edit,Write,Glob,Grep"
+          claude_args: --max-turns 200 --allowedTools "Read,Bash,Edit,Write,Glob,Grep"
 
       # The action's console output is sanitized ("full output hidden for
       # security"), so a run that does nothing leaves no trace of *why*. Six
@@ -125,8 +154,8 @@ jobs:
           # disagreed with the finding, could not verify it, or died mid-run, the
           # outcome is the same and it is not success.
           gh issue comment "$ISSUE" --body \
-            "\`pr-fix\` run [${GITHUB_RUN_ID}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) exited without pushing, with ${LEFT} unchecked finding(s) still open. The branch is unchanged at \`${after}\`.
+            "\`pr-fix\` run [${GITHUB_RUN_ID}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) exited without pushing, with ${LEFT} unchecked **blocking** finding(s) still open. The branch is unchanged at \`${after}\`.
 
           This is a failed fix run, not a completed one. If the fix was correct but unverifiable, it should have been pushed with a note saying what could not be run (see \`pr-fix\` SKILL.md step 4); if the finding is wrong, it should have been argued on this issue (step 3). Silently discarding the work is neither." || true
-          echo "::error::pr-fix pushed nothing while ${LEFT} finding(s) remain unchecked. See #${ISSUE}."
+          echo "::error::pr-fix pushed nothing while ${LEFT} blocking finding(s) remain unchecked. See #${ISSUE}."
           exit 1
