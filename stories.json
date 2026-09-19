@@ -1080,7 +1080,7 @@
         "docs/data-model.md's Migration strategy section is updated to note that RLS is hand-written SQL that is not the app's live enforcement path, matching the corrected security.md"
       ],
       "dependsOn": [],
-      "status": "in_progress",
+      "status": "done",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -1093,9 +1093,9 @@
       },
       "demo": "docs/demos/US-033.md",
       "branch": "feature/us-033-correct-security-doc-authorization-section",
-      "prNumber": null,
-      "issueNumber": null,
-      "reviewRounds": 0,
+      "prNumber": 76,
+      "issueNumber": 77,
+      "reviewRounds": 1,
       "notes": "Filed from docs/production-readiness.md must-fix #3 (production-prep pass after US-030). Full detail and code citations in docs/production-prep/docs-dx-findings.md finding 1 and finding 8."
     },
     {
