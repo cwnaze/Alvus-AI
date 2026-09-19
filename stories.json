@@ -1050,7 +1050,7 @@
         "A regression check demonstrates the fix: e2e/us-016.spec.ts, e2e/us-017.spec.ts, e2e/us-018.spec.ts, e2e/us-023.spec.ts, and e2e/us-029.spec.ts all pass reliably (3 consecutive green runs) against a production build served by wrangler dev, the same way production-prep's verification run them"
       ],
       "dependsOn": [],
-      "status": "in_progress",
+      "status": "done",
       "demoKind": "command",
       "verification": {
         "commands": [
@@ -1063,7 +1063,7 @@
       },
       "demo": null,
       "branch": "feature/us-032-db-client-timeout",
-      "prNumber": null,
+      "prNumber": 75,
       "issueNumber": null,
       "reviewRounds": 0,
       "notes": "Filed from docs/production-readiness.md must-fix #2 (production-prep pass after US-030). Reproduced live during that pass's own verification run: 5/16 demo specs failed with requests that never returned (including a raw Playwright APIRequestContext PUT bypassing all frontend JS, ruling out a frontend-only cause). Full trace analysis and evidence in docs/production-readiness.md must-fix #2 and docs/production-prep/operational-readiness-findings.md should-fix #4. Root cause is suspected but not confirmed to be the Workers postgres.js polyfill connection-lifecycle race apps/worker/src/index.ts:55-58 already comments on for the health check; whoever picks this up should confirm before assuming the timeout alone is sufficient."
