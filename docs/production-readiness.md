@@ -6,6 +6,20 @@ plus full verification (typecheck, lint, build, unit/integration suite, producti
 demo suite). This report is the terminus of the pipeline; see `docs/pipeline-log.md` for
 story history.
 
+> **Status — all four must-fix findings are resolved.** This report is a point-in-time
+> snapshot of the audit itself; the blockers it lists below were each turned into a story
+> and landed before this report was merged. Read the "Must fix before launch" section as
+> the audit's original findings, not as open work.
+>
+> | Must-fix | Story | Status |
+> |---|---|---|
+> | 1. Vulnerable TipTap reachable via share-link page | US-031 — bump `@tiptap/*` to `^3.31.3` + `assertNoPrototypePollutionKeys()` in `parseContent` | done |
+> | 2. No DB query/connection timeout | US-032 — `connect_timeout`/`statement_timeout` on the shared client + 5xx `AppError` logging | done |
+> | 3. `docs/security.md` Authorization section wrong | US-033 | done |
+> | 4. `docs/data-model.md` missing three tables | US-034 | done |
+>
+> "Should fix soon" was **not** actioned and remains open.
+
 ## Verification summary
 
 - `npm run typecheck` — pass (all 4 workspaces).

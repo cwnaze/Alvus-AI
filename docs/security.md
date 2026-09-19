@@ -27,21 +27,46 @@
 | Admin endpoints | n/a | n/a | no | full |
 | Share-link endpoint | n/a | token validated → read-only render | n/a | n/a |
 
-**anon-key + RLS** (RLS is the enforcement): all user-initiated project/source CRUD via
-`supabase-js` with the user's own JWT. Policies: `auth.uid() = owner_id` AND
-`users.status = 'approved'`.
+**Live enforcement path: the Worker connects as the `postgres` role over
+`DATABASE_URL` for every query (Drizzle), never as the caller's own JWT via
+`supabase-js`/PostgREST.** There is no anon-key request path in this app at all —
+authorization is enforced entirely by explicit, per-route ownership checks in Hono,
+not by RLS evaluating `auth.uid()`:
 
-**service-role + manual checks required** (RLS bypassed — API must replicate it):
-- Admin/waitlist endpoints → handler must verify caller's own `users.role = 'admin'`.
-- Stripe webhook handler → authorized by signature verification, not RLS.
-- Server-side academic-source fetch/write on a user's behalf → handler must verify
-  caller owns the target project before the service-role write.
-- Share-link resolution → requester is unauthenticated (RLS can't apply); handler
-  must check token valid/unrevoked/unexpired, return only that one paper, no write
-  route exists on this path at all, never expose the owner's other projects.
+- `authenticate` (`middleware/auth.ts`) verifies the bearer token against the
+  Supabase Auth server and loads the caller's `users` row.
+- `requireApproved` rejects any request from a signed-in account whose
+  `users.status != 'approved'`, checked on every request (except `GET /auth/me` and
+  `POST /auth/logout`) so a still-valid access token can't outrun an admin
+  revoking/rejecting the account.
+- `requireAdmin` gates admin/waitlist endpoints on `users.role = 'admin'`.
+- `loadOwnedProject` (`routes/projects.ts`) is the ownership check every
+  project-scoped route (projects, sources, documents, feedback passes) calls before
+  touching data: 404 if the project doesn't exist, 403 if `project.owner_id !==
+  authUser.id`. A malformed/nonexistent id is 404 (no row to be unauthorized
+  *about*); an existing row owned by someone else is 403, not a leaky 404 — see
+  `docs/api.md`'s cross-cutting rules.
+- Stripe webhook handler → authorized by signature verification, not by the caller's
+  identity at all.
+- Share-link resolution (`routes/shared.ts`) → requester is unauthenticated by
+  design; the handler hashes the token, looks it up, and checks
+  valid/unrevoked/unexpired itself. No write route exists on this path, and it never
+  exposes the owner's other projects.
 
-Rule: any new table/endpoint must state which path it uses. Service-role without a
-matching manual check is a bug.
+**RLS + grants are a secondary, independently-tested backstop, not the live
+enforcement path.** Migration `0011_enable_row_level_security.sql` enables RLS on
+every table with deny-by-default, SELECT-only policies scoped by `owner_id =
+auth.uid()` (or a project join for tables without their own `owner_id`) plus an
+approved-status gate, and revokes INSERT/UPDATE/DELETE from `anon`/`authenticated`
+entirely — so even if a future change introduced a caller-JWT connection, it could
+still only ever read its own approved-user's rows and could never write. That
+invariant is verified independently by `tests/rls/rls.test.ts` (US-026's RLS
+integration suite), which is not part of any request's live code path today.
+
+Rule: any new table/endpoint must state which path it uses. A route that reaches the
+DB without a matching `loadOwnedProject`-style check (or an equivalent explicit
+ownership check) is a bug — RLS does not cover for it, because the Worker's own
+connection bypasses RLS by using the `postgres` role.
 
 ## Secret classification
 
@@ -57,10 +82,14 @@ matching manual check is a bug.
 | `STRIPE_SECRET_KEY` | App runtime (sensitive) | Never | No |
 | `STRIPE_WEBHOOK_SECRET` | App runtime (sensitive) | Never | No |
 | `SEMANTIC_SCHOLAR_API_KEY` (optional) | App runtime (sensitive) | Never | No |
+| `SHARE_LINK_ENCRYPTION_KEY` | App runtime (sensitive) | Never | No |
 
 App runtime secrets are set per-environment via `wrangler secret put`, never as
-plaintext `vars` in `wrangler.toml`. `SUPABASE_SECRET_KEY` leak = full RLS
-bypass = treat as a full data breach.
+plaintext `vars` in `wrangler.toml`. `SUPABASE_SECRET_KEY` leak = full compromise of
+the Supabase Auth admin API (`createSupabaseAdmin` in
+`apps/worker/src/lib/supabase/client.ts` — user impersonation, `admin.createUser`,
+`admin.listUsers`), not an RLS bypass (RLS was never the live enforcement path here) =
+treat as a full data breach.
 
 ## Input validation boundaries
 
@@ -95,9 +124,13 @@ bypass = treat as a full data breach.
 - **Malicious upload / PDF parsing:** parser is untrusted-input-facing code (historic
   RCE/DoS in PDF libs) — parse timeouts, output size caps, never execute embedded
   content, keep dependency patched.
-- **Cross-project leakage via RLS bug:** every anon-key-reachable table must ship
-  RLS-enabled with an explicit policy from day one; missing RLS = full data leak, not
-  degraded UX.
+- **Cross-project leakage via a missing ownership check:** there is no anon-key/RLS
+  request path to fall back on, so every project-scoped route must call
+  `loadOwnedProject` (or an equivalent explicit check) before touching data — see the
+  rule at the end of the Authorization section above. A route that skips this check is
+  a full cross-project data leak, not degraded UX. RLS (migration `0011`) is a
+  tested backstop against a future caller-JWT path, not a substitute for this check
+  today.
 - **Prompt injection from source/upload content:** external/uploaded text is
   untrusted data, not instructions, once in the LLM's context — structurally
   separate system instructions from quoted source text; instruction-like text inside

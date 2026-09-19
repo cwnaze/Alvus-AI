@@ -22,6 +22,9 @@ function buildApp() {
   app.get('/rate-limited', () => {
     throw new AppError(429, 'rate_limited', 'Too many requests', { retry_after: 60 }, { 'Retry-After': '60' });
   });
+  app.get('/upstream-unreachable', () => {
+    throw new AppError(502, 'ai_provider_unreachable', 'The analysis service is currently unreachable');
+  });
   return app;
 }
 
@@ -102,6 +105,36 @@ describe('global error handler', () => {
     if (!call) throw new Error('expected console.error to have been called');
     const logged = JSON.parse(call[0] as string);
     expect(logged.userId).toBeNull();
+    consoleError.mockRestore();
+  });
+
+  it('logs a 5xx-class AppError so a timeout-triggered failure produces a server-side log line with correlationId', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const app = buildApp();
+    const res = await app.request('/upstream-unreachable', { headers: { [CORRELATION_ID_HEADER]: 'client-supplied-id' } });
+
+    expect(res.status).toBe(502);
+    expect(consoleError).toHaveBeenCalledTimes(1);
+    const call = consoleError.mock.calls[0];
+    if (!call) throw new Error('expected console.error to have been called');
+    const logged = JSON.parse(call[0] as string);
+    expect(logged).toMatchObject({
+      level: 'error',
+      correlationId: 'client-supplied-id',
+      method: 'GET',
+      route: '/upstream-unreachable',
+      code: 'ai_provider_unreachable',
+      message: 'The analysis service is currently unreachable',
+    });
+    consoleError.mockRestore();
+  });
+
+  it('does not log a 4xx AppError -- those are expected client-facing outcomes, not operator-facing failures', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const app = buildApp();
+    await app.request('/rate-limited');
+
+    expect(consoleError).not.toHaveBeenCalled();
     consoleError.mockRestore();
   });
 });

@@ -29,6 +29,29 @@ function toResponse(row: ProjectDocumentRow): ProjectDocumentResponse {
   return { content: row.content as ProjectDocumentResponse['content'], updated_at: row.updatedAt.toISOString() };
 }
 
+const PROTOTYPE_POLLUTION_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+// GHSA-cp6q-959q-f8rh: @tiptap/core's mergeAttributes() turns an own
+// `__proto__` key on a node/mark `attrs` object into the merged object's
+// actual prototype, which prosemirror-model's DOMSerializer then enumerates
+// as inherited DOM attributes (e.g. a synthesized `onerror`). JSON.parse
+// creates `__proto__`/`constructor`/`prototype` as ordinary own keys rather
+// than triggering that setter, so this walk still sees and rejects them --
+// defense-in-depth independent of the upstream fix bumped alongside this.
+function assertNoPrototypePollutionKeys(value: unknown): void {
+  if (value === null || typeof value !== 'object') return;
+  if (Array.isArray(value)) {
+    for (const item of value) assertNoPrototypePollutionKeys(item);
+    return;
+  }
+  for (const key of Object.keys(value)) {
+    if (PROTOTYPE_POLLUTION_KEYS.has(key)) {
+      throw new AppError(400, 'invalid_content', `content must not contain a "${key}" key`);
+    }
+    assertNoPrototypePollutionKeys((value as Record<string, unknown>)[key]);
+  }
+}
+
 // A TipTap document is a JSON object with a `type: "doc"` root -- reject
 // anything that isn't a plain object up front rather than letting an
 // arbitrary JSON value (array, string, null) land in the `content` column.
@@ -36,6 +59,7 @@ function parseContent(value: unknown): Record<string, unknown> {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     throw new AppError(400, 'invalid_content', 'content must be a TipTap document object');
   }
+  assertNoPrototypePollutionKeys(value);
   return value as Record<string, unknown>;
 }
 

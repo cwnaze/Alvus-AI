@@ -13,6 +13,7 @@ erDiagram
   users ||--o| subscriptions : "has"
   users ||--o{ usage_events : "generates"
   users ||--o{ suggestion_requests : "generates"
+  users ||--o{ ai_rate_limit_attempts : "rate-limits"
   users ||--o{ projects : "owns"
   projects ||--|| project_documents : "has content"
   projects ||--o{ uploaded_files : "receives"
@@ -22,6 +23,8 @@ erDiagram
   external_works ||--o{ project_sources : "backs (discovered)"
   uploaded_files ||--o| project_sources : "backs (uploaded)"
   tier_limits ||--o{ subscriptions : "caps (by tier)"
+  share_link_lookups
+  auth_rate_limit_attempts
 ```
 
 ## `waitlist_signups`
@@ -249,6 +252,54 @@ neither the token (the hash is one-way, the ciphertext needs the Worker
 secret), only the app holding `SHARE_LINK_ENCRYPTION_KEY` can. Never logged in
 plaintext.
 
+## `share_link_lookups`
+Append-only log backing the public share-link endpoint's rate limit (US-027; not FK'd to
+`share_links` — keyed by requester IP rather than a specific link since the endpoint is
+deliberately unauthenticated). Same sum-at-read-time shape as `suggestion_requests`.
+| Field | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `ip_address` | text, not null | |
+| `created_at` | timestamptz | |
+
+Indexes: composite `(ip_address, created_at)` for the window-count query. Sensitive:
+`ip_address` (PII-adjacent) — RLS enabled with zero policies and no GRANT, so
+anon/authenticated are denied outright; readable only by the service-role connection.
+
+## `auth_rate_limit_attempts`
+Append-only log backing the public auth endpoints' (signup/login/password-reset) per-IP
+rate limit (US-027) — not owned by any user, since these endpoints are unauthenticated
+by definition. `endpoint` keeps each route's window independent so a burst of login
+attempts can't also lock the same IP out of signup.
+| Field | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `ip_address` | text, not null | |
+| `endpoint` | text, not null | |
+| `created_at` | timestamptz | |
+
+Indexes: composite `(ip_address, endpoint, created_at)` for the window-count query.
+Sensitive: `ip_address` (PII-adjacent) — RLS enabled with zero policies and no GRANT, so
+anon/authenticated are denied outright; readable only by the service-role connection.
+
+## `ai_rate_limit_attempts`
+Append-only log backing the AI-metered endpoints' (analyze, feedback) per-user rate
+limit (US-027) — a burst guard layered in addition to the tier-quota check in
+`usage_events`/`lib/metering`, same sum-at-read-time shape as `suggestion_requests`.
+`action_type` mirrors `usage_events`' discriminator so the two action types never share
+a window.
+| Field | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `user_id` | uuid, FK → `users.id` ON DELETE CASCADE | |
+| `action_type` | text | enum: `source_analysis`\|`feedback_pass` |
+| `created_at` | timestamptz | |
+
+Indexes: composite `(user_id, action_type, created_at)` for the window-count query.
+Sensitive: `user_id` ties usage bursts to a specific person — self-read only, RLS
+`select` policy `user_id = auth.uid()` granted to `authenticated`; writes restricted to
+the service-role connection.
+
 ## Migration strategy
 
 - Schema-as-code in `db/schema/*.ts`; `drizzle-kit generate` → committed SQL migrations
@@ -258,7 +309,11 @@ plaintext.
   the infra doc) for reproducible history.
 - RLS policies are hand-written SQL migrations (not modeled in Drizzle's schema DSL);
   which tables need RLS is flagged per-entity above, policies themselves are the
-  security doc's job.
+  security doc's job. RLS is a secondary, independently-tested backstop, not the
+  app's live enforcement path — the Worker always connects as the `postgres` role
+  over `DATABASE_URL`, which bypasses RLS, so authorization is actually enforced by
+  the per-route ownership checks described in `docs/security.md`'s Authorization
+  section.
 - `db/seed.ts` (guarded to local/dev `DATABASE_URL` only) seeds: full `tier_limits`
   matrix (needed in every env including CI), a few fake `users` (member + admin), and
   sample `projects`/`project_documents`/`project_sources` across
@@ -278,5 +333,8 @@ plaintext.
 | `project_sources` | summaries, quotes, citation | derived from private context |
 | `feedback_passes` | `comments` | derived from private document content |
 | `share_links` | `token_hash`, `token_encrypted` | credential-equivalent |
+| `share_link_lookups` | `ip_address` | PII-adjacent; no anon/authenticated read |
+| `auth_rate_limit_attempts` | `ip_address` | PII-adjacent; no anon/authenticated read |
+| `ai_rate_limit_attempts` | `user_id` | ties usage bursts to a person; self-read only |
 | `external_works` | none | public metadata |
 | `tier_limits` | none | public config |

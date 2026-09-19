@@ -36,6 +36,20 @@ export const onError = <E extends { Variables: ErrorVariables }>(err: Error, c: 
   const correlationId = c.get('requestId');
 
   if (err instanceof AppError) {
+    if (err.status >= 500) {
+      console.error(
+        JSON.stringify({
+          level: 'error',
+          correlationId,
+          method: c.req.method,
+          route: c.req.routePath,
+          userId: c.get('userId') ?? null,
+          code: err.code,
+          message: err.message,
+        }),
+      );
+    }
+
     return c.json(
       {
         error: {
