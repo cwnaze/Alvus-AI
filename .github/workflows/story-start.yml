@@ -62,4 +62,4 @@ jobs:
           # trips the watchdog's retry breaker and escalates to needs-human instead of
           # finishing the story. Observed rate is ~6 turns/min, so 300 targets ~50-55m of
           # Claude runtime, leaving buffer under the 60m job timeout for setup/post steps.
-          claude_args: --max-turns 300 --allowedTools "Bash,Edit,Write,Glob,Grep"
+          claude_args: --max-turns 300 --allowedTools "Read,Bash,Edit,Write,Glob,Grep"

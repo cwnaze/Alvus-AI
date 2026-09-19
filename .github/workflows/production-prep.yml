@@ -46,4 +46,4 @@ jobs:
           github_token: ${{ secrets.PIPELINE_PAT }}
           prompt: /production-prep
           # See story-start.yml: default action permissions have no Bash access.
-          claude_args: --max-turns 200 --allowedTools "Bash,Edit,Write,Glob,Grep"
+          claude_args: --max-turns 200 --allowedTools "Read,Bash,Edit,Write,Glob,Grep"
