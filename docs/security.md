@@ -85,8 +85,11 @@ connection bypasses RLS by using the `postgres` role.
 | `SHARE_LINK_ENCRYPTION_KEY` | App runtime (sensitive) | Never | No |
 
 App runtime secrets are set per-environment via `wrangler secret put`, never as
-plaintext `vars` in `wrangler.toml`. `SUPABASE_SECRET_KEY` leak = full RLS
-bypass = treat as a full data breach.
+plaintext `vars` in `wrangler.toml`. `SUPABASE_SECRET_KEY` leak = full compromise of
+the Supabase Auth admin API (`createSupabaseAdmin` in
+`apps/worker/src/lib/supabase/client.ts` — user impersonation, `admin.createUser`,
+`admin.listUsers`), not an RLS bypass (RLS was never the live enforcement path here) =
+treat as a full data breach.
 
 ## Input validation boundaries
 
@@ -121,9 +124,13 @@ bypass = treat as a full data breach.
 - **Malicious upload / PDF parsing:** parser is untrusted-input-facing code (historic
   RCE/DoS in PDF libs) — parse timeouts, output size caps, never execute embedded
   content, keep dependency patched.
-- **Cross-project leakage via RLS bug:** every anon-key-reachable table must ship
-  RLS-enabled with an explicit policy from day one; missing RLS = full data leak, not
-  degraded UX.
+- **Cross-project leakage via a missing ownership check:** there is no anon-key/RLS
+  request path to fall back on, so every project-scoped route must call
+  `loadOwnedProject` (or an equivalent explicit check) before touching data — see the
+  rule at the end of the Authorization section above. A route that skips this check is
+  a full cross-project data leak, not degraded UX. RLS (migration `0011`) is a
+  tested backstop against a future caller-JWT path, not a substitute for this check
+  today.
 - **Prompt injection from source/upload content:** external/uploaded text is
   untrusted data, not instructions, once in the LLM's context — structurally
   separate system instructions from quoted source text; instruction-like text inside
